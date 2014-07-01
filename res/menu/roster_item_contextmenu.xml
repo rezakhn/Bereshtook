@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+		<item android:id="@+id/roster_contextmenu_contact_open_chat" android:visible="false"
+			android:enabled="true" android:orderInCategory="1"
+			android:title="@string/roster_contextmenu_contact_open_chat">
+		</item>
+
+		<item android:id="@+id/roster_contextmenu_contact_mark_all_as_read" android:visible="false"
+			android:enabled="true" android:orderInCategory="1"
+			android:title="@string/roster_contextmenu_contact_mark_all_as_read">
+		</item>
+
+		<item android:id="@+id/roster_contextmenu_contact_rename" android:visible="false"
+			android:enabled="true" android:orderInCategory="3"
+			android:title="@string/roster_contextmenu_contact_rename">
+		</item>
+
+		<item android:id="@+id/roster_contextmenu_contact_request_auth" android:visible="false"
+			android:enabled="true" android:orderInCategory="4"
+			android:title="@string/roster_contextmenu_contact_request_auth">
+		</item>
+
+		<item android:visible="true" android:enabled="true"
+			android:orderInCategory="5" android:id="@+id/roster_contextmenu_move_to_friends"
+			android:title="@string/roster_contextmenu_move_to_friends">
+		</item>
+		
+		<item android:visible="true" android:enabled="true"
+			android:orderInCategory="6" android:id="@+id/roster_contextmenu_move_to_bereshtooks"
+			android:title="@string/roster_contextmenu_move_to_bereshtooks">
+		</item>
+
+		<item android:visible="false" android:enabled="true"
+			android:orderInCategory="2" android:id="@+id/roster_contextmenu_contact_delmsg"
+			android:title="@string/roster_contextmenu_contact_delmsg">
+		</item>
+
+		<item android:visible="false" android:enabled="true"
+			android:orderInCategory="2" android:id="@+id/roster_contextmenu_contact_delete"
+			android:title="@string/roster_contextmenu_contact_delete">
+		</item>
+
+</menu>

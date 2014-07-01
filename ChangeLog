@@ -1,0 +1,68 @@
+0.8.7b:
+ * Server connection: fixed several reconnection issues
+ * Preferences: No more crashes with incorrect JID
+ * UI: Action Bar updates
+ * Notification: Removed distracting ticker for online/offline changes
+
+0.8.7:
+ * XEP-0198: Stream Management now fully supported
+ * Chat: Returned messages (errors) are displayed in red
+ * Settings: IDNA servers are supported now
+ * Roster: Ask user about new contact requests
+ * Preferences: Auto-reconnect option removed (use "Quit" or set status to "Offline")
+ * Status notification: improve display of connection status, error messages
+ * XEP-0092: Software Version replies implemented
+ * XEP-0280: incoming carbons now only ring once
+ * XEP-0184 + XEP-0280: ack status fixed for CC'ed messages
+ * Action Bar: ActionBarSherlock updated from 4.2.0 to 4.4.0
+
+0.8.6b:
+ * Also fix client-to-server pings (Oops, sorry!)
+
+0.8.6:
+ * Fix server-to-client pings (error caused periodic reconnects)
+ * Better connectivity when changing WiFi networks
+ * Implement Message Carbons (XEP-0280)
+ * Share with yaxim: using main contact list now
+ * Contact context menu: display JID
+ * Sent messages context menu: new "Resend" option
+ * Contact sorting is case insensitive now
+ * Large contact list loads slightly faster
+ * Minor bug fix when aborting a connection
+
+0.8.5:
+ * Implement XEP-0199 (client-to-server ping)
+ * Implement XEP-0184 (message delivery receipts)
+ * Privacy setting to suppress message content in notification
+ * Display number of new messages in roster
+ * Repair scrolling in chat window (fixes #53)
+ * Work around WiFi/3G reconnection bug
+ * Implement account creation with yaxim
+ * New actionbar
+ * Dark/light theme
+ * Font size preference
+ * Display number of members in roster group (fixes #41)
+ * Backend database changes
+
+0.8.4:
+ * New user-friendly first startup dialog
+ * Support Android 3.x and 4.x
+ * Remember which roster groups were collapsed (fixes #51)
+ * Support offline timestamps (sending and receiving)
+ * New roster implementation (using SQLite, fixes #5)
+ * Enforce SSL by default (fixes #65)
+ * Support negative priorities (fixes #61)
+ * Updated ASMACK from flow, fixed SMACK debugging
+ * Support jabber servers with SRV record (finally!)
+
+0.8.3:
+ * Fix another auto-reconnect iussue
+ * Support negative priority (fixes #61)
+ * Display 'Error' messages as such (fixes #44)
+ * Show MD5 checksum of SSL certificates (fixes #54)
+ * Improved UI
+
+0.8.2:
+ * Fix for annoying auto-reconnect bug! Sorry folks!
+ * New group separator image
+ * Auto-clear notification when opening chat window

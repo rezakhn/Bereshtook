@@ -1,0 +1,19 @@
+Bereshtook a diffrenct way to chat and play
+==========================================
+
+## Features
+
+ * Connection with a single XMPP server (or GTalk, or Facebook Chat, or ...)
+ * You are asked about self-signed SSL certificates
+ * Allows automatic connection after turning on your phone
+ * Reconnect on 3G/WiFi network change
+ * Chat with your buddies (all messages are stored)
+ * Adding/removing buddies from the roster
+ * Delivery receipts (XEP-0184)
+ * Message carbons (XEP-0280)
+ * Play multiplayer turn based games
+ * Shows the distance to other members
+ 
+
+by Black Grape IT Co.
+=====================
