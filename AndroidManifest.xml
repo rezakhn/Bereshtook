@@ -69,5 +69,6 @@
 			android:authorities="ir.bereshtook.androidclient.provider.Roster" />
 
 		<activity android:name="de.duenndns.ssl.MemorizingActivity" />
+		<meta-data android:name="com.crashlytics.ApiKey" android:value="855d51f66fb9c8dc5b6bbe76d729d407859b7418"/>
 	</application>
 </manifest>

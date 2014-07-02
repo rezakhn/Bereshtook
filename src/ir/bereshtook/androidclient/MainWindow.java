@@ -1,5 +1,6 @@
 package ir.bereshtook.androidclient;
 
+import com.crashlytics.android.Crashlytics;
 import ir.bereshtook.androidclient.IXMPPRosterCallback.Stub;
 import ir.bereshtook.androidclient.data.BereshtookConfiguration;
 import ir.bereshtook.androidclient.data.ChatProvider;
@@ -102,6 +103,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		setTheme(mConfig.getTheme());
 		super.onCreate(savedInstanceState);
 
+		Crashlytics.start(this);
 		requestWindowFeature(Window.FEATURE_ACTION_BAR);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		actionBar = getSupportActionBar();
@@ -965,7 +967,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	private void registerCrashReporter() {
 		if (mConfig.reportCrash) {
-			ExceptionHandler.register(this, "http://duenndns.de/yaxim-crash/");
+			ExceptionHandler.register(this, "http://bereshtook.ir/crash_report/");
 		}
 	}
 
