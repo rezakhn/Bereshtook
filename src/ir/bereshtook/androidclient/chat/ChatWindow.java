@@ -613,7 +613,8 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			Log.d(TAG, "contact status changed: " + status_mode + " " + status_message);
 			mSubTitle.setVisibility((status_message != null && status_message.length() != 0)?
 					View.VISIBLE : View.GONE);
-			mSubTitle.setText(LocationUtil.findDistance(BereshtookApplication.getConfig(this).statusMessage, status_message));
+			if(status_message != null && status_message.contains("#"))
+				mSubTitle.setText(LocationUtil.findDistance(BereshtookApplication.getConfig(this).statusMessage, status_message));
 			if (mServiceAdapter == null || !mServiceAdapter.isServiceAuthenticated())
 				status_mode = 0; // override icon if we are offline
 			mStatusMode.setImageResource(StatusMode.values()[status_mode].getDrawableId());
