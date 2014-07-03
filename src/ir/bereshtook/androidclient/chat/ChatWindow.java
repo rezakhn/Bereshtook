@@ -36,6 +36,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -48,6 +49,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -446,6 +448,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	}
 
 	public class ChatItemWrapper {
+		private LinearLayout mLinearLayout = null;
 		private TextView mDateView = null;
 		private TextView mFromView = null;
 		private TextView mMessageView = null;
@@ -469,11 +472,17 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				getDateView().setTextColor(tv.data);
 				getFromView().setText(getString(R.string.chat_from_me));
 				getFromView().setTextColor(tv.data);
+				getLinearLayout().setBackgroundResource(R.drawable.bubble_me);
+				getLinearLayout().setGravity(Gravity.RIGHT);
+				((LinearLayout)mRowView).setGravity(Gravity.RIGHT);
 			} else {
 				getTheme().resolveAttribute(R.attr.ChatMsgHeaderYouColor, tv, true);
 				getDateView().setTextColor(tv.data);
 				getFromView().setText(from + ":");
 				getFromView().setTextColor(tv.data);
+				getLinearLayout().setBackgroundResource(R.drawable.bubble_notme);
+				getLinearLayout().setGravity(Gravity.LEFT);
+				((LinearLayout)mRowView).setGravity(Gravity.LEFT);
 			}
 			switch (delivery_status) {
 			case ChatConstants.DS_NEW:
@@ -546,6 +555,12 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 						.findViewById(R.id.iconView);
 			}
 			return mIconView;
+		}
+		
+		LinearLayout getLinearLayout(){
+			if(mLinearLayout == null)
+				mLinearLayout = (LinearLayout) mRowView.findViewById(R.id.chat_linear_layout);
+			return mLinearLayout;
 		}
 
 	}

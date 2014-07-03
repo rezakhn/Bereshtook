@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="fill_parent" android:padding="4dp" 
-		android:layout_height="wrap_content" android:orientation="vertical"
-		>
+		android:layout_height="wrap_content" android:orientation="vertical">
 
-		<LinearLayout android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:orientation="horizontal">
+		<LinearLayout android:id="@+id/chat_linear_layout" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:orientation="vertical"
+			android:minWidth="100dp"
+			android:minHeight="50dp">
 
 			<TextView android:id="@+id/chat_date" android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -13,14 +14,21 @@
 				android:ellipsize="end"
 				android:paddingRight="6dp"
 				android:paddingEnd="6dp"
-				/>
+				android:visibility="gone"/>
 
 			<TextView android:id="@+id/chat_from" android:layout_width="0dp"
 				android:layout_height="wrap_content" android:layout_weight="1"
 				android:singleLine="true"
 				android:textSize="11sp" android:textColor="#88f"
-				android:ellipsize="end" android:text="@string/chat_from_me" />
-
+				android:ellipsize="end" android:text="@string/chat_from_me"
+				android:visibility="gone"/>
+			
+			<TextView android:id="@+id/chat_message"
+				style="?attr/ChatText"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:autoLink="all"/>
+			
 			<ImageView
 			    android:id="@+id/iconView"
 			    android:layout_width="wrap_content"
@@ -28,14 +36,9 @@
 			    android:layout_gravity="center_vertical"
 			    android:layout_marginLeft="6dp"
 			    android:layout_marginStart="6dp"
-			    android:src="@drawable/ic_chat_msg_status_unread" />
+			    android:src="@drawable/ic_chat_msg_status_unread"
+			    android:visibility="visible"/>				
 
 		</LinearLayout>
-
-		<TextView android:id="@+id/chat_message"
-			style="?attr/ChatText"
-			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			android:gravity="center_vertical"
-			android:autoLink="all"/>
 
 </LinearLayout>
