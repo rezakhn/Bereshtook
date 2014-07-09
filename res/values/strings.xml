@@ -120,7 +120,7 @@
 	<string name="roster_contextmenu_group_rename">Rename group</string>
 	<string name="roster_contextmenu_contact_mark_all_as_read">Mark all messages as read</string>
 	<string name="roster_contextmenu_contact_delete">Delete Contact</string>
-	<string name="roster_contextmenu_contact_delmsg">Delete Chat History</string>
+	<string name="roster_contextmenu_contact_delmsg">پاک کردن گفتگو ها</string>
 	<string name="roster_contextmenu_contact_open_chat">Open Chat</string>
 	<string name="roster_contextmenu_contact_rename">Rename</string>
 	<string name="roster_contextmenu_contact_request_auth">Request Authorization</string>
@@ -176,8 +176,8 @@
 	<string name="MoveRosterEntryToGroupDialog_title">Change group</string>
 	<string name="deleteRosterItem_text">Really remove %1$s (%2$s)?</string>
 	<string name="deleteRosterItem_title">Delete Contact</string>
-	<string name="deleteChatHistory_text">Really remove all messages with %1$s (%2$s)?</string>
-	<string name="deleteChatHistory_title">Delete Chat History</string>
+	<string name="deleteChatHistory_text">آیا از پاک کردن گفتگو های %1$s مطمئن هستید؟</string>
+	<string name="deleteChatHistory_title">پاک کردن گفتگو ها</string>
 	<string name="subscriptionRequest_text">%1$s wants to add you as a contact: \"%2$s\"</string>
 	<string name="subscriptionRequest_title">Subscription Request</string>
 
@@ -200,7 +200,6 @@
 	<!-- About Dialog -->
 	<string name="AboutDialog_title">درباره برشتوک</string>
 	<string name="AboutDialog_DevelopersTitle">توسعه دهنده</string>
-	<string name="AboutDialog_DevelopersText">محمد الهی</string>
 	<string name="AboutDialog_LicenceTitle">Licensing</string>
 	<string name="AboutDialog_Vote">Give Feedback</string>
 	<string name="AboutDialog_LicenceText">
@@ -228,7 +227,14 @@
 	
 	<string name="choose_request_type">دوست دادی چیکا کنی؟</string>
 	<string name="chat_request">دعوت به گفتگو</string>
+	
 	<string name="play_request">دعوت به بازی</string>
+	    
+	<string name="play_request_sent_title">ارسال شد</string>
+	<string name="play_request_sent_msg">دعوتنامه بازی ارسال شد</string>
+	
+	<string name="play_request_received_title">دعوت به بازی</string>
+	<string name="play_request_received_msg">%s شما را دعوت به بازی کرده است</string>
 	
 	<string name="menu_smileys">شکلک ها</string>
 	<string name="send">ارسال</string>
@@ -238,4 +244,12 @@
     <string name="go">بریم</string>
     <string name="confirm">تایید</string>
     <string name="cancel">بیخیال</string>
+    
+    <string name="accept">قبول</string>
+    <string name="deny">رد</string>
+    <string name="zero">صفر</string>
+    <string name="you_win">بردی</string>
+    <string name="you_lose">خوردی</string>
+    <string name="draw">مساوی</string>
+    <string name="not_your_turn">الان نوبت شما نیست!</string>
 </resources>
