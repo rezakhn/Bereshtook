@@ -49,6 +49,16 @@
 		<activity android:name=".preferences.AccountPrefs"
 			android:label="@string/account_settings_title">
 		</activity>
+		
+		<activity android:name=".game.RPSWindow">
+		</activity>
+		
+		<receiver android:name=".game.GameBroadcastReceiver">
+          <intent-filter>
+          <action android:name="ir.bereshtook.NEWGAMEMSG">
+          </action>
+          </intent-filter>
+      	</receiver>
 
 		<service android:name=".service.XMPPService">
 			<intent-filter>

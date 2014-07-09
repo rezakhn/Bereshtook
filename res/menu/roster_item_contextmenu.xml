@@ -30,8 +30,8 @@
 			android:title="@string/roster_contextmenu_move_to_bereshtooks">
 		</item>
 
-		<item android:visible="false" android:enabled="true"
-			android:orderInCategory="2" android:id="@+id/roster_contextmenu_contact_delmsg"
+		<item android:visible="true" android:enabled="true"
+			android:orderInCategory="7" android:id="@+id/roster_contextmenu_contact_delmsg"
 			android:title="@string/roster_contextmenu_contact_delmsg">
 		</item>
 

@@ -1,18 +1,16 @@
 package ir.bereshtook.androidclient.service;
 
+import ir.bereshtook.androidclient.IXMPPRosterCallback;
 import ir.bereshtook.androidclient.MainWindow;
+import ir.bereshtook.androidclient.R;
 import ir.bereshtook.androidclient.data.RosterProvider;
 import ir.bereshtook.androidclient.exceptions.BereshtookXMPPException;
+import ir.bereshtook.androidclient.game.GameWindow;
 import ir.bereshtook.androidclient.util.ConnectionState;
 import ir.bereshtook.androidclient.util.StatusMode;
 
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import ir.bereshtook.androidclient.IXMPPRosterCallback;
-import ir.bereshtook.androidclient.R;
-import ir.bereshtook.androidclient.service.IXMPPChatService;
-import ir.bereshtook.androidclient.service.IXMPPRosterService;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -315,6 +313,9 @@ public class XMPPService extends GenericService {
 		// do not show notification if not a foreground service
 		if (!mConfig.foregroundService)
 			return;
+		// no need for non-removable notification
+		if(mConfig.foregroundService)
+			return;
 
 		if (cs == ConnectionState.OFFLINE) {
 			mServiceNotification.hideNotification(this, SERVICE_NOTIFICATION);
@@ -443,7 +444,32 @@ public class XMPPService extends GenericService {
 		mSmackable.registerCallback(new XMPPServiceCallback() {
 			public void newMessage(String from, String message, boolean silent_notification) {
 				logInfo("notification: " + from);
-				notifyClient(from, mSmackable.getNameForJID(from), message, !mIsBoundTo.contains(from), silent_notification, false);
+				String name = mSmackable.getNameForJID(from);
+				if(!message.startsWith(GameWindow.GAME_CODE))
+					notifyClient(from, name, message, !mIsBoundTo.contains(from), silent_notification, false);
+				else if(message.endsWith(GameWindow.INVITE_CODE) || message.endsWith(GameWindow.ACCEPT_CODE) || message.endsWith(GameWindow.DENY_CODE)){
+					String notifMsg = null;
+					if(message.endsWith(GameWindow.INVITE_CODE))
+						notifMsg = name + "!شما را به بازی دعوت کرد ";
+					else if(message.endsWith(GameWindow.ACCEPT_CODE))
+						notifMsg = name + "!دعوت شما را قبول کرد ";
+					else if(message.endsWith(GameWindow.DENY_CODE))
+						notifMsg = name + "!دعوت شما را رد کرد ";
+					
+					notifyClient(from, "برشتوک", notifMsg, !mIsBoundTo.contains(from), silent_notification, false);
+					if(message.endsWith(GameWindow.ACCEPT_CODE))
+						broadcastGameMsg(from, message);
+				}
+				else
+					broadcastGameMsg(from, message);
+			}
+
+			private void broadcastGameMsg(String from, String message) {
+				Intent i = new Intent();
+				i.putExtra("from", from);
+				i.putExtra("message", message);
+				i.setAction("ir.bereshtook.NEWGAMEMSG");
+				sendBroadcast(i);
 			}
 
 			public void messageError(final String from, final String error, final boolean silent_notification) {

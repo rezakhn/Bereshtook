@@ -1,15 +1,15 @@
 package ir.bereshtook.androidclient.service;
 
 import ir.bereshtook.androidclient.BereshtookApplication;
-import ir.bereshtook.androidclient.data.ChatProvider;
-import ir.bereshtook.androidclient.data.RosterProvider;
 import ir.bereshtook.androidclient.data.BereshtookConfiguration;
+import ir.bereshtook.androidclient.data.ChatProvider;
 import ir.bereshtook.androidclient.data.ChatProvider.ChatConstants;
+import ir.bereshtook.androidclient.data.RosterProvider;
 import ir.bereshtook.androidclient.data.RosterProvider.RosterConstants;
 import ir.bereshtook.androidclient.exceptions.BereshtookXMPPException;
+import ir.bereshtook.androidclient.game.GameWindow;
 import ir.bereshtook.androidclient.util.ConnectionState;
 import ir.bereshtook.androidclient.util.LogConstants;
-import ir.bereshtook.androidclient.util.PreferenceConstants;
 import ir.bereshtook.androidclient.util.StatusMode;
 
 import java.io.File;
@@ -28,9 +28,7 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.SmackConfiguration;
-import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.IQ.Type;
@@ -42,29 +40,28 @@ import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.DNSUtil;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.util.dns.DNSJavaResolver;
-import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
-import org.jivesoftware.smackx.entitycaps.cache.SimpleDirectoryPersistentCache;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.carbons.Carbon;
 import org.jivesoftware.smackx.carbons.CarbonManager;
+import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
+import org.jivesoftware.smackx.entitycaps.cache.SimpleDirectoryPersistentCache;
 import org.jivesoftware.smackx.entitycaps.provider.CapsExtensionProvider;
 import org.jivesoftware.smackx.forward.Forwarded;
-import org.jivesoftware.smackx.provider.DelayInfoProvider;
-import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
-import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
-import org.jivesoftware.smackx.packet.DelayInformation;
 import org.jivesoftware.smackx.packet.DelayInfo;
+import org.jivesoftware.smackx.packet.DelayInformation;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.Version;
 import org.jivesoftware.smackx.ping.PingManager;
-import org.jivesoftware.smackx.ping.packet.*;
+import org.jivesoftware.smackx.ping.packet.Ping;
 import org.jivesoftware.smackx.ping.provider.PingProvider;
+import org.jivesoftware.smackx.provider.DelayInfoProvider;
+import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
+import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
 
-import ir.bereshtook.androidclient.R;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -735,13 +732,17 @@ public class SmackableImp implements Smackable {
 		newMessage.setBody(message);
 		newMessage.addExtension(new DeliveryReceiptRequest());
 		if (isAuthenticated()) {
-			addChatMessageToDB(ChatConstants.OUTGOING, toJID, message, ChatConstants.DS_SENT_OR_READ,
-					System.currentTimeMillis(), newMessage.getPacketID());
+			if(!GameWindow.isGameMsg(message)){
+				addChatMessageToDB(ChatConstants.OUTGOING, toJID, message, ChatConstants.DS_SENT_OR_READ,
+						System.currentTimeMillis(), newMessage.getPacketID());
+			}
 			mXMPPConnection.sendPacket(newMessage);
 		} else {
 			// send offline -> store to DB
-			addChatMessageToDB(ChatConstants.OUTGOING, toJID, message, ChatConstants.DS_NEW,
-					System.currentTimeMillis(), newMessage.getPacketID());
+			if(!GameWindow.isGameMsg(message)){
+				addChatMessageToDB(ChatConstants.OUTGOING, toJID, message, ChatConstants.DS_NEW,
+						System.currentTimeMillis(), newMessage.getPacketID());
+			}
 		}
 	}
 
@@ -1053,7 +1054,8 @@ public class SmackableImp implements Smackable {
 					if (msg.getType() == Message.Type.error)
 						is_new = ChatConstants.DS_FAILED;
 
-					addChatMessageToDB(direction, fromJID, chatMessage, is_new, ts, msg.getPacketID());
+					if(!GameWindow.isGameMsg(chatMessage))
+						addChatMessageToDB(direction, fromJID, chatMessage, is_new, ts, msg.getPacketID());
 					if (direction == ChatConstants.INCOMING)
 						mServiceCallBack.newMessage(fromJID, chatMessage, (cc != null));
 				}

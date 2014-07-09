@@ -1,6 +1,7 @@
 package ir.bereshtook.androidclient;
 
 import com.crashlytics.android.Crashlytics;
+
 import ir.bereshtook.androidclient.IXMPPRosterCallback.Stub;
 import ir.bereshtook.androidclient.data.BereshtookConfiguration;
 import ir.bereshtook.androidclient.data.ChatProvider;
@@ -10,6 +11,7 @@ import ir.bereshtook.androidclient.data.RosterProvider.RosterConstants;
 import ir.bereshtook.androidclient.dialogs.AddRosterItemDialog;
 import ir.bereshtook.androidclient.dialogs.ChangeStatusDialog;
 import ir.bereshtook.androidclient.dialogs.FirstStartDialog;
+import ir.bereshtook.androidclient.game.GameBroadcastReceiver;
 import ir.bereshtook.androidclient.location.BestLocationListener;
 import ir.bereshtook.androidclient.location.BestLocationProvider;
 import ir.bereshtook.androidclient.location.BestLocationProvider.LocationType;
@@ -29,6 +31,7 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -212,6 +215,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		
 		initLocation();
 		mBestLocationProvider.startLocationUpdatesWithListener(mBestLocationListener);
+		GameBroadcastReceiver.setContext(this);
 
 		BereshtookApplication.getApp(this).mMTM.bindDisplayActivity(this);
 
@@ -337,14 +341,14 @@ public class MainWindow extends SherlockExpandableListActivity {
 	void removeChatHistoryDialog(final String JID, final String userName) {
 		new AlertDialog.Builder(this)
 			.setTitle(R.string.deleteChatHistory_title)
-			.setMessage(getString(R.string.deleteChatHistory_text, userName, JID))
-			.setPositiveButton(android.R.string.yes,
+			.setMessage(getString(R.string.deleteChatHistory_text, userName))
+			.setPositiveButton(R.string.confirm,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							removeChatHistory(JID);
 						}
 					})
-			.setNegativeButton(android.R.string.no, null)
+			.setNegativeButton(R.string.cancel, null)
 			.create().show();
 	}
 
@@ -1211,10 +1215,15 @@ public class MainWindow extends SherlockExpandableListActivity {
 			boolean hasStatus = statusmsg.getText() != null && statusmsg.getText().length() > 0;
 			statusmsg.setVisibility(hasStatus ? View.VISIBLE : View.GONE);
 			
-			String strStatus = statusmsg.getText().toString();
-			if(hasStatus && strStatus.contains("#")){
-				statusmsg.setText(LocationUtil.findDistance(mLocation, strStatus));
+			if(hasStatus && mLocation != null){
+				String strStatus = statusmsg.getText().toString();
+				if(strStatus.contains("#"))
+					statusmsg.setText(LocationUtil.findDistance(mLocation, strStatus));
+				else
+					statusmsg.setText("");
 			}
+			else
+				statusmsg.setText("");
 			
 			String jid = cursor.getString(cursor.getColumnIndex(RosterConstants.JID));
 			TextView unreadmsg = (TextView)view.findViewById(R.id.roster_unreadmsg_cnt);

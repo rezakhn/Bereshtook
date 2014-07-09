@@ -245,8 +245,16 @@
     <string name="confirm">تایید</string>
     <string name="cancel">بیخیال</string>
     
+    <string name="you_invite_to_game">دعوت به بازی کردی</string>
+    <string name="would_you_accept">میای بازی کنیم؟</string>
+    <string name="you_accepted_invite">دعوت رو قبول کردی</string>
+    <string name="she_accepted_invite">دعوت رو قبول کرد</string>
+    <string name="you_denied_invite">دعوت رو قبول کرد</string>
+    <string name="she_denied_invite">دعوت رو قبول کردی</string>
+    
     <string name="accept">قبول</string>
     <string name="deny">رد</string>
+    
     <string name="zero">صفر</string>
     <string name="you_win">بردی</string>
     <string name="you_lose">خوردی</string>
