@@ -13,6 +13,9 @@ import ir.bereshtook.androidclient.util.LogConstants;
 import ir.bereshtook.androidclient.util.StatusMode;
 
 import java.io.File;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.Collection;
 import java.util.Date;
 
@@ -192,8 +195,14 @@ public class SmackableImp implements Smackable {
 		mXMPPConfig.setDebuggerEnabled(mConfig.smackdebug);
 		if (mConfig.require_ssl)
 			this.mXMPPConfig.setSecurityMode(ConnectionConfiguration.SecurityMode.required);
+		
+		mXMPPConfig.setSelfSignedCertificateEnabled(true);
+		//mXMPPConfig.setTruststoreType("BKS");
+		//mXMPPConfig.setTruststorePassword("kharchang");
+		//mXMPPConfig.setTruststorePath("res/raw/myKeystore.bks");
 
 		// register MemorizingTrustManager for HTTPS
+		/*
 		try {
 			SSLContext sc = SSLContext.getInstance("TLS");
 			sc.init(null, new X509TrustManager[] { BereshtookApplication.getApp(mService).mMTM },
@@ -202,7 +211,8 @@ public class SmackableImp implements Smackable {
 		} catch (java.security.GeneralSecurityException e) {
 			debugLog("initialize MemorizingTrustManager: " + e);
 		}
-
+		*/
+		
 		this.mXMPPConnection = new XmppStreamHandler.ExtXMPPConnection(mXMPPConfig);
 		this.mStreamHandler = new XmppStreamHandler(mXMPPConnection, mConfig.smackdebug);
 		mStreamHandler.addAckReceivedListener(new XmppStreamHandler.AckReceivedListener() {
