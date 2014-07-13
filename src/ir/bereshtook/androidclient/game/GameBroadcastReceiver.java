@@ -1,5 +1,6 @@
 package ir.bereshtook.androidclient.game;
 
+import ir.bereshtook.androidclient.game.rps.RPSWindow;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

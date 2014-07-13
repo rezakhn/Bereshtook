@@ -114,7 +114,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 		actionBar.setHomeButtonEnabled(true);
 		registerCrashReporter();
 
-		showFirstStartUpDialogIfPrefsEmpty();
+		if (mConfig.jabberID.length() < 3)
+			showFirstStartUpDialog();
 		getContentResolver().registerContentObserver(RosterProvider.CONTENT_URI,
 				true, mRosterObserver);
 		getContentResolver().registerContentObserver(ChatProvider.CONTENT_URI,
@@ -731,6 +732,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 		case R.id.menu_about:
 			aboutDialog();
 			return true;
+		
+		case R.id.menu_account:
+			showFirstStartUpDialog();
+			return true;
 
 		}
 
@@ -940,22 +945,20 @@ public class MainWindow extends SherlockExpandableListActivity {
 		}
 	}
 
-	private void showFirstStartUpDialogIfPrefsEmpty() {
-		Log.i(TAG, "showFirstStartUpDialogIfPrefsEmpty, JID: "
+	private void showFirstStartUpDialog() {
+		Log.i(TAG, "showFirstStartUpDialog, JID: "
 						+ mConfig.jabberID);
-		if (mConfig.jabberID.length() < 3) {
-			// load preference defaults
-			PreferenceManager.setDefaultValues(this, R.layout.mainprefs, false);
-			PreferenceManager.setDefaultValues(this, R.layout.accountprefs, false);
+		// load preference defaults
+		PreferenceManager.setDefaultValues(this, R.layout.mainprefs, false);
+		PreferenceManager.setDefaultValues(this, R.layout.accountprefs, false);
 
-			// prevent a start-up with empty JID
-			SharedPreferences prefs = PreferenceManager
-					.getDefaultSharedPreferences(this);
-			prefs.edit().putBoolean(PreferenceConstants.CONN_STARTUP, false).commit();
+		// prevent a start-up with empty JID
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		prefs.edit().putBoolean(PreferenceConstants.CONN_STARTUP, false).commit();
 
-			// show welcome dialog
-			new FirstStartDialog(this, serviceAdapter).show();
-		}
+		// show welcome dialog
+		new FirstStartDialog(this, serviceAdapter).show();
 	}
 
 	public static Intent createIntent(Context context) {

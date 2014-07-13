@@ -1,4 +1,4 @@
-package ir.bereshtook.androidclient.game;
+package ir.bereshtook.androidclient.game.rps;
 
 public class RPSGame {
 	public enum Choice {NONE, ROCK, PAPER, SCISSOR};

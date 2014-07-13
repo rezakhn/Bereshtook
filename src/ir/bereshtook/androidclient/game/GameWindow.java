@@ -35,8 +35,8 @@ public abstract class GameWindow extends SherlockActivity {
 	protected String withJabberID;
 	protected Boolean isGuest;
 	
-	abstract void receiveMsg(String msg);
-	abstract void startGame();
+	protected abstract void receiveMsg(String msg);
+	protected abstract void startGame();
 	
 	
 	protected void sendMsg(String msg){

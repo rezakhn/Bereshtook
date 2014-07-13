@@ -50,7 +50,7 @@
 			android:label="@string/account_settings_title">
 		</activity>
 		
-		<activity android:name=".game.RPSWindow">
+		<activity android:name=".game.rps.RPSWindow">
 		</activity>
 		
 		<receiver android:name=".game.GameBroadcastReceiver">

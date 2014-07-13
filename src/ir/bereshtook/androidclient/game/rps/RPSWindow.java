@@ -1,8 +1,9 @@
-package ir.bereshtook.androidclient.game;
+package ir.bereshtook.androidclient.game.rps;
 
 import ir.bereshtook.androidclient.R;
-import ir.bereshtook.androidclient.game.RPSGame.Choice;
-import ir.bereshtook.androidclient.game.RPSGame.Turn;
+import ir.bereshtook.androidclient.game.GameWindow;
+import ir.bereshtook.androidclient.game.rps.RPSGame.Choice;
+import ir.bereshtook.androidclient.game.rps.RPSGame.Turn;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -137,7 +138,7 @@ public class RPSWindow extends GameWindow {
 		}
 	};
 	
-	public void receiveMsg(String msg) {
+	protected void receiveMsg(String msg) {
 		if(msg.equals(ROCK_MSG) || msg.equals(PAPER_MSG) || msg.equals(SCISSOR_MSG)){
 			if(game.getTrn() == Turn.BOTH)
 				soundChoice.start();
@@ -193,7 +194,7 @@ public class RPSWindow extends GameWindow {
 		
 	}
 
-	public void startGame() {
+	protected void startGame() {
 		game = new RPSGame();
 		game.init();
 		nextRound(true);
