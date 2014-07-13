@@ -4,6 +4,7 @@ import ir.bereshtook.androidclient.R;
 import ir.bereshtook.androidclient.game.RPSGame.Choice;
 import ir.bereshtook.androidclient.game.RPSGame.Turn;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -38,6 +39,12 @@ public class RPSWindow extends GameWindow {
 	private TextView txtScoreDown;
 	private Context mContext;
 	
+	private MediaPlayer soundChoice;
+	private MediaPlayer soundVictory;
+	private MediaPlayer soundDraw;
+	private MediaPlayer soundLose;
+	private MediaPlayer soundError;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -57,6 +64,12 @@ public class RPSWindow extends GameWindow {
 		txtScoreUp = (TextView)findViewById(R.id.btnScoreUp);
 		txtScoreDown = (TextView)findViewById(R.id.btnScoreDown);
 		
+		soundChoice = MediaPlayer.create(this, R.raw.sound_choice);
+		soundVictory = MediaPlayer.create(this, R.raw.sound_victory);
+		soundDraw = MediaPlayer.create(this, R.raw.sound_draw);
+		soundLose = MediaPlayer.create(this, R.raw.sound_lose);
+		soundError = MediaPlayer.create(this, R.raw.sound_error);
+		
 		btnRockDown.setOnClickListener(mClickListener);
 		btnPaperDown.setOnClickListener(mClickListener);
 		btnScissorDown.setOnClickListener(mClickListener);
@@ -69,15 +82,19 @@ public class RPSWindow extends GameWindow {
 		@Override
 		public void onClick(View v) {
 			if(!weAreOnline()){
+				soundError.start();
 				Toast tNotSent = IcsToast.makeText(mContext, "you are not online", IcsToast.LENGTH_SHORT);
 				tNotSent.show();
 				return;
 			}
 			else if(game.getTrn() != Turn.MY && game.getTrn() != Turn.BOTH){
+				soundError.start();
 				Toast notTurn = IcsToast.makeText(mContext, "not your turn", IcsToast.LENGTH_SHORT);
 				notTurn.show();
 				return;
 			}
+			if(game.getTrn() == Turn.BOTH)
+				soundChoice.start();
 			
 			switch(v.getId()){
 			case R.id.btnRockDown:
@@ -86,8 +103,8 @@ public class RPSWindow extends GameWindow {
 				choiceDown.setBackgroundResource(R.raw.a_rock_down);
 				break;
 			case R.id.btnPaperDown:
-				game.setMyChoice(Choice.PAPER);
 				sendMsg(PAPER_MSG);
+				game.setMyChoice(Choice.PAPER);
 				choiceDown.setBackgroundResource(R.raw.a_paper_down);
 				break;
 			case R.id.btnScissorDown:
@@ -122,22 +139,24 @@ public class RPSWindow extends GameWindow {
 	
 	public void receiveMsg(String msg) {
 		if(msg.equals(ROCK_MSG) || msg.equals(PAPER_MSG) || msg.equals(SCISSOR_MSG)){
-			int backGround = R.raw.tick;
+			if(game.getTrn() == Turn.BOTH)
+				soundChoice.start();
+			int background = R.raw.tick;
 			if(msg.equals(ROCK_MSG)){
 				game.setHerChoice(Choice.ROCK);
-				backGround = R.raw.a_rock_up;
+				background = R.raw.a_rock_up;
 			}
 			else if(msg.equals(PAPER_MSG)){
 				game.setHerChoice(Choice.PAPER);
-				backGround = R.raw.a_paper_up;
+				background = R.raw.a_paper_up;
 			}
 			else if(msg.equals(SCISSOR_MSG)){
 				game.setHerChoice(Choice.SCISSOR);
-				backGround = R.raw.a_scissor_up;
+				background = R.raw.a_scissor_up;
 			}
 			if(game.getTrn() == Turn.MY)
-				backGround = R.raw.tick;
-			choiceUp.setBackgroundResource(backGround);
+				background = R.raw.tick;
+			choiceUp.setBackgroundResource(background);
 			if(game.getTrn() == Turn.NONE)
 				checkWinner();
 		}
@@ -149,19 +168,22 @@ public class RPSWindow extends GameWindow {
 		Toast result = null;
 		switch (game.judge()) {
 		case ME:
+			soundVictory.start();
 			result = IcsToast.makeText(mContext, getString(R.string.you_win), IcsToast.LENGTH_SHORT);
 			break;
 		case HER:
+			soundLose.start();
 			result = IcsToast.makeText(mContext, getString(R.string.you_lose), IcsToast.LENGTH_SHORT);
 			break;
 		case DRAW:
+			soundDraw.start();
 			result = IcsToast.makeText(mContext, getString(R.string.draw), IcsToast.LENGTH_SHORT);
 			break;
 		}
 		result.show();
 		txtScoreUp.setText(game.getHerScore().toString());
 		txtScoreDown.setText(game.getMyScore().toString());
-		nextRound();
+		nextRound(false);
 	}
 
 	private void enableChoices(boolean b) {
@@ -174,19 +196,21 @@ public class RPSWindow extends GameWindow {
 	public void startGame() {
 		game = new RPSGame();
 		game.init();
-		nextRound();
+		nextRound(true);
 	}
 	
-	private void nextRound() {
+	private void nextRound(boolean newGame) {
 		game.nextRound();
 		final Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
-		    @Override
-		    public void run() {
-				choiceUp.setBackgroundResource(R.raw.square);
-				choiceDown.setBackgroundResource(R.raw.square);
-				enableChoices(true);
-		    }
-		}, 2000);
+		if(!newGame){
+			handler.postDelayed(new Runnable() {
+			    @Override
+			    public void run() {
+					choiceUp.setBackgroundResource(R.raw.square);
+					choiceDown.setBackgroundResource(R.raw.square);
+					enableChoices(true);
+			    }
+			}, 1750);
+		}
 	}
 }
