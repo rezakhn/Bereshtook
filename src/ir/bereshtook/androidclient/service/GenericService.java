@@ -1,5 +1,6 @@
 package ir.bereshtook.androidclient.service;
 
+import ir.bereshtook.androidclient.R;
 import ir.bereshtook.androidclient.chat.ChatWindow;
 import ir.bereshtook.androidclient.data.BereshtookConfiguration;
 import ir.bereshtook.androidclient.util.LogConstants;
@@ -20,11 +21,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
-
-import ir.bereshtook.androidclient.R;
 
 public abstract class GenericService extends Service {
 

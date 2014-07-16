@@ -20,6 +20,8 @@
 		android:alphabeticShortcut="p"
 		android:icon="@android:drawable/ic_menu_preferences"
 		android:visible="false" />
+	
+	<item android:id="@+id/menu_account" android:title="@string/Menu_Account" />
 
 	<item android:id="@+id/menu_about" android:title="@string/Menu_about"
 		android:alphabeticShortcut="y"

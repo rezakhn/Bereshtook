@@ -6,6 +6,9 @@ import ir.bereshtook.androidclient.R;
 import ir.bereshtook.androidclient.data.ChatProvider;
 import ir.bereshtook.androidclient.data.ChatProvider.ChatConstants;
 import ir.bereshtook.androidclient.data.RosterProvider;
+import ir.bereshtook.androidclient.game.GameBroadcastReceiver;
+import ir.bereshtook.androidclient.game.GameWindow;
+import ir.bereshtook.androidclient.game.rps.RPSWindow;
 import ir.bereshtook.androidclient.location.LocationUtil;
 import ir.bereshtook.androidclient.service.IXMPPChatService;
 import ir.bereshtook.androidclient.service.XMPPService;
@@ -17,9 +20,13 @@ import ir.bereshtook.androidclient.util.chat.QuickAction;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.R.anim;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.ContentObserver;
@@ -33,6 +40,7 @@ import android.os.IBinder;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.transition.Visibility;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
@@ -40,7 +48,9 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -57,6 +67,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.internal.widget.IcsToast;
 import com.actionbarsherlock.view.Window;
 
 @SuppressWarnings("deprecation") /* recent ClipboardManager only available since API 11 */
@@ -86,6 +97,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	private ImageButton mSmileyButton = null;
     private QuickAction mSmileyPopup;
     private AdapterView.OnItemClickListener mSmileySelectListener;
+    private Button mRequestPlayButton = null; 
 	private EditText mChatInput = null;
 	private String mWithJabberID = null;
 	private String mUserScreenName = null;
@@ -142,6 +154,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		mTitle = (TextView)layout.findViewById(R.id.action_bar_title);
 		mSubTitle = (TextView)layout.findViewById(R.id.action_bar_subtitle);
 		mTitle.setText(title);
+		
+		mRequestPlayButton = (Button)layout.findViewById(R.id.btnRequestPlay);
+		mRequestPlayButton.setOnClickListener(clickLisener);
 
 		setTitle(null);
 		getSupportActionBar().setCustomView(layout);
@@ -162,6 +177,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	protected void onResume() {
 		super.onResume();
 		updateContactStatus();
+		GameBroadcastReceiver.setContext(this);
 	}
 
 	@Override
@@ -188,7 +204,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		mServiceIntent.setAction("ir.bereshtook.androidclient.XMPPSERVICE");
 
 		mServiceConnection = new ServiceConnection() {
-
+			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				Log.i(TAG, "called onServiceConnected()");
 				mServiceAdapter = new XMPPChatServiceAdapter(
@@ -198,7 +214,8 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				mServiceAdapter.clearNotifications(mWithJabberID);
 				updateContactStatus();
 			}
-
+			
+			@Override
 			public void onServiceDisconnected(ComponentName name) {
 				Log.i(TAG, "called onServiceDisconnected()");
 			}
@@ -287,7 +304,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		});
 
 	}
-    
+	
 	private void setContactFromUri() {
 		Intent i = getIntent();
 		mWithJabberID = i.getDataString().toLowerCase();
@@ -337,10 +354,20 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		return new View.OnClickListener() {
 
 			public void onClick(View v) {
-				if(v.getId() == R.id.btnChatSend)
+				switch(v.getId()){
+				
+				case R.id.btnChatSend:
 					sendMessageIfNotNull();
-				else if(v.getId() == R.id.btnChatSmiley){
+					break;
+					
+				case R.id.btnChatSmiley:
 					showSmileysPopup(v);
+					break;
+					
+				case R.id.btnRequestPlay:
+					requestPlay();
+					break;
+					
 				}
 			}
 		};
@@ -352,7 +379,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		}
 	}
 
-	private void sendMessage(String message) {
+	public void sendMessage(String message) {
 		mChatInput.setText(null);
 		mSendButton.setEnabled(false);
 		mServiceAdapter.sendMessage(mWithJabberID, message);
@@ -364,6 +391,16 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
         if (mSmileyPopup == null)
             mSmileyPopup = MessageUtils.smileysPopup(this, mSmileySelectListener);
         mSmileyPopup.show(anchor);
+	}
+	
+	private void requestPlay(){
+		if(mServiceAdapter != null && mServiceAdapter.isServiceAuthenticated()){
+			sendMessage(RPSWindow.INVITE_MSG);
+		}
+		else{
+			Toast tNotSent = IcsToast.makeText(this, "you are not online", IcsToast.LENGTH_SHORT);
+			tNotSent.show();
+		}
 	}
 	
 	private void markAsReadDelayed(final int id, final int delay) {
@@ -453,6 +490,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		private TextView mFromView = null;
 		private TextView mMessageView = null;
 		private ImageView mIconView = null;
+		private Button btnAccept = null;
+		private Button btnDeny = null;
+		private Boolean isSystemMsg = null;
 
 		private final View mRowView;
 		private ChatWindow chatWindow;
@@ -484,6 +524,56 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				getLinearLayout().setGravity(Gravity.LEFT);
 				((LinearLayout)mRowView).setGravity(Gravity.LEFT);
 			}
+			isSystemMsg = false;
+			btnAccept = (Button) getLinearLayout().findViewById(R.id.btnAccept);
+			btnDeny = (Button) getLinearLayout().findViewById(R.id.btnDeny);
+			btnAccept.setVisibility(View.GONE);
+			btnDeny.setVisibility(View.GONE);
+			
+			if(message.endsWith(GameWindow.INVITE_CODE)){
+				isSystemMsg = true;
+				if(from_me){
+					message = getString(R.string.you_invite_to_game);
+				}
+				else{
+					message = getString(R.string.would_you_accept);
+					btnAccept.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							sendMessage(RPSWindow.ACCEPT_MSG);
+							Intent game = new Intent(mActivity, RPSWindow.class);
+							game.putExtra("jid", mWithJabberID);
+							game.putExtra("isGuest", true);
+							mActivity.startActivity(game);
+						}
+					});
+					btnAccept.setVisibility(View.VISIBLE);
+					btnDeny.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							sendMessage(RPSWindow.DENY_MSG);
+						}
+					});
+					btnDeny.setVisibility(View.VISIBLE);
+				}
+			}
+			else if(message.endsWith(GameWindow.ACCEPT_CODE)){
+				isSystemMsg = true;
+				if(from_me)
+					message = getString(R.string.you_accepted_invite);
+				else
+					message = getString(R.string.she_accepted_invite);
+			}
+			else if(message.endsWith(GameWindow.DENY_CODE)){
+				isSystemMsg = true;
+				if(from_me)
+					message = getString(R.string.you_denied_invite);
+				else
+					message = getString(R.string.she_denied_invite);
+			}
+			
 			switch (delivery_status) {
 			case ChatConstants.DS_NEW:
 				ColorDrawable layers[] = new ColorDrawable[2];
@@ -523,8 +613,13 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			}
 			getMessageView().setText(message);
 			getMessageView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize);
+			if(isSystemMsg)
+				getMessageView().setTextColor(getResources().getColor(R.color.system_message_color));
+			else
+				getMessageView().setTextColor(getResources().getColor(R.color.person_message_color));
 			getDateView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize*2/3);
 			getFromView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize*2/3);
+			
 		}
 		
 		TextView getDateView() {
@@ -628,8 +723,13 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			Log.d(TAG, "contact status changed: " + status_mode + " " + status_message);
 			mSubTitle.setVisibility((status_message != null && status_message.length() != 0)?
 					View.VISIBLE : View.GONE);
-			if(status_message != null && status_message.contains("#"))
+			
+			String mStatus = BereshtookApplication.getConfig(this).statusMessage;
+			if(status_message != null && status_message.contains("#") && mStatus != null && mStatus.contains("#"))
 				mSubTitle.setText(LocationUtil.findDistance(BereshtookApplication.getConfig(this).statusMessage, status_message));
+			else
+				mSubTitle.setText("");
+			
 			if (mServiceAdapter == null || !mServiceAdapter.isServiceAuthenticated())
 				status_mode = 0; // override icon if we are offline
 			mStatusMode.setImageResource(StatusMode.values()[status_mode].getDrawableId());
