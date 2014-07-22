@@ -27,6 +27,7 @@ public abstract class GameWindow extends SherlockActivity {
 	public static final String INVITE_CODE = "INVITE#";
 	public static final String ACCEPT_CODE = "ACCEPT#";
 	public static final String DENY_CODE = "DENY#";
+	public static final String EXIT_CODE = "EXIT#";
 	
 	private Intent mServiceIntent;
 	private ServiceConnection mServiceConnection;
@@ -57,7 +58,8 @@ public abstract class GameWindow extends SherlockActivity {
 	public static Boolean isGameMsg(String msg){
 		if(msg == null)
 			return false;
-		return msg.startsWith(GAME_CODE) && !msg.endsWith(INVITE_CODE) && !msg.endsWith(ACCEPT_CODE) && !msg.endsWith(DENY_CODE);
+		return msg.startsWith(GAME_CODE) && !msg.endsWith(INVITE_CODE) 
+				&& !msg.endsWith(ACCEPT_CODE) && !msg.endsWith(DENY_CODE);
 	}
 	
 	@Override
@@ -138,5 +140,5 @@ public abstract class GameWindow extends SherlockActivity {
 	private void bindXMPPService() {
 		bindService(mServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 	}
-
+	
 }

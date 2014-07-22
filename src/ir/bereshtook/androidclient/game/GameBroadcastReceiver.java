@@ -1,6 +1,8 @@
 package ir.bereshtook.androidclient.game;
 
+import ir.bereshtook.androidclient.game.battleship.BattleshipWindow;
 import ir.bereshtook.androidclient.game.rps.RPSWindow;
+import ir.bereshtook.androidclient.game.ttt.TTTWindow;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +32,14 @@ public class GameBroadcastReceiver extends BroadcastReceiver {
 		final String message = intent.getStringExtra("message");
 		
 		if(message.endsWith(GameWindow.ACCEPT_CODE) && mContext != null && mGameWindow == null){
-			Intent game = new Intent(mContext, RPSWindow.class);
+			Intent game = null;
+			if(message.startsWith(RPSWindow.RPS_GAME))
+				game = new Intent(mContext, RPSWindow.class);
+			else if(message.startsWith(TTTWindow.TTT_GAME))
+				game = new Intent(mContext, TTTWindow.class);
+			else if(message.startsWith(BattleshipWindow.BATTLESHIP_GAME))
+				game = new Intent(mContext, BattleshipWindow.class);
+			
 			game.putExtra("jid", from);
 			game.putExtra("isGuest", false);
 			mContext.startActivity(game);

@@ -10,3 +10,6 @@ res/values/version.xml
 lint.xml
 assets/crashlytics-build.properties
 res/values/com_crashlytics_export_strings.xml
+/proguard/dump.txt
+/proguard/seeds.txt
+/proguard/usage.txt

@@ -8,7 +8,9 @@ import ir.bereshtook.androidclient.data.ChatProvider.ChatConstants;
 import ir.bereshtook.androidclient.data.RosterProvider;
 import ir.bereshtook.androidclient.game.GameBroadcastReceiver;
 import ir.bereshtook.androidclient.game.GameWindow;
+import ir.bereshtook.androidclient.game.battleship.BattleshipWindow;
 import ir.bereshtook.androidclient.game.rps.RPSWindow;
+import ir.bereshtook.androidclient.game.ttt.TTTWindow;
 import ir.bereshtook.androidclient.location.LocationUtil;
 import ir.bereshtook.androidclient.service.IXMPPChatService;
 import ir.bereshtook.androidclient.service.XMPPService;
@@ -20,9 +22,7 @@ import ir.bereshtook.androidclient.util.chat.QuickAction;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.R.anim;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -40,7 +40,6 @@ import android.os.IBinder;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.transition.Visibility;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
@@ -48,13 +47,13 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -395,10 +394,49 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	
 	private void requestPlay(){
 		if(mServiceAdapter != null && mServiceAdapter.isServiceAuthenticated()){
-			sendMessage(RPSWindow.INVITE_MSG);
+            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+            		ChatWindow.this,
+                    android.R.layout.select_dialog_singlechoice);
+            arrayAdapter.add("سنگ کاغذ قیچی");
+            arrayAdapter.add("دوز");
+            //arrayAdapter.add("نبرد کشتی ها");
+            
+			AlertDialog.Builder chooseGameDialog = new AlertDialog.Builder(
+					ChatWindow.this);
+            chooseGameDialog.setIcon(R.drawable.ic_launcher);
+            chooseGameDialog.setTitle(R.string.choose_a_game);
+            chooseGameDialog.setNegativeButton(R.string.cancel,
+                    new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            chooseGameDialog.setAdapter(arrayAdapter, 
+            		new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							switch (which) {
+							case 0:
+	                        	sendMessage(RPSWindow.INVITE_MSG);
+								break;
+							case 1:
+	                        	sendMessage(TTTWindow.INVITE_MSG);
+								break;
+							case 2:
+								sendMessage(BattleshipWindow.INVITE_MSG);
+								break;
+							}
+                            dialog.dismiss();
+						}
+					});
+            chooseGameDialog.show();
 		}
 		else{
-			Toast tNotSent = IcsToast.makeText(this, "you are not online", IcsToast.LENGTH_SHORT);
+			Toast tNotSent = IcsToast.makeText(this, getString(R.string.you_are_not_online), IcsToast.LENGTH_SHORT);
 			tNotSent.show();
 		}
 	}
@@ -502,9 +540,10 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			this.chatWindow = chatWindow;
 		}
 
-		void populateFrom(String date, boolean from_me, String from, String message,
+		void populateFrom(String date, boolean from_me, String from, final String message,
 				int delivery_status) {
 //			Log.i(TAG, "populateFrom(" + from_me + ", " + from + ", " + message + ")");
+			String myMessage = message;
 			getDateView().setText(date);
 			TypedValue tv = new TypedValue();
 			if (from_me) {
@@ -533,16 +572,27 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			if(message.endsWith(GameWindow.INVITE_CODE)){
 				isSystemMsg = true;
 				if(from_me){
-					message = getString(R.string.you_invite_to_game);
+					myMessage = getString(R.string.you_invite_to_game);
 				}
 				else{
-					message = getString(R.string.would_you_accept);
+					myMessage = getString(R.string.would_you_accept);
 					btnAccept.setOnClickListener(new OnClickListener() {
 						
 						@Override
 						public void onClick(View v) {
-							sendMessage(RPSWindow.ACCEPT_MSG);
-							Intent game = new Intent(mActivity, RPSWindow.class);
+							Intent game = null;
+							if(message.startsWith(RPSWindow.RPS_GAME)){
+								sendMessage(RPSWindow.ACCEPT_MSG);
+								game = new Intent(mActivity, RPSWindow.class);
+							}
+							else if(message.startsWith(TTTWindow.TTT_GAME)){
+								sendMessage(TTTWindow.ACCEPT_MSG);
+								game = new Intent(mActivity, TTTWindow.class);
+							}							
+							else if(message.startsWith(BattleshipWindow.BATTLESHIP_GAME)){
+								sendMessage(BattleshipWindow.ACCEPT_MSG);
+								game = new Intent(mActivity, BattleshipWindow.class);
+							}
 							game.putExtra("jid", mWithJabberID);
 							game.putExtra("isGuest", true);
 							mActivity.startActivity(game);
@@ -562,16 +612,16 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			else if(message.endsWith(GameWindow.ACCEPT_CODE)){
 				isSystemMsg = true;
 				if(from_me)
-					message = getString(R.string.you_accepted_invite);
+					myMessage = getString(R.string.you_accepted_invite);
 				else
-					message = getString(R.string.she_accepted_invite);
+					myMessage = getString(R.string.she_accepted_invite);
 			}
 			else if(message.endsWith(GameWindow.DENY_CODE)){
 				isSystemMsg = true;
 				if(from_me)
-					message = getString(R.string.you_denied_invite);
+					myMessage = getString(R.string.you_denied_invite);
 				else
-					message = getString(R.string.she_denied_invite);
+					myMessage = getString(R.string.she_denied_invite);
 			}
 			
 			switch (delivery_status) {
@@ -611,7 +661,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				mRowView.setBackgroundColor(0x30ff0000); // default is transparent
 				break;
 			}
-			getMessageView().setText(message);
+			getMessageView().setText(myMessage);
 			getMessageView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize);
 			if(isSystemMsg)
 				getMessageView().setTextColor(getResources().getColor(R.color.system_message_color));
