@@ -1,7 +1,5 @@
 package ir.bereshtook.androidclient;
 
-import com.crashlytics.android.Crashlytics;
-
 import ir.bereshtook.androidclient.IXMPPRosterCallback.Stub;
 import ir.bereshtook.androidclient.data.BereshtookConfiguration;
 import ir.bereshtook.androidclient.data.ChatProvider;
@@ -31,7 +29,6 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -70,6 +67,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockExpandableListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.Window;
+import com.crashlytics.android.Crashlytics;
 import com.nullwire.trace.ExceptionHandler;
 
 public class MainWindow extends SherlockExpandableListActivity {
@@ -100,7 +98,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.i(TAG, getString(R.string.build_version));
+		Log.i(TAG, getString(R.string.version_code));
 		mConfig = BereshtookApplication.getConfig(this);
 		mTheme = mConfig.theme;
 		setTheme(mConfig.getTheme());
@@ -193,7 +191,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		if (serviceAdapter != null)
 			serviceAdapter.unregisterUICallback(rosterCallback);
 
-		BereshtookApplication.getApp(this).mMTM.unbindDisplayActivity(this);
+		//BereshtookApplication.getApp(this).mMTM.unbindDisplayActivity(this);
 		unbindXMPPService();
 		storeExpandedState();
 		
@@ -218,7 +216,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		mBestLocationProvider.startLocationUpdatesWithListener(mBestLocationListener);
 		GameBroadcastReceiver.setContext(this);
 
-		BereshtookApplication.getApp(this).mMTM.bindDisplayActivity(this);
+		//BereshtookApplication.getApp(this).mMTM.bindDisplayActivity(this);
 
 		// handle SEND action
 		handleSendIntent();

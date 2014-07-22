@@ -4,7 +4,6 @@ import ir.bereshtook.androidclient.data.BereshtookConfiguration;
 import android.app.Application;
 import android.content.Context;
 import android.preference.PreferenceManager;
-import de.duenndns.ssl.MemorizingTrustManager;
 
 public class BereshtookApplication extends Application {
 	// identity name and type, see:
@@ -14,7 +13,7 @@ public class BereshtookApplication extends Application {
 
 	// MTM is needed globally for both the backend (connect)
 	// and the frontend (display dialog)
-	public MemorizingTrustManager mMTM;
+	//public MemorizingTrustManager mMTM;
 
 	private BereshtookConfiguration mConfig;
 
@@ -24,7 +23,7 @@ public class BereshtookApplication extends Application {
 
 	@Override
 	public void onCreate() {
-		mMTM = new MemorizingTrustManager(this);
+		//mMTM = new MemorizingTrustManager(this);
 		mConfig = new BereshtookConfiguration(PreferenceManager
 				.getDefaultSharedPreferences(this));
 	}
