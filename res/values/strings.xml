@@ -244,8 +244,9 @@
     <string name="ok">باشه</string>
     <string name="go">بریم</string>
     <string name="confirm">تایید</string>
-    <string name="cancel">بیخیال</string>
+    <string name="cancel">انصراف</string>
     
+    <string name="choose_a_game">یک بازی را انتخاب کن</string>
     <string name="you_invite_to_game">دعوت به بازی کردی</string>
     <string name="would_you_accept">میای بازی کنیم؟</string>
     <string name="you_accepted_invite">دعوت رو قبول کردی</string>
@@ -255,10 +256,19 @@
     
     <string name="accept">قبول</string>
     <string name="deny">رد</string>
+
+    <string name="exit_game_title">خروج از بازی</string>
+    <string name="exit_game_message">در صورت خروج از بازی امکان ادامه دادن آن وجود نخواهد داشت.</string>
+    <string name="exit_game_confirm">تایید خروج</string>
+    <string name="exit_game_cancel">خارج نمیشم</string>
+    
+    <string name="opponent_leaved_title">رفت!</string>
+    <string name="opponent_leaved_message">حریف میدان را ترک کرد</string>
     
     <string name="zero">صفر</string>
     <string name="you_win">بردی</string>
     <string name="you_lose">خوردی</string>
     <string name="draw">مساوی</string>
     <string name="not_your_turn">الان نوبت شما نیست!</string>
+    <string name="you_are_not_online">شما آنلاین نیستید</string>
 </resources>
