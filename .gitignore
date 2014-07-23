@@ -6,7 +6,6 @@ gen/
 *.class
 local.properties
 build.properties
-res/values/version.xml
 lint.xml
 assets/crashlytics-build.properties
 res/values/com_crashlytics_export_strings.xml

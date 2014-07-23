@@ -13,6 +13,8 @@
 	<string name="conn_reconnect">تلاش مجدد برای وصل شدن تا %d ثانیه دیگر</string>
 	<string name="conn_disconnected">ارتباط قطع شد</string>
 	<string name="conn_no_network">شبکه ایی پیدا نشد</string>
+	<string name="conn_authentication_fail">نام کاربری یا رمز عبور اشتباه است</string>
+	<string name="conn_conflict">نام کاربری تکراری است</string>
 
 	<!-- Global Strings -->
 	<string name="Global_Exit">خروج</string>
@@ -247,12 +249,13 @@
     <string name="cancel">انصراف</string>
     
     <string name="choose_a_game">یک بازی را انتخاب کن</string>
-    <string name="you_invite_to_game">دعوت به بازی کردی</string>
-    <string name="would_you_accept">میای بازی کنیم؟</string>
+    <string name="you_invited_to_game">دعوت به بازی کردی</string>
+    <string name="she_invited_to_invite">میای بازی کنیم؟</string>
     <string name="you_accepted_invite">دعوت رو قبول کردی</string>
     <string name="she_accepted_invite">دعوت رو قبول کرد</string>
     <string name="you_denied_invite">دعوت رو قبول کرد</string>
     <string name="she_denied_invite">دعوت رو قبول کردی</string>
+    <string name="would_you_accept">آیا دعوت رو قبول میکنی؟</string>
     
     <string name="accept">قبول</string>
     <string name="deny">رد</string>

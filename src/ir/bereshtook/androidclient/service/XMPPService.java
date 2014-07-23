@@ -277,11 +277,19 @@ public class XMPPService extends GenericService {
 
 	private String getConnectionStateString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(mReconnectInfo);
 		if (mSmackable != null && mSmackable.getLastError() != null) {
-			sb.append("\n");
-			sb.append(mSmackable.getLastError());
+			if(mSmackable.getLastError().equals("SASL authentication failed using mechanism DIGEST-MD5"))
+				sb.append(getString(R.string.conn_authentication_fail));
+			else if(mSmackable.getLastError().equals("conflict(409)"))
+				sb.append(getString(R.string.conn_conflict));
+			else{
+				sb.append(mReconnectInfo);
+				sb.append("\n");
+				sb.append(mSmackable.getLastError());
+			}
 		}
+		else
+			sb.append(mReconnectInfo);
 		return sb.toString();
 	}
 
@@ -400,15 +408,16 @@ public class XMPPService extends GenericService {
 			mSmackable.requestConnectionState(ConnectionState.RECONNECT_NETWORK);
 
 		} else if (mConnectionDemanded.get()) {
-			mReconnectInfo = getString(R.string.conn_reconnect, mReconnectTimeout);
-			mSmackable.requestConnectionState(ConnectionState.RECONNECT_DELAYED);
-			logInfo("connectionFailed(): registering reconnect in " + mReconnectTimeout + "s");
-			((AlarmManager)getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP,
-					System.currentTimeMillis() + mReconnectTimeout * 1000, mPAlarmIntent);
-			mReconnectTimeout = mReconnectTimeout * 2;
-			if (mReconnectTimeout > RECONNECT_MAXIMUM)
-				mReconnectTimeout = RECONNECT_MAXIMUM;
-		} else {
+				mReconnectInfo = getString(R.string.conn_reconnect, mReconnectTimeout);
+				mSmackable.requestConnectionState(ConnectionState.RECONNECT_DELAYED);
+				logInfo("connectionFailed(): registering reconnect in " + mReconnectTimeout + "s");
+				((AlarmManager)getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP,
+						System.currentTimeMillis() + mReconnectTimeout * 1000, mPAlarmIntent);
+				mReconnectTimeout = mReconnectTimeout * 2;
+				if (mReconnectTimeout > RECONNECT_MAXIMUM)
+					mReconnectTimeout = RECONNECT_MAXIMUM;
+		} 
+		else {
 			connectionClosed();
 		}
 
@@ -450,13 +459,13 @@ public class XMPPService extends GenericService {
 				else if(message.endsWith(GameWindow.INVITE_CODE) || message.endsWith(GameWindow.ACCEPT_CODE) || message.endsWith(GameWindow.DENY_CODE)){
 					String notifMsg = null;
 					if(message.endsWith(GameWindow.INVITE_CODE))
-						notifMsg = name + "!شما را به بازی دعوت کرد ";
+						notifMsg = name + " " + R.string.she_invited_to_invite;
 					else if(message.endsWith(GameWindow.ACCEPT_CODE))
-						notifMsg = name + "!دعوت شما را قبول کرد ";
+						notifMsg = name + " " + R.string.she_accepted_invite;
 					else if(message.endsWith(GameWindow.DENY_CODE))
-						notifMsg = name + "!دعوت شما را رد کرد ";
+						notifMsg = name + " " + R.string.she_denied_invite;
 					
-					notifyClient(from, "برشتوک", notifMsg, !mIsBoundTo.contains(from), silent_notification, false);
+					notifyClient(from, name, notifMsg, !mIsBoundTo.contains(from), silent_notification, false);
 					if(message.endsWith(GameWindow.ACCEPT_CODE))
 						broadcastGameMsg(from, message);
 				}
@@ -492,6 +501,7 @@ public class XMPPService extends GenericService {
 				//case OFFLINE:
 				case DISCONNECTED:
 					connectionFailed(getString(R.string.conn_disconnected));
+					updateServiceNotification();
 					break;
 				case ONLINE:
 					mReconnectTimeout = RECONNECT_AFTER;

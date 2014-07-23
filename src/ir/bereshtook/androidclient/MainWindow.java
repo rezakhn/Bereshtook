@@ -1134,7 +1134,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			};
 			
 			if(mBestLocationProvider == null){
-				mBestLocationProvider = new BestLocationProvider(this, true, true, 10000, 10000, 2, 0);
+				mBestLocationProvider = new BestLocationProvider(this, true, true, 10000, 10000, 10000, 0);
 			}
 		}
 	}

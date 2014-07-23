@@ -572,7 +572,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			if(message.endsWith(GameWindow.INVITE_CODE)){
 				isSystemMsg = true;
 				if(from_me){
-					myMessage = getString(R.string.you_invite_to_game);
+					myMessage = getString(R.string.you_invited_to_game);
 				}
 				else{
 					myMessage = getString(R.string.would_you_accept);
