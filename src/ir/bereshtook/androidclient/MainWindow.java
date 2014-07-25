@@ -14,7 +14,6 @@ import ir.bereshtook.androidclient.location.BestLocationListener;
 import ir.bereshtook.androidclient.location.BestLocationProvider;
 import ir.bereshtook.androidclient.location.BestLocationProvider.LocationType;
 import ir.bereshtook.androidclient.location.LocationUtil;
-import ir.bereshtook.androidclient.preferences.AccountPrefs;
 import ir.bereshtook.androidclient.preferences.MainPrefs;
 import ir.bereshtook.androidclient.service.IXMPPRosterService;
 import ir.bereshtook.androidclient.service.XMPPService;
@@ -98,7 +97,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.i(TAG, getString(R.string.version_code));
+		Log.i(TAG, getString(R.string.version_name));
 		mConfig = BereshtookApplication.getConfig(this);
 		mTheme = mConfig.theme;
 		setTheme(mConfig.getTheme());
@@ -808,7 +807,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 	// according to the requested state
 	private void toggleConnection() {
 		if (!mConfig.jid_configured) {
-			startActivity(new Intent(this, AccountPrefs.class));
+			//startActivity(new Intent(this, AccountPrefs.class));
+			showFirstStartUpDialog();
 			return;
 		}
 		boolean oldState = isConnected() || isConnecting();
@@ -953,7 +953,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		// prevent a start-up with empty JID
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		prefs.edit().putBoolean(PreferenceConstants.CONN_STARTUP, false).commit();
+		prefs.edit().putBoolean(PreferenceConstants.CONN_STARTUP, true).commit();
 
 		// show welcome dialog
 		new FirstStartDialog(this, serviceAdapter).show();
@@ -1134,7 +1134,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			};
 			
 			if(mBestLocationProvider == null){
-				mBestLocationProvider = new BestLocationProvider(this, true, true, 10000, 10000, 10000, 0);
+				mBestLocationProvider = new BestLocationProvider(this, true, true, 60000, 60000, 10000, 0);
 			}
 		}
 	}

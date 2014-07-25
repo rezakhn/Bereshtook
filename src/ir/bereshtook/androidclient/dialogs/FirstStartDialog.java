@@ -1,7 +1,10 @@
 package ir.bereshtook.androidclient.dialogs;
 
+import ir.bereshtook.androidclient.BereshtookApplication;
 import ir.bereshtook.androidclient.MainWindow;
+import ir.bereshtook.androidclient.R;
 import ir.bereshtook.androidclient.XMPPRosterServiceAdapter;
+import ir.bereshtook.androidclient.data.BereshtookConfiguration;
 import ir.bereshtook.androidclient.exceptions.BereshtookXMPPAdressMalformedException;
 import ir.bereshtook.androidclient.preferences.AccountPrefs;
 import ir.bereshtook.androidclient.util.PreferenceConstants;
@@ -16,15 +19,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-
-import ir.bereshtook.androidclient.R;
 
 public class FirstStartDialog extends AlertDialog implements DialogInterface.OnClickListener,
 		CompoundButton.OnCheckedChangeListener, TextWatcher {
@@ -35,6 +35,7 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	private EditText mEditPassword;
 	private EditText mRepeatPassword;
 	private CheckBox mCreateAccount;
+	private BereshtookConfiguration mConfig;
 
 	public FirstStartDialog(MainWindow mainWindow,
 			XMPPRosterServiceAdapter serviceAdapter) {
@@ -56,9 +57,13 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		mRepeatPassword = (EditText) group.findViewById(R.id.startup_password_repeat);
 		mCreateAccount = (CheckBox) group.findViewById(R.id.create_account);
 
+		mConfig = BereshtookApplication.getConfig(mainWindow);
+		mEditJabberID.setText(mConfig.userName);
+		mEditPassword.setText(mConfig.password);
+		
 		//mEditJabberID.addTextChangedListener(this);
 		//mEditPassword.addTextChangedListener(this);
-		//mRepeatPassword.addTextChangedListener(this);
+		mRepeatPassword.addTextChangedListener(this);
 		mCreateAccount.setOnCheckedChangeListener(this);
 	}
 
@@ -128,16 +133,17 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	@Override
 	public void onCheckedChanged(CompoundButton btn,boolean isChecked) {
 		mRepeatPassword.setVisibility(isChecked? View.VISIBLE : View.GONE);
-		//updateDialog();
+		updateDialog();
 	}
+	@Override
 	public void afterTextChanged(Editable s) {
-		//updateDialog();
+		updateDialog();
 	}
-
+	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 	}
-
+	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
 

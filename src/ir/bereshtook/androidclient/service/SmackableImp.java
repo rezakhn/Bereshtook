@@ -424,9 +424,9 @@ public class SmackableImp implements Smackable {
 
 		// set Version for replies
 		String app_name = mService.getString(ir.bereshtook.androidclient.R.string.app_name);
-		String version_code = mService.getString(ir.bereshtook.androidclient.R.string.version_code);
+		String version_name = mService.getString(ir.bereshtook.androidclient.R.string.version_name);
 		Version.Manager.getInstanceFor(mXMPPConnection).setVersion(
-				new Version(app_name, version_code, "Android"));
+				new Version(app_name, version_name, "Android"));
 
 		// reference DeliveryReceiptManager, add listener
 		DeliveryReceiptManager dm = DeliveryReceiptManager.getInstanceFor(mXMPPConnection);

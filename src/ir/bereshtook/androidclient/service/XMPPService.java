@@ -278,13 +278,13 @@ public class XMPPService extends GenericService {
 	private String getConnectionStateString() {
 		StringBuilder sb = new StringBuilder();
 		if (mSmackable != null && mSmackable.getLastError() != null) {
+			sb.append(mReconnectInfo);
+			sb.append("\n");
 			if(mSmackable.getLastError().equals("SASL authentication failed using mechanism DIGEST-MD5"))
 				sb.append(getString(R.string.conn_authentication_fail));
 			else if(mSmackable.getLastError().equals("conflict(409)"))
 				sb.append(getString(R.string.conn_conflict));
 			else{
-				sb.append(mReconnectInfo);
-				sb.append("\n");
 				sb.append(mSmackable.getLastError());
 			}
 		}

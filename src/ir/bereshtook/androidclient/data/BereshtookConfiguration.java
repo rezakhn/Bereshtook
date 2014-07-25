@@ -138,7 +138,7 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 		this.foregroundService = prefs.getBoolean(PreferenceConstants.FOREGROUND, true);
 
 		this.autoConnect = prefs.getBoolean(PreferenceConstants.CONN_STARTUP,
-				false);
+				true);
 		this.messageCarbons = prefs.getBoolean(
 				PreferenceConstants.MESSAGE_CARBONS, true);
 
@@ -155,7 +155,7 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 		this.statusMessage = prefs.getString(PreferenceConstants.STATUS_MESSAGE, "");
 		this.statusMessageHistory = prefs.getString(PreferenceConstants.STATUS_MESSAGE_HISTORY, statusMessage).split("\036");
 		this.theme = prefs.getString(PreferenceConstants.THEME, "light");
-		this.chatFontSize = prefs.getString("setSizeChat", "18");
+		this.chatFontSize = prefs.getString("setSizeChat", "16");
 		this.showOffline = prefs.getBoolean(PreferenceConstants.SHOW_OFFLINE, false);
 		this.enableGroups = prefs.getBoolean(PreferenceConstants.ENABLE_GROUPS, true);
 

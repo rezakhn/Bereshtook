@@ -68,7 +68,7 @@
 
 		<service android:name=".service.XMPPService">
 			<intent-filter>
-				<action android:name="de.hdmstuttgart.yaxim.XMPPSERVICE" />
+				<action android:name="ir.bereshtook.androidclient.XMPPSERVICE" />
 			</intent-filter>
 		</service>
 
