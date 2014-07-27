@@ -11,7 +11,7 @@
 		<TextView
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:drawableLeft="@drawable/icon"
+			android:drawableLeft="@drawable/ic_launcher"
 			android:drawablePadding="10sp"
 			android:text="@string/AboutDialog_DevelopersTitle"
 			android:textSize="20sp"

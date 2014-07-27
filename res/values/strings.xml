@@ -248,6 +248,10 @@
     <string name="confirm">تایید</string>
     <string name="cancel">انصراف</string>
     
+    <string name="rps_game">سنگ کاغذ قیچی</string>
+    <string name="ttt_game">دوز</string>
+    <string name="battleship_game">نبرد کشتی ها</string>
+    
     <string name="choose_a_game">یک بازی را انتخاب کن</string>
     <string name="you_invited_to_game">دعوت به بازی کردی</string>
     <string name="she_invited_to_invite">میای بازی کنیم؟</string>

@@ -397,9 +397,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
             final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
             		ChatWindow.this,
                     android.R.layout.select_dialog_singlechoice);
-            arrayAdapter.add("سنگ کاغذ قیچی");
-            arrayAdapter.add("دوز");
-            //arrayAdapter.add("نبرد کشتی ها");
+            arrayAdapter.add(getString(R.string.rps_game));
+            arrayAdapter.add(getString(R.string.ttt_game));
+            //arrayAdapter.add(getString(R.string.battleship_game));
             
 			AlertDialog.Builder chooseGameDialog = new AlertDialog.Builder(
 					ChatWindow.this);
