@@ -78,7 +78,7 @@
 			android:entries="@array/fontSizesChat"
 			android:entryValues="@array/fontSizesChatCodes"
 			android:dialogTitle="@string/FontChat_dialog"
-		    android:defaultValue="18"
+		    android:defaultValue="16"
 		/>
 		<CheckBoxPreference
 			android:id="@+id/enableGroups"

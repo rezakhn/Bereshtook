@@ -3,7 +3,7 @@ package ir.bereshtook.androidclient.game.rps;
 public class RPSGame {
 	public enum Choice {NONE, ROCK, PAPER, SCISSOR};
 	public enum Turn {MY, HER, NONE, BOTH};
-	public enum Winner {ME, HER, DRAW};
+	public enum Winner {ME, SHE, DRAW};
 	
 	private Integer myScore;
 	private Integer herScore;
@@ -83,23 +83,23 @@ public class RPSGame {
 		else if(herChoice == Choice.NONE)
 			wnr = Winner.ME;
 		else if(myChoice == Choice.NONE)
-			wnr = Winner.HER;
+			wnr = Winner.SHE;
 		else if(myChoice == Choice.ROCK && herChoice == Choice.SCISSOR)
 			wnr = Winner.ME;
 		else if(herChoice == Choice.ROCK && myChoice == Choice.SCISSOR)
-			wnr = Winner.HER;
+			wnr = Winner.SHE;
 		else if(myChoice == Choice.SCISSOR && herChoice == Choice.PAPER)
 			wnr = Winner.ME;
 		else if(herChoice == Choice.SCISSOR && herChoice == Choice.SCISSOR)
-			wnr = Winner.HER;
+			wnr = Winner.SHE;
 		else if(myChoice == Choice.PAPER && herChoice == Choice.ROCK)
 			wnr = Winner.ME;
 		else if(herChoice == Choice.PAPER && myChoice == Choice.ROCK)
-			wnr = Winner.HER;
+			wnr = Winner.SHE;
 		
 		if(wnr == Winner.ME)
 			myScore++;
-		else if(wnr == Winner.HER)
+		else if(wnr == Winner.SHE)
 			herScore++;
 		return wnr;
 	}

@@ -13,14 +13,8 @@ import ir.bereshtook.androidclient.util.LogConstants;
 import ir.bereshtook.androidclient.util.StatusMode;
 
 import java.io.File;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.Collection;
 import java.util.Date;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.X509TrustManager;
 
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -196,7 +190,9 @@ public class SmackableImp implements Smackable {
 		if (mConfig.require_ssl)
 			this.mXMPPConfig.setSecurityMode(ConnectionConfiguration.SecurityMode.required);
 		
+		this.mXMPPConfig.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 		mXMPPConfig.setSelfSignedCertificateEnabled(true);
+		
 		//mXMPPConfig.setTruststoreType("BKS");
 		//mXMPPConfig.setTruststorePassword("kharchang");
 		//mXMPPConfig.setTruststorePath("res/raw/myKeystore.bks");
@@ -428,9 +424,9 @@ public class SmackableImp implements Smackable {
 
 		// set Version for replies
 		String app_name = mService.getString(ir.bereshtook.androidclient.R.string.app_name);
-		String build_revision = mService.getString(ir.bereshtook.androidclient.R.string.build_revision);
+		String version_name = mService.getString(ir.bereshtook.androidclient.R.string.version_name);
 		Version.Manager.getInstanceFor(mXMPPConnection).setVersion(
-				new Version(app_name, build_revision, "Android"));
+				new Version(app_name, version_name, "Android"));
 
 		// reference DeliveryReceiptManager, add listener
 		DeliveryReceiptManager dm = DeliveryReceiptManager.getInstanceFor(mXMPPConnection);

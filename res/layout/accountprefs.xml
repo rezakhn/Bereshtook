@@ -75,7 +75,7 @@
 		<CheckBoxPreference
 			android:id="@+id/require_ssl"
 			android:key="require_ssl"
-			android:defaultValue="true"
+			android:defaultValue="false"
 			android:title="@string/require_ssl_title"
 			android:summary="@string/require_ssl_summ"
 		/>
