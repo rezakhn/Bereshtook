@@ -1,23 +1,23 @@
 package ir.blackgrape.bereshtook;
 
-import ir.blackgrape.bereshtook.IXMPPRosterCallback;
-import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.IXMPPRosterCallback.Stub;
-import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.data.ChatProvider;
-import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.ChatProvider.ChatConstants;
+import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.RosterProvider.RosterConstants;
 import ir.blackgrape.bereshtook.dialogs.AddRosterItemDialog;
 import ir.blackgrape.bereshtook.dialogs.ChangeStatusDialog;
 import ir.blackgrape.bereshtook.dialogs.FirstStartDialog;
 import ir.blackgrape.bereshtook.game.GameBroadcastReceiver;
+import ir.blackgrape.bereshtook.game.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.location.BestLocationListener;
 import ir.blackgrape.bereshtook.location.BestLocationProvider;
-import ir.blackgrape.bereshtook.location.LocationUtil;
 import ir.blackgrape.bereshtook.location.BestLocationProvider.LocationType;
+import ir.blackgrape.bereshtook.location.LocationUtil;
 import ir.blackgrape.bereshtook.preferences.MainPrefs;
+import ir.blackgrape.bereshtook.service.IXMPPDataService;
+import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.ConnectionState;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
@@ -96,6 +96,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private BestLocationProvider mBestLocationProvider;
 	private BestLocationListener mBestLocationListener;
 	private Location mLocation;
+	
+	private Intent gameServiceIntent;
+	private ServiceConnection gameServiceConnection;
+	private XMPPDataServiceAdapter gameServiceAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -123,6 +127,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		createUICallback();
 		setupContenView();
 		registerListAdapter();
+		registerGameService();
 	}
 
 	@Override
@@ -193,7 +198,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			serviceAdapter.unregisterUICallback(rosterCallback);
 
 		//BereshtookApplication.getApp(this).mMTM.unbindDisplayActivity(this);
-		unbindXMPPService();
+		unbindServices();
 		storeExpandedState();
 		
 		initLocation();
@@ -211,7 +216,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			finish();
 		}
 		displayOwnStatus();
-		bindXMPPService();
+		bindServices();
 		
 		initLocation();
 		mBestLocationProvider.startLocationUpdatesWithListener(mBestLocationListener);
@@ -872,17 +877,46 @@ public class MainWindow extends SherlockExpandableListActivity {
 			}
 		};
 	}
+	
+	private void registerGameService(){
+		Log.i(TAG, "called startGameService()");
+		gameServiceIntent = new Intent(this, XMPPService.class);
+		gameServiceIntent.setAction("ir.blackgrape.bereshtook.XMPPSERVICE2");
+		gameServiceIntent.putExtra("isGameService", true);
+		
+		gameServiceConnection = new ServiceConnection() {
+			
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				gameServiceAdapter = new XMPPDataServiceAdapter(
+						IXMPPDataService.Stub.asInterface(service));
+				String strCoins = gameServiceAdapter.loadGameData("coins");
+				Integer Coins;
+				if(strCoins != null)
+					Coins = Integer.parseInt(strCoins);
+				else
+					gameServiceAdapter.saveGameData("coins", "1000");
+			}
+			
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				Log.i(TAG, "Game service called onServiceDisconnected()");
+			}
+		};
+	}
 
-	private void unbindXMPPService() {
+	private void unbindServices() {
 		try {
 			unbindService(xmppServiceConnection);
+			unbindService(gameServiceConnection);
 		} catch (IllegalArgumentException e) {
 			Log.e(TAG, "Service wasn't bound!");
 		}
 	}
 
-	private void bindXMPPService() {
+	private void bindServices() {
 		bindService(xmppServiceIntent, xmppServiceConnection, BIND_AUTO_CREATE);
+		bindService(gameServiceIntent, gameServiceConnection, BIND_AUTO_CREATE);
 	}
 
 	private void registerListAdapter() {

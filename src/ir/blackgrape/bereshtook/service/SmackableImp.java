@@ -3,8 +3,8 @@ package ir.blackgrape.bereshtook.service;
 import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.data.ChatProvider;
-import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.ChatProvider.ChatConstants;
+import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.RosterProvider.RosterConstants;
 import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPException;
 import ir.blackgrape.bereshtook.game.GameWindow;
@@ -37,6 +37,7 @@ import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.DNSUtil;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.util.dns.DNSJavaResolver;
+import org.jivesoftware.smackx.PrivateDataManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.carbons.Carbon;
 import org.jivesoftware.smackx.carbons.CarbonManager;
@@ -44,6 +45,7 @@ import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
 import org.jivesoftware.smackx.entitycaps.cache.SimpleDirectoryPersistentCache;
 import org.jivesoftware.smackx.entitycaps.provider.CapsExtensionProvider;
 import org.jivesoftware.smackx.forward.Forwarded;
+import org.jivesoftware.smackx.packet.DefaultPrivateData;
 import org.jivesoftware.smackx.packet.DelayInfo;
 import org.jivesoftware.smackx.packet.DelayInformation;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
@@ -101,6 +103,8 @@ public class SmackableImp implements Smackable {
 
 	static void registerSmackProviders() {
 		ProviderManager pm = ProviderManager.getInstance();
+		//Private Data Storage
+		pm.addIQProvider("query", "jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
 		// add IQ handling
 		pm.addIQProvider("query","http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
 		pm.addIQProvider("query","http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
@@ -164,6 +168,8 @@ public class SmackableImp implements Smackable {
 
 	private PongTimeoutAlarmReceiver mPongTimeoutAlarmReceiver = new PongTimeoutAlarmReceiver();
 	private BroadcastReceiver mPingAlarmReceiver = new PingAlarmReceiver();
+	
+	private PrivateDataManager mPrivateDataManager;
 
 
 	public SmackableImp(BereshtookConfiguration config,
@@ -217,7 +223,6 @@ public class SmackableImp implements Smackable {
 			}
 		});
 		mConfig.reconnect_required = false;
-
 		initServiceDiscovery();
 	}
 
@@ -235,6 +240,8 @@ public class SmackableImp implements Smackable {
 			registerPresenceListener();
 			registerPongListener();
 			sendOfflineMessages();
+			
+			this.mPrivateDataManager = new PrivateDataManager(this.mXMPPConnection);
 			// we need to "ping" the service to let it know we are actually
 			// connected, even when no roster entries will come in
 			updateConnectionState(ConnectionState.ONLINE);
@@ -1192,5 +1199,28 @@ public class SmackableImp implements Smackable {
 	@Override
 	public String getLastError() {
 		return mLastError;
+	}
+
+	@Override
+	public void savePrivateData(DefaultPrivateData privateData) {
+		try {
+			if(mPrivateDataManager != null && mXMPPConnection.isAuthenticated())
+				mPrivateDataManager.setPrivateData(privateData);
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public DefaultPrivateData loadPrivateData(String elementName, String namespace) {
+		try {
+			if(mPrivateDataManager != null && mXMPPConnection.isAuthenticated())
+				return (DefaultPrivateData) mPrivateDataManager.getPrivateData(elementName, namespace);
+			else
+				return null;
+		} catch (XMPPException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

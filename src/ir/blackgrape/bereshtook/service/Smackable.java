@@ -3,6 +3,8 @@ package ir.blackgrape.bereshtook.service;
 import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPException;
 import ir.blackgrape.bereshtook.util.ConnectionState;
 
+import org.jivesoftware.smackx.packet.DefaultPrivateData;
+
 
 public interface Smackable {
 	boolean doConnect(boolean create_account) throws BereshtookXMPPException;
@@ -26,6 +28,9 @@ public interface Smackable {
 	
 	void registerCallback(XMPPServiceCallback callBack);
 	void unRegisterCallback();
+	
+	void savePrivateData(DefaultPrivateData privateData);
+	DefaultPrivateData loadPrivateData(String elementName, String namespace);
 	
 	String getNameForJID(String jid);
 }

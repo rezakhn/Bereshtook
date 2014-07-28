@@ -69,6 +69,7 @@
 		<service android:name=".service.XMPPService">
 			<intent-filter>
 				<action android:name="ir.blackgrape.bereshtook.XMPPSERVICE" />
+				<action android:name="ir.blackgrape.bereshtook.XMPPSERVICE2" />
 			</intent-filter>
 		</service>
 

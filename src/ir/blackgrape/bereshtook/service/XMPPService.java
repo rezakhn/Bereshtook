@@ -1,10 +1,8 @@
 package ir.blackgrape.bereshtook.service;
 
 import ir.blackgrape.bereshtook.IXMPPRosterCallback;
-import ir.blackgrape.bereshtook.R;
-import ir.blackgrape.bereshtook.service.IXMPPChatService;
-import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.MainWindow;
+import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPException;
 import ir.blackgrape.bereshtook.game.GameWindow;
@@ -13,6 +11,8 @@ import ir.blackgrape.bereshtook.util.StatusMode;
 
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.jivesoftware.smackx.packet.DefaultPrivateData;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -46,6 +46,8 @@ public class XMPPService extends GenericService {
 	private boolean create_account = false;
 	private IXMPPRosterService.Stub mService2RosterConnection;
 	private IXMPPChatService.Stub mServiceChatConnection;
+	private IXMPPDataService.Stub mServiceDataConnection;
+	private boolean isDataService = false;
 
 	private RemoteCallbackList<IXMPPRosterCallback> mRosterCallbacks = new RemoteCallbackList<IXMPPRosterCallback>();
 	private HashSet<String> mIsBoundTo = new HashSet<String>();
@@ -54,11 +56,16 @@ public class XMPPService extends GenericService {
 	@Override
 	public IBinder onBind(Intent intent) {
 		super.onBind(intent);
+		String action = intent.getAction();
 		String chatPartner = intent.getDataString();
 		if ((chatPartner != null)) {
 			resetNotificationCounter(chatPartner);
 			mIsBoundTo.add(chatPartner);
 			return mServiceChatConnection;
+		}
+		else if(action.equals("ir.blackgrape.bereshtook.XMPPSERVICE2")){
+			isDataService = true;
+			return mServiceDataConnection;
 		}
 
 		return mService2RosterConnection;
@@ -89,6 +96,7 @@ public class XMPPService extends GenericService {
 
 		createServiceRosterStub();
 		createServiceChatStub();
+		createServiceDataStub();
 
 		mPAlarmIntent = PendingIntent.getBroadcast(this, 0, mAlarmIntent,
 					PendingIntent.FLAG_UPDATE_CURRENT);
@@ -274,6 +282,30 @@ public class XMPPService extends GenericService {
 				mSmackable.sendPresenceRequest(jid, type);
 			}
 
+		};
+	}
+	
+	private void createServiceDataStub(){
+		mServiceDataConnection = new IXMPPDataService.Stub() {
+			
+			@Override
+			public void saveData(String key, String value){
+				if(mSmackable != null && mSmackable.isAuthenticated()){
+					DefaultPrivateData privateData = new DefaultPrivateData("game", "bereshtook.ir");
+					privateData.setValue(key, value);
+					mSmackable.savePrivateData(privateData);
+				}
+			}
+			
+			@Override
+			public String loadData(String key){
+				if(mSmackable != null && mSmackable.isAuthenticated()){
+					DefaultPrivateData privateData = mSmackable.loadPrivateData("game", "bereshtook.ir");
+					if(privateData != null)
+						return privateData.getValue(key);
+				}
+				return null;
+			}
 		};
 	}
 
