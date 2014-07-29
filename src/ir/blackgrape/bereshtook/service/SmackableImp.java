@@ -242,11 +242,21 @@ public class SmackableImp implements Smackable {
 			sendOfflineMessages();
 			
 			this.mPrivateDataManager = new PrivateDataManager(this.mXMPPConnection);
+			if(create_account)
+				initPrivateData();
 			// we need to "ping" the service to let it know we are actually
 			// connected, even when no roster entries will come in
 			updateConnectionState(ConnectionState.ONLINE);
 		} else throw new BereshtookXMPPException("SMACK connected, but authentication failed");
 		return true;
+	}
+
+	private void initPrivateData() {
+		DefaultPrivateData privateData = new DefaultPrivateData("game", "bereshtook.ir");
+		privateData.setValue("coins", "1000");
+		privateData.setValue("wins", "0");
+		privateData.setValue("losses", "0");
+		savePrivateData(privateData);
 	}
 
 	// BLOCKING, call on a new Thread!

@@ -19,6 +19,7 @@ import ir.blackgrape.bereshtook.preferences.MainPrefs;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.service.XMPPService;
+import ir.blackgrape.bereshtook.shop.ShopActivity;
 import ir.blackgrape.bereshtook.util.ConnectionState;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.SimpleCursorTreeAdapter;
@@ -97,9 +98,9 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private BestLocationListener mBestLocationListener;
 	private Location mLocation;
 	
-	private Intent gameServiceIntent;
-	private ServiceConnection gameServiceConnection;
-	private XMPPDataServiceAdapter gameServiceAdapter;
+	private Intent dataServiceIntent;
+	private ServiceConnection dataServiceConnection;
+	private XMPPDataServiceAdapter dataServiceAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -113,8 +114,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 		requestWindowFeature(Window.FEATURE_ACTION_BAR);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		actionBar = getSupportActionBar();
-		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE, ActionBar.DISPLAY_SHOW_TITLE);
+		// no difference!!!
+		//actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE, ActionBar.DISPLAY_SHOW_TITLE);
 		actionBar.setHomeButtonEnabled(true);
+		//actionBar.setTitle(null);
 		registerCrashReporter();
 
 		if (mConfig.jabberID.length() < 3)
@@ -127,7 +130,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		createUICallback();
 		setupContenView();
 		registerListAdapter();
-		registerGameService();
+		registerDataService();
 	}
 
 	@Override
@@ -740,7 +743,11 @@ public class MainWindow extends SherlockExpandableListActivity {
 		case R.id.menu_account:
 			showFirstStartUpDialog();
 			return true;
-
+			
+		case R.id.menu_coins:
+			Intent coinShop = new Intent(this, ShopActivity.class);
+			startActivity(coinShop);
+			return true;
 		}
 
 		return false;
@@ -878,24 +885,22 @@ public class MainWindow extends SherlockExpandableListActivity {
 		};
 	}
 	
-	private void registerGameService(){
+	private void registerDataService(){
 		Log.i(TAG, "called startGameService()");
-		gameServiceIntent = new Intent(this, XMPPService.class);
-		gameServiceIntent.setAction("ir.blackgrape.bereshtook.XMPPSERVICE2");
-		gameServiceIntent.putExtra("isGameService", true);
+		dataServiceIntent = new Intent(this, XMPPService.class);
+		dataServiceIntent.setAction("ir.blackgrape.bereshtook.XMPPSERVICE2");
+		dataServiceIntent.putExtra("isGameService", true);
 		
-		gameServiceConnection = new ServiceConnection() {
+		dataServiceConnection = new ServiceConnection() {
 			
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
-				gameServiceAdapter = new XMPPDataServiceAdapter(
+				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				String strCoins = gameServiceAdapter.loadGameData("coins");
+				String strCoins = dataServiceAdapter.loadGameData("coins");
 				Integer Coins;
 				if(strCoins != null)
 					Coins = Integer.parseInt(strCoins);
-				else
-					gameServiceAdapter.saveGameData("coins", "1000");
 			}
 			
 			@Override
@@ -908,7 +913,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private void unbindServices() {
 		try {
 			unbindService(xmppServiceConnection);
-			unbindService(gameServiceConnection);
+			unbindService(dataServiceConnection);
 		} catch (IllegalArgumentException e) {
 			Log.e(TAG, "Service wasn't bound!");
 		}
@@ -916,7 +921,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	private void bindServices() {
 		bindService(xmppServiceIntent, xmppServiceConnection, BIND_AUTO_CREATE);
-		bindService(gameServiceIntent, gameServiceConnection, BIND_AUTO_CREATE);
+		bindService(dataServiceIntent, dataServiceConnection, BIND_AUTO_CREATE);
 	}
 
 	private void registerListAdapter() {

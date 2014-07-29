@@ -229,8 +229,12 @@
 	<string name="friends_group">دوستان</string>
 	<string name="bereshtooks_group">همه برشتوک ها</string>
 	
-	<string name="choose_request_type">دوست دادی چیکا کنی؟</string>
-	<string name="chat_request">دعوت به گفتگو</string>
+	<string name="coins">سکه</string>	
+	<string name="coin_info_description">برای بدست آوردن سکه میتوانید بازی کنید و برنده شوید یا سکه بخرید</string>
+	<string name="coin_pack1_desc">500 سکه فقط 450 تومان</string>
+	<string name="coin_pack2_desc">1000 سکه فقط 900 تومان</string>
+	<string name="coin_pack3_desc">2000 سکه فقط 1500 تومان</string>
+	<string name="coin_pack4_desc">9000 سکه فقط 4000 تومان</string>
 	
 	<string name="play_request">دعوت به بازی</string>
 	    

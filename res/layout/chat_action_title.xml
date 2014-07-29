@@ -51,5 +51,5 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/play_request"
-			android:layout_gravity="right"/>
+			/>
 </LinearLayout>
