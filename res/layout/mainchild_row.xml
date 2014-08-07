@@ -24,16 +24,24 @@
 		<TextView android:id="@+id/roster_screenname"
 			style="?attr/MainChild"
 			android:paddingStart="10dp"
-			android:paddingLeft="10dp" android:longClickable="false"
+			android:paddingLeft="10dp"
+			android:paddingRight="10dp"
+			android:longClickable="false"
 			android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:singleLine="true" />
+			android:layout_height="wrap_content" android:singleLine="true"
+			android:layout_gravity="right|center"
+			android:gravity="right|center"
+		 />
 
 		<TextView android:id="@+id/roster_statusmsg"
 			android:paddingStart="10dp"
 			android:paddingLeft="10dp"
+			android:paddingRight="10dp"
 			android:textSize="13sp" android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:singleLine="true"
 			android:ellipsize="end" android:visibility="gone" 
+			android:layout_gravity="right|center"
+			android:gravity="right|center"
 			/>
 
 	</LinearLayout>

@@ -2,6 +2,7 @@ package ir.blackgrape.bereshtook.chat;
 
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.service.IXMPPChatService;
+import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
 import ir.blackgrape.bereshtook.data.ChatProvider;
@@ -9,12 +10,14 @@ import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.ChatProvider.ChatConstants;
 import ir.blackgrape.bereshtook.game.GameBroadcastReceiver;
 import ir.blackgrape.bereshtook.game.GameWindow;
+import ir.blackgrape.bereshtook.game.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.game.battleship.BattleshipWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSWindow;
 import ir.blackgrape.bereshtook.game.ttt.TTTWindow;
-import ir.blackgrape.bereshtook.location.LocationUtil;
 import ir.blackgrape.bereshtook.service.XMPPService;
+import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.StatusMode;
+import ir.blackgrape.bereshtook.util.StatusUtil;
 import ir.blackgrape.bereshtook.util.chat.MessageUtils;
 import ir.blackgrape.bereshtook.util.chat.QuickAction;
 import ir.blackgrape.bereshtook.util.chat.MessageUtils.SmileyImageSpan;
@@ -106,6 +109,11 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	private int mChatFontSize;
 	private Context mActivity;
 
+	private Intent dataServiceIntent;
+	private ServiceConnection dataServiceConnection;
+	private XMPPDataServiceAdapter dataServiceAdapter;
+	private Integer mCoins = null;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		setTheme(BereshtookApplication.getConfig(this).getTheme());
@@ -127,6 +135,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		registerForContextMenu(getListView());
 		setContactFromUri();
 		registerXMPPService();
+		registerDataService();
 		setOnClickListener();
 		setSendButton();
 		setSmileyButton();
@@ -183,15 +192,15 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if (hasFocus)
-			bindXMPPService();
+			bindXMPPServices();
 		else
-			unbindXMPPService();
+			unbindXMPPServices();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (hasWindowFocus()) unbindXMPPService();
+		if (hasWindowFocus()) unbindXMPPServices();
 		getContentResolver().unregisterContentObserver(mContactObserver);
 	}
 
@@ -221,17 +230,41 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 
 		};
 	}
+	
+	private void registerDataService(){
+		Log.i(TAG, "called startGameService()");
+		dataServiceIntent = new Intent(this, XMPPService.class);
+		dataServiceIntent.setAction("ir.blackgrape.bereshtook.XMPPSERVICE2");
+		dataServiceIntent.putExtra("isGameService", true);
+		
+		dataServiceConnection = new ServiceConnection() {
+			
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				dataServiceAdapter = new XMPPDataServiceAdapter(
+						IXMPPDataService.Stub.asInterface(service));
+				mCoins = loadCoins();
+			}
+			
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				Log.i(TAG, "Game service called onServiceDisconnected()");
+			}
+		};
+	}
 
-	private void unbindXMPPService() {
+	private void unbindXMPPServices() {
 		try {
 			unbindService(mServiceConnection);
+			unbindService(dataServiceConnection);
 		} catch (IllegalArgumentException e) {
 			Log.e(TAG, "Service wasn't bound!");
 		}
 	}
 
-	private void bindXMPPService() {
+	private void bindXMPPServices() {
 		bindService(mServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+		bindService(dataServiceIntent, dataServiceConnection, BIND_AUTO_CREATE);
 	}
 	
 	private void setOnClickListener(){
@@ -348,7 +381,14 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		}
 	}
 	
-
+	void removeInviteMessage(final String from, final String message) {
+		String jid = from + "@bereshtook.ir";
+		getContentResolver().delete(ChatProvider.CONTENT_URI,
+				ChatProvider.ChatConstants.JID + " = ? AND "
+						+ ChatConstants.DIRECTION + " = " + ChatConstants.INCOMING + " AND "
+						+ ChatConstants.MESSAGE + " = ?", new String[] {jid, message});
+	}
+	
 	private View.OnClickListener getOnSetListener() {
 		return new View.OnClickListener() {
 
@@ -419,18 +459,20 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 						
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+							String inviteMsg = null;
 							switch (which) {
 							case 0:
-	                        	sendMessage(RPSWindow.INVITE_MSG);
+								inviteMsg = RPSWindow.INVITE_MSG;
 								break;
 							case 1:
-	                        	sendMessage(TTTWindow.INVITE_MSG);
+								inviteMsg = TTTWindow.INVITE_MSG;
 								break;
 							case 2:
-								sendMessage(BattleshipWindow.INVITE_MSG);
+								inviteMsg = BattleshipWindow.INVITE_MSG;
 								break;
 							}
-                            dialog.dismiss();
+							showGameRules(inviteMsg, false);
 						}
 					});
             chooseGameDialog.show();
@@ -441,6 +483,92 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		}
 	}
 	
+	private void showGameRules(final String inviteOrAcceptMsg, final boolean isGuest) {
+		if(mCoins == null)
+			mCoins = loadCoins();
+		//if coins still is null >> serious problem!!!
+		if(mCoins == null)
+			mCoins = 0;
+		if(mCoins < 100){
+			lowCoinAlert();
+			return;
+		}
+		AlertDialog.Builder chooseNotifyDialog = new AlertDialog.Builder(
+				ChatWindow.this);
+		chooseNotifyDialog.setIcon(R.drawable.ic_launcher);
+		chooseNotifyDialog.setTitle(R.string.attention);
+		chooseNotifyDialog.setMessage(R.string.win_lose_condition_desc);
+		chooseNotifyDialog.setPositiveButton(R.string.confirm,
+				new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        sendMessage(inviteOrAcceptMsg);
+                        if(isGuest)
+                        	startGame(inviteOrAcceptMsg.replaceFirst(GameWindow.ACCEPT_CODE, ""));
+                    }
+                });
+		chooseNotifyDialog.setNegativeButton(R.string.cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+		chooseNotifyDialog.show();
+	}
+	
+	private void lowCoinAlert() {
+		AlertDialog.Builder chooseNotifyDialog = new AlertDialog.Builder(
+				ChatWindow.this);
+		chooseNotifyDialog.setIcon(R.drawable.ic_launcher);
+		chooseNotifyDialog.setTitle(R.string.attention);
+		chooseNotifyDialog.setMessage(R.string.coin_lack_desc);
+		chooseNotifyDialog.setPositiveButton(R.string.buy_coin,
+				new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    	
+                    }
+                });
+		chooseNotifyDialog.setNegativeButton(R.string.cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+		chooseNotifyDialog.show();
+		
+	}
+
+	protected void startGame(String gameName) {
+		Intent game = null;
+		if(gameName.equals(RPSWindow.RPS_GAME))
+			game = new Intent(this, RPSWindow.class);
+		else if(gameName.equals(TTTWindow.TTT_GAME))
+			game = new Intent(this, TTTWindow.class);
+		else if(gameName.equals(BattleshipWindow.BATTLESHIP_GAME))
+			game = new Intent(this, BattleshipWindow.class);
+		
+		game.putExtra("jid", mWithJabberID);
+		game.putExtra("isGuest", true);
+		mActivity.startActivity(game);
+	}
+	
+	private Integer loadCoins(){
+		if(dataServiceAdapter == null)
+			return null;
+		
+		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
+		if(strCoins != null)
+			return Integer.parseInt(strCoins);
+		return null;
+	}
+
 	private void markAsReadDelayed(final int id, final int delay) {
 		new Thread() {
 			@Override
@@ -540,7 +668,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			this.chatWindow = chatWindow;
 		}
 
-		void populateFrom(String date, boolean from_me, String from, final String message,
+		void populateFrom(String date, boolean from_me, final String from, final String message,
 				int delivery_status) {
 //			Log.i(TAG, "populateFrom(" + from_me + ", " + from + ", " + message + ")");
 			String myMessage = message;
@@ -580,22 +708,15 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 						
 						@Override
 						public void onClick(View v) {
-							Intent game = null;
-							if(message.startsWith(RPSWindow.RPS_GAME)){
-								sendMessage(RPSWindow.ACCEPT_MSG);
-								game = new Intent(mActivity, RPSWindow.class);
-							}
-							else if(message.startsWith(TTTWindow.TTT_GAME)){
-								sendMessage(TTTWindow.ACCEPT_MSG);
-								game = new Intent(mActivity, TTTWindow.class);
-							}							
-							else if(message.startsWith(BattleshipWindow.BATTLESHIP_GAME)){
-								sendMessage(BattleshipWindow.ACCEPT_MSG);
-								game = new Intent(mActivity, BattleshipWindow.class);
-							}
-							game.putExtra("jid", mWithJabberID);
-							game.putExtra("isGuest", true);
-							mActivity.startActivity(game);
+							removeInviteMessage(from , message);
+							String acceptMsg = null;
+							if(message.startsWith(RPSWindow.RPS_GAME))
+								acceptMsg = RPSWindow.ACCEPT_MSG;
+							else if(message.startsWith(TTTWindow.TTT_GAME))
+								acceptMsg = TTTWindow.ACCEPT_MSG;
+							else if(message.startsWith(BattleshipWindow.BATTLESHIP_GAME))
+								acceptMsg = BattleshipWindow.ACCEPT_MSG;
+							showGameRules(acceptMsg, true);
 						}
 					});
 					btnAccept.setVisibility(View.VISIBLE);
@@ -603,6 +724,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 						
 						@Override
 						public void onClick(View v) {
+							removeInviteMessage(from , message);
 							sendMessage(RPSWindow.DENY_MSG);
 						}
 					});
@@ -769,16 +891,16 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		if (cursor.getCount() == 1) {
 			cursor.moveToFirst();
 			int status_mode = cursor.getInt(MODE_IDX);
-			String status_message = cursor.getString(MSG_IDX);
-			Log.d(TAG, "contact status changed: " + status_mode + " " + status_message);
-			mSubTitle.setVisibility((status_message != null && status_message.length() != 0)?
+			String herStatus = cursor.getString(MSG_IDX);
+			Log.d(TAG, "contact status changed: " + status_mode + " " + herStatus);
+			mSubTitle.setVisibility((herStatus != null && herStatus.length() != 0)?
 					View.VISIBLE : View.GONE);
 			
 			String mStatus = BereshtookApplication.getConfig(this).statusMessage;
-			if(status_message != null && status_message.contains("#") && mStatus != null && mStatus.contains("#"))
-				mSubTitle.setText(LocationUtil.findDistance(BereshtookApplication.getConfig(this).statusMessage, status_message));
-			else
-				mSubTitle.setText("");
+			if(herStatus != null && mStatus.contains("S") && mStatus.contains("#"))
+				mSubTitle.setText(StatusUtil.makeStatusWithLocation(mStatus.substring(mStatus.indexOf('S')+1), herStatus));
+			else if(herStatus != null && mStatus.contains("S"))
+				mSubTitle.setText(StatusUtil.makeStatus(herStatus));
 			
 			if (mServiceAdapter == null || !mServiceAdapter.isServiceAuthenticated())
 				status_mode = 0; // override icon if we are offline

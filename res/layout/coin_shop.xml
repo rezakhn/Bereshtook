@@ -19,11 +19,20 @@
 	    >
 	    
     <TextView
+        android:id="@+id/current_coins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="10dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+         />	    
+	    
+    <TextView
         android:id="@+id/coin_info_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:padding="15dp"
+        android:padding="10dp"
         android:text="@string/coin_info_description" />
 
     <RelativeLayout

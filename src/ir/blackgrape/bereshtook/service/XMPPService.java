@@ -7,6 +7,7 @@ import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPException;
 import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.util.ConnectionState;
+import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.StatusMode;
 
 import java.util.HashSet;
@@ -47,7 +48,6 @@ public class XMPPService extends GenericService {
 	private IXMPPRosterService.Stub mService2RosterConnection;
 	private IXMPPChatService.Stub mServiceChatConnection;
 	private IXMPPDataService.Stub mServiceDataConnection;
-	private boolean isDataService = false;
 
 	private RemoteCallbackList<IXMPPRosterCallback> mRosterCallbacks = new RemoteCallbackList<IXMPPRosterCallback>();
 	private HashSet<String> mIsBoundTo = new HashSet<String>();
@@ -64,7 +64,6 @@ public class XMPPService extends GenericService {
 			return mServiceChatConnection;
 		}
 		else if(action.equals("ir.blackgrape.bereshtook.XMPPSERVICE2")){
-			isDataService = true;
 			return mServiceDataConnection;
 		}
 
@@ -219,7 +218,7 @@ public class XMPPService extends GenericService {
 					throws RemoteException {
 				if (mSmackable != null) { // this should always be true, but stil...
 					mSmackable.setStatusFromConfig();
-					updateServiceNotification();
+					//updateServiceNotification();
 				}
 			}
 
@@ -291,7 +290,7 @@ public class XMPPService extends GenericService {
 			@Override
 			public void saveData(String key, String value){
 				if(mSmackable != null && mSmackable.isAuthenticated()){
-					DefaultPrivateData privateData = new DefaultPrivateData("game", "bereshtook.ir");
+					DefaultPrivateData privateData = mSmackable.loadPrivateData(PRIVATE_DATA.GAME, PRIVATE_DATA.DOMAIN);
 					privateData.setValue(key, value);
 					mSmackable.savePrivateData(privateData);
 				}
@@ -300,7 +299,7 @@ public class XMPPService extends GenericService {
 			@Override
 			public String loadData(String key){
 				if(mSmackable != null && mSmackable.isAuthenticated()){
-					DefaultPrivateData privateData = mSmackable.loadPrivateData("game", "bereshtook.ir");
+					DefaultPrivateData privateData = mSmackable.loadPrivateData(PRIVATE_DATA.GAME, PRIVATE_DATA.DOMAIN);
 					if(privateData != null)
 						return privateData.getValue(key);
 				}
@@ -493,11 +492,11 @@ public class XMPPService extends GenericService {
 				else if(message.endsWith(GameWindow.INVITE_CODE) || message.endsWith(GameWindow.ACCEPT_CODE) || message.endsWith(GameWindow.DENY_CODE)){
 					String notifMsg = null;
 					if(message.endsWith(GameWindow.INVITE_CODE))
-						notifMsg = name + " " + R.string.she_invited_to_invite;
+						notifMsg = getString(R.string.she_invited_to_invite);
 					else if(message.endsWith(GameWindow.ACCEPT_CODE))
-						notifMsg = name + " " + R.string.she_accepted_invite;
+						notifMsg = getString(R.string.she_accepted_invite);
 					else if(message.endsWith(GameWindow.DENY_CODE))
-						notifMsg = name + " " + R.string.she_denied_invite;
+						notifMsg = getString(R.string.she_denied_invite);
 					
 					notifyClient(from, name, notifMsg, !mIsBoundTo.contains(from), silent_notification, false);
 					if(message.endsWith(GameWindow.ACCEPT_CODE))

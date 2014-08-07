@@ -2,6 +2,7 @@ package ir.blackgrape.bereshtook.game.battleship;
 
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import ir.blackgrape.bereshtook.game.Game;
 import ir.blackgrape.bereshtook.game.GameWindow;
 
 public class BattleshipWindow extends GameWindow {
@@ -22,13 +23,23 @@ public class BattleshipWindow extends GameWindow {
 	}	
 	
 	@Override
-	protected void receiveMsg(String msg) {
+	protected void onReceiveMsg(String msg) {
 
 	}
 
 	@Override
 	protected void startGame() {
 
+	}
+
+	@Override
+	protected void endGame() {
+		
+	}
+
+	@Override
+	protected Game getGame() {
+		return null;
 	}
 
 }

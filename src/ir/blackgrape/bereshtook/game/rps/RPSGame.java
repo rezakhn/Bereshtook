@@ -1,6 +1,8 @@
 package ir.blackgrape.bereshtook.game.rps;
 
-public class RPSGame {
+import ir.blackgrape.bereshtook.game.Game;
+
+public class RPSGame extends Game {
 	public enum Choice {NONE, ROCK, PAPER, SCISSOR};
 	public enum Turn {MY, HER, NONE, BOTH};
 	public enum Winner {ME, SHE, DRAW};
@@ -19,13 +21,15 @@ public class RPSGame {
 		this.trn = turn;
 	}
 	
+	@Override
 	public Integer getMyScore() {
 		return myScore;
 	}
 	public void setMyScore(Integer myScore) {
 		this.myScore = myScore;
 	}
-
+	
+	@Override
 	public Integer getHerScore() {
 		return herScore;
 	}
@@ -33,6 +37,7 @@ public class RPSGame {
 		this.herScore = herScore;
 	}
 
+	@Override
 	public Integer getMaxScore() {
 		return maxScore;
 	}
@@ -65,7 +70,7 @@ public class RPSGame {
 	public void init(){
 		myScore = 0;
 		herScore = 0;
-		maxScore = 3;
+		maxScore = 5;
 		trn = Turn.NONE;
 		myChoice = Choice.NONE;
 		herChoice = Choice.NONE;

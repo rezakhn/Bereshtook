@@ -45,7 +45,7 @@ public class GameBroadcastReceiver extends BroadcastReceiver {
 			mContext.startActivity(game);
 		}
 		else if(isGameSet)
-			mGameWindow.receiveMsg(message);
+			mGameWindow.onReceiveMsg(message);
 
 	}
 

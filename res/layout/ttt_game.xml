@@ -306,8 +306,20 @@
          android:layout_above="@id/cell_two"
          android:src="@raw/ttt_co0"
          />
+     
+     <TextView android:id="@+id/txt_status_up"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/score_up"
+        android:layout_alignBottom="@id/score_up"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:clickable="true"
+        />
           
-     <ImageView android:id="@+id/score_down"
+      <ImageView android:id="@+id/score_down"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_alignRight="@id/cell_eight"
@@ -315,4 +327,29 @@
          android:layout_below="@id/cell_eight"
          android:src="@raw/ttt_co0"
          />
+
+     <TextView android:id="@+id/txt_status_down"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/score_down"
+        android:layout_alignTop="@id/score_down"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:textAlignment="textStart"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:clickable="true"
+        android:text="@string/send_status"
+        />
+           
+      <TextView android:id="@+id/max_score"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_alignParentRight="true"
+         android:layout_alignParentBottom="true"
+         android:textAlignment="textStart"
+         android:text="@string/max_score_is_3"
+         android:layout_marginRight="20dp"
+         android:layout_marginBottom="10dp"
+          />
 </RelativeLayout> 

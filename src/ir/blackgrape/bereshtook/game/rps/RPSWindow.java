@@ -1,14 +1,13 @@
 package ir.blackgrape.bereshtook.game.rps;
 
 import ir.blackgrape.bereshtook.R;
+import ir.blackgrape.bereshtook.game.Game;
 import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Choice;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Turn;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Winner;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -23,7 +22,6 @@ import com.actionbarsherlock.internal.widget.IcsToast;
 public class RPSWindow extends GameWindow {
 
 	public static final String RPS_GAME = GAME_CODE + "RPS#";
-	public static final String STATUS_MSG = RPS_GAME + "STATUS#";
 	public static final String INVITE_MSG = RPS_GAME + "INVITE#";
 	public static final String ACCEPT_MSG = RPS_GAME + "ACCEPT#";
 	public static final String DENY_MSG = RPS_GAME + "DENY#";
@@ -44,20 +42,10 @@ public class RPSWindow extends GameWindow {
 	private ImageView choiceDown;
 	private TextView txtScoreUp;
 	private TextView txtScoreDown;
-	private TextView txtStatusUp;
-	private TextView txtStatusDown;
-	private Context mContext;
-	
-	private MediaPlayer soundChoice;
-	private MediaPlayer soundWin;
-	private MediaPlayer soundDraw;
-	private MediaPlayer soundLose;
-	private MediaPlayer soundError;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mContext = this;
 		setContentView(R.layout.rps_game);
 		
 		btnRockUp = (Button) findViewById(R.id.btnRockUp);
@@ -76,19 +64,15 @@ public class RPSWindow extends GameWindow {
 		txtStatusUp = (TextView) findViewById(R.id.txt_status_up);
 		txtStatusDown = (TextView) findViewById(R.id.txt_status_down);
 		
-		soundChoice = MediaPlayer.create(this, R.raw.sound_choice);
-		soundWin = MediaPlayer.create(this, R.raw.sound_victory);
-		soundDraw = MediaPlayer.create(this, R.raw.sound_draw);
-		soundLose = MediaPlayer.create(this, R.raw.sound_lose);
-		soundError = MediaPlayer.create(this, R.raw.sound_error);
-		
 		btnRockDown.setOnClickListener(buttonClickListener);
 		btnPaperDown.setOnClickListener(buttonClickListener);
 		btnScissorDown.setOnClickListener(buttonClickListener);
 		
-		txtScoreDown.setOnClickListener(statusClickListener);
+		txtStatusDown.setOnClickListener(statusClickListener);
 		
 		startGame();
+		txtScoreUp.setText(game.getHerScore().toString() + "/" + game.getMaxScore());
+		txtScoreDown.setText(game.getMyScore().toString() + "/" + game.getMaxScore());
 	}
 
 	private OnClickListener buttonClickListener = new OnClickListener() {
@@ -97,13 +81,13 @@ public class RPSWindow extends GameWindow {
 		public void onClick(View v) {
 			if(!weAreOnline()){
 				soundError.start();
-				Toast tNotSent = IcsToast.makeText(mContext, "you are not online", IcsToast.LENGTH_SHORT);
+				Toast tNotSent = IcsToast.makeText(mContext, getString(R.string.you_are_not_online), IcsToast.LENGTH_SHORT);
 				tNotSent.show();
 				return;
 			}
 			else if(game.getTrn() != Turn.MY && game.getTrn() != Turn.BOTH){
 				soundError.start();
-				Toast notTurn = IcsToast.makeText(mContext, "not your turn", IcsToast.LENGTH_SHORT);
+				Toast notTurn = IcsToast.makeText(mContext, getString(R.string.not_your_turn), IcsToast.LENGTH_SHORT);
 				notTurn.show();
 				return;
 			}
@@ -151,33 +135,8 @@ public class RPSWindow extends GameWindow {
 		}
 	};
 	
-	
-	private OnClickListener statusClickListener = new OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			AlertDialog.Builder alert = new AlertDialog.Builder(RPSWindow.this);
-			alert.setTitle("Set Status");
-			
-			final TextView input = new TextView(RPSWindow.this);
-			alert.setView(input);
-
-			alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-			    sendMsg(input.getText().toString());
-			    txtStatusDown.setText(input.getText());
-			  }
-			});
-
-			  alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			  public void onClick(DialogInterface dialog, int whichButton) {
-			  }
-			});
-			alert.show();
-		}
-	};
-	
-	protected void receiveMsg(String msg) {
+	@Override
+	protected void onReceiveMsg(String msg) {
 		if(msg.equals(ROCK_MSG) || msg.equals(PAPER_MSG) || msg.equals(SCISSOR_MSG)){
 			if(game.getTrn() == Turn.BOTH)
 				soundChoice.start();
@@ -205,18 +164,7 @@ public class RPSWindow extends GameWindow {
 			txtStatusUp.setText(status);
 		}
 		else if(msg.equals(EXIT_MSG)){
-		    new AlertDialog.Builder(this)
-	        .setIcon(android.R.drawable.ic_dialog_alert)
-	        .setTitle(R.string.opponent_leaved_title)
-	        .setMessage(R.string.opponent_leaved_message)
-	        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
-	        {
-		        @Override
-		        public void onClick(DialogInterface dialog, int which) {
-		            finish();   
-		        }
-	        })
-	        .show();
+			sheLeft();
 		}			
 	}
 			
@@ -225,9 +173,9 @@ public class RPSWindow extends GameWindow {
 		enableChoices(false);
 		Toast toast = null;
 		Winner result = game.judge();
-		switch (game.judge()) {
+		switch (result) {
 		case ME:
-			toast = IcsToast.makeText(mContext, getString(R.string.you_win), IcsToast.LENGTH_SHORT);
+			toast = IcsToast.makeText(mContext, getString(R.string.you_won), IcsToast.LENGTH_SHORT);
 			break;
 		case SHE:
 			toast = IcsToast.makeText(mContext, getString(R.string.you_lose), IcsToast.LENGTH_SHORT);
@@ -238,8 +186,8 @@ public class RPSWindow extends GameWindow {
 		}
 		playSound(result);
 		toast.show();
-		txtScoreUp.setText(game.getHerScore().toString());
-		txtScoreDown.setText(game.getMyScore().toString());
+		txtScoreUp.setText(game.getHerScore().toString() + "/" + game.getMaxScore());
+		txtScoreDown.setText(game.getMyScore().toString() + "/" + game.getMaxScore());
 		nextRound(false);
 	}
 	
@@ -266,6 +214,11 @@ public class RPSWindow extends GameWindow {
 		nextRound(true);
 	}
 	
+	@Override
+	protected Game getGame() {
+		return game;
+	}
+
 	private void nextRound(boolean isNewGame) {
 		game.nextRound();
 		final Handler handler = new Handler();
@@ -279,6 +232,10 @@ public class RPSWindow extends GameWindow {
 			    }
 			}, 1750);
 		}
+		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore())
+			game.nextRound();
+		else
+			endGame();
 	}
 	
 	@Override
@@ -288,15 +245,15 @@ public class RPSWindow extends GameWindow {
 	        .setTitle(R.string.exit_game_title)
 	        .setMessage(R.string.exit_game_message)
 	        .setPositiveButton(R.string.exit_game_confirm, new DialogInterface.OnClickListener()
-	    {
-	        @Override
-	        public void onClick(DialogInterface dialog, int which) {
-	        	sendMsg(EXIT_MSG);
-	            finish();
-	        }
-
-	    })
-	    .setNegativeButton(R.string.exit_game_cancel, null)
-	    .show();
+		    {
+		        @Override
+		        public void onClick(DialogInterface dialog, int which) {
+		        	sendMsg(EXIT_MSG);
+		            finish();
+		        }
+	
+		    })
+		    .setNegativeButton(R.string.exit_game_cancel, null)
+		    .show();
 	}
 }

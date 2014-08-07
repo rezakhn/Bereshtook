@@ -14,16 +14,17 @@ import ir.blackgrape.bereshtook.game.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.location.BestLocationListener;
 import ir.blackgrape.bereshtook.location.BestLocationProvider;
 import ir.blackgrape.bereshtook.location.BestLocationProvider.LocationType;
-import ir.blackgrape.bereshtook.location.LocationUtil;
 import ir.blackgrape.bereshtook.preferences.MainPrefs;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.shop.ShopActivity;
 import ir.blackgrape.bereshtook.util.ConnectionState;
+import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.SimpleCursorTreeAdapter;
 import ir.blackgrape.bereshtook.util.StatusMode;
+import ir.blackgrape.bereshtook.util.StatusUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,6 +102,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private Intent dataServiceIntent;
 	private ServiceConnection dataServiceConnection;
 	private XMPPDataServiceAdapter dataServiceAdapter;
+	private Integer mCoins = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -116,8 +118,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 		actionBar = getSupportActionBar();
 		// no difference!!!
 		//actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE, ActionBar.DISPLAY_SHOW_TITLE);
+		actionBar.setTitle(getString(R.string.me));
 		actionBar.setHomeButtonEnabled(true);
-		//actionBar.setTitle(null);
 		registerCrashReporter();
 
 		if (mConfig.jabberID.length() < 3)
@@ -201,7 +203,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			serviceAdapter.unregisterUICallback(rosterCallback);
 
 		//BereshtookApplication.getApp(this).mMTM.unbindDisplayActivity(this);
-		unbindServices();
+		unbindXMPPServices();
 		storeExpandedState();
 		
 		initLocation();
@@ -219,11 +221,17 @@ public class MainWindow extends SherlockExpandableListActivity {
 			finish();
 		}
 		displayOwnStatus();
-		bindServices();
+		bindXMPPServices();
 		
 		initLocation();
 		mBestLocationProvider.startLocationUpdatesWithListener(mBestLocationListener);
 		GameBroadcastReceiver.setContext(this);
+		
+		String strStatus = getMyStatusMsg();
+		if(strStatus.contains("S") && !strStatus.equals(mConfig.statusMessage)){
+			mConfig.statusMessage = strStatus;
+			serviceAdapter.setStatusFromConfig();
+		}
 
 		//BereshtookApplication.getApp(this).mMTM.bindDisplayActivity(this);
 
@@ -574,6 +582,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.roster_options, menu);
 		return true;
 	}
@@ -652,13 +661,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private void displayOwnStatus() {
 		// This and many other things like it should be done with observer
 		actionBar.setIcon(getStatusActionIcon());
-
-		if (mConfig.statusMessage.equals("")) {
-			actionBar.setSubtitle(null);
-		} else {
-			//actionBar.setSubtitle(mConfig.statusMessage);
-			actionBar.setSubtitle(null);
-		}
+		if(mCoins != null)
+			actionBar.setSubtitle(mCoins.toString() + getString(R.string.coin));
 	}
 
 	private void aboutDialog() {
@@ -720,7 +724,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		case android.R.id.home:
 		case R.id.menu_status:
-			mConfig.statusMessage = getLocationMsg();
+			mConfig.statusMessage = getMyStatusMsg();
 			new ChangeStatusDialog(this, StatusMode.fromString(mConfig.statusMode),
 					mConfig.statusMessage, mConfig.statusMessageHistory).show();
 			return true;
@@ -809,6 +813,14 @@ public class MainWindow extends SherlockExpandableListActivity {
 		case ONLINE:
 			mConnectingText.setVisibility(View.GONE);
 			setSupportProgressBarIndeterminateVisibility(false);
+			
+			String strStatus = getMyStatusMsg();
+			if(strStatus.contains("S") && !strStatus.equals(mConfig.statusMessage)){
+				mConfig.statusMessage = strStatus;
+				serviceAdapter.setStatusFromConfig();
+			}
+			displayOwnStatus();
+			break;
 		}
 	}
 	
@@ -897,10 +909,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				String strCoins = dataServiceAdapter.loadGameData("coins");
-				Integer Coins;
-				if(strCoins != null)
-					Coins = Integer.parseInt(strCoins);
+				mCoins = loadCoins();
+				displayOwnStatus();
 			}
 			
 			@Override
@@ -910,7 +920,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		};
 	}
 
-	private void unbindServices() {
+	private void unbindXMPPServices() {
 		try {
 			unbindService(xmppServiceConnection);
 			unbindService(dataServiceConnection);
@@ -919,7 +929,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		}
 	}
 
-	private void bindServices() {
+	private void bindXMPPServices() {
 		bindService(xmppServiceIntent, xmppServiceConnection, BIND_AUTO_CREATE);
 		bindService(dataServiceIntent, dataServiceConnection, BIND_AUTO_CREATE);
 	}
@@ -942,10 +952,6 @@ public class MainWindow extends SherlockExpandableListActivity {
 						//Log.d(TAG, "connectionStatusChanged: " + cs);
 						updateConnectionState(cs);
 						invalidateOptionsMenu();
-						
-						String strLocation = getLocationMsg();
-						if(!mConfig.statusMessage.equals(strLocation))
-							setAndSaveStatus(getStatusMode(), strLocation);
 					}
 				});
 			}
@@ -1147,22 +1153,22 @@ public class MainWindow extends SherlockExpandableListActivity {
 				
 				@Override
 				public void onStatusChanged(String provider, int status, Bundle extras) {
-					Log.i(TAG, "onStatusChanged PROVIDER:" + provider + " STATUS:" + String.valueOf(status));
+					//Log.i(TAG, "onStatusChanged PROVIDER:" + provider + " STATUS:" + String.valueOf(status));
 				}
 				
 				@Override
 				public void onProviderEnabled(String provider) {
-					Log.i(TAG, "onProviderEnabled PROVIDER:" + provider);
+					//Log.i(TAG, "onProviderEnabled PROVIDER:" + provider);
 				}
 				
 				@Override
 				public void onProviderDisabled(String provider) {
-					Log.i(TAG, "onProviderDisabled PROVIDER:" + provider);
+					//Log.i(TAG, "onProviderDisabled PROVIDER:" + provider);
 				}
 				
 				@Override
 				public void onLocationUpdateTimeoutExceeded(LocationType type) {
-					Log.w(TAG, "onLocationUpdateTimeoutExceeded PROVIDER:" + type);
+					//Log.w(TAG, "onLocationUpdateTimeoutExceeded PROVIDER:" + type);
 				}
 				
 				@Override
@@ -1175,18 +1181,31 @@ public class MainWindow extends SherlockExpandableListActivity {
 			};
 			
 			if(mBestLocationProvider == null){
-				mBestLocationProvider = new BestLocationProvider(this, true, true, 60000, 60000, 10000, 0);
+				mBestLocationProvider = new BestLocationProvider(this, true, true, 60000, 60000, 10000, 100);
 			}
 		}
 	}
-	private String getLocationMsg(){
-		if(mLocation != null)
-			return mLocation.getLatitude() + "#" + mLocation.getLongitude();
+	private String getMyStatusMsg(){
+		if(mCoins == null && dataServiceAdapter != null)
+			mCoins = loadCoins();
+		
+		if(mLocation != null && mCoins != null)
+			return mCoins + "S" + mLocation.getLatitude() + "#" + mLocation.getLongitude();
+		else if(mCoins != null)
+			return mCoins + "S";
 		else
-			return "";
+			return ""; //never should happens but...
 	}
 	
-	
+	private Integer loadCoins(){
+		if(dataServiceAdapter == null)
+			return null;
+		
+		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
+		if(strCoins != null)
+			return Integer.parseInt(strCoins);
+		return null;
+	}
 	
 	public class RosterExpListAdapter extends SimpleCursorTreeAdapter {
 
@@ -1253,19 +1272,16 @@ public class MainWindow extends SherlockExpandableListActivity {
 		@Override
 		protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
 			super.bindChildView(view, context, cursor, isLastChild);
-			TextView statusmsg = (TextView)view.findViewById(R.id.roster_statusmsg);
-			boolean hasStatus = statusmsg.getText() != null && statusmsg.getText().length() > 0;
-			statusmsg.setVisibility(hasStatus ? View.VISIBLE : View.GONE);
+			TextView statusMsg = (TextView)view.findViewById(R.id.roster_statusmsg);
+			boolean hasStatus = statusMsg.getText() != null && statusMsg.getText().length() > 0;
+			statusMsg.setVisibility(hasStatus ? View.VISIBLE : View.GONE);
 			
-			if(hasStatus && mLocation != null){
-				String strStatus = statusmsg.getText().toString();
-				if(strStatus.contains("#"))
-					statusmsg.setText(LocationUtil.findDistance(mLocation, strStatus));
-				else
-					statusmsg.setText("");
+			if(hasStatus){
+				String herStatus = statusMsg.getText().toString();
+				statusMsg.setText(StatusUtil.makeStatusWithLocation(mLocation, herStatus));
 			}
 			else
-				statusmsg.setText("");
+				statusMsg.setText("");
 			
 			String jid = cursor.getString(cursor.getColumnIndex(RosterConstants.JID));
 			TextView unreadmsg = (TextView)view.findViewById(R.id.roster_unreadmsg_cnt);
@@ -1277,7 +1293,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			unreadmsg.bringToFront();
 		}
 
-		 protected void setViewImage(ImageView v, String value) {
+		protected void setViewImage(ImageView v, String value) {
 			int presenceMode = Integer.parseInt(value);
 			v.setImageResource(getIconForPresenceMode(presenceMode));
 		 }

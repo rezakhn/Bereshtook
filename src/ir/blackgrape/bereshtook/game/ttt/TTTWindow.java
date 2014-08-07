@@ -1,6 +1,7 @@
 package ir.blackgrape.bereshtook.game.ttt;
 
 import ir.blackgrape.bereshtook.R;
+import ir.blackgrape.bereshtook.game.Game;
 import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.game.ttt.TTTGame.Turn;
 import ir.blackgrape.bereshtook.game.ttt.TTTGame.WinType;
@@ -8,13 +9,13 @@ import ir.blackgrape.bereshtook.game.ttt.TTTGame.Winner;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Pair;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.internal.widget.IcsToast;
@@ -41,10 +42,6 @@ public class TTTWindow extends GameWindow {
 	private TTTGame game;
 	private ImageView iv[][];
 	
-	private MediaPlayer soundWin;
-	private MediaPlayer soundLose;
-	private MediaPlayer soundDraw;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -64,14 +61,13 @@ public class TTTWindow extends GameWindow {
 		iv[2][1] = (ImageView) findViewById(R.id.cell_eight);
 		iv[2][2] = (ImageView) findViewById(R.id.cell_nine);
 		
-		soundWin = MediaPlayer.create(this, R.raw.ttt_sound_cheer);
-		soundLose = MediaPlayer.create(this, R.raw.sound_lose);
-		soundDraw = MediaPlayer.create(this, R.raw.sound_draw);
-		
 		for(int j=0; j<3; j++)
 			for(int i=0; i<3; i++)
 				iv[j][i].setOnClickListener(mClickListener);
 		
+		txtStatusUp = (TextView) findViewById(R.id.txt_status_up);
+		txtStatusDown = (TextView) findViewById(R.id.txt_status_down);
+		txtStatusDown.setOnClickListener(statusClickListener);
 		startGame();
 	}
 	
@@ -79,8 +75,15 @@ public class TTTWindow extends GameWindow {
 		
 		@Override
 		public void onClick(View v) {
-			if(game.getTrn() != Turn.MY){
-				Toast notTurn = IcsToast.makeText(mContext, "not your turn", IcsToast.LENGTH_SHORT);
+			if(!weAreOnline()){
+				soundError.start();
+				Toast tNotSent = IcsToast.makeText(mContext, getString(R.string.you_are_not_online), IcsToast.LENGTH_SHORT);
+				tNotSent.show();
+				return;
+			}
+			else if(game.getTrn() != Turn.MY){
+				soundError.start();
+				Toast notTurn = IcsToast.makeText(mContext, getString(R.string.not_your_turn), IcsToast.LENGTH_SHORT);
 				notTurn.show();
 				return;
 			}
@@ -155,7 +158,7 @@ public class TTTWindow extends GameWindow {
 	};
 	
 	@Override
-	protected void receiveMsg(String msg) {
+	protected void onReceiveMsg(String msg) {
 		if(msg.equals(ONE_MSG)){
 			game.setHerChoice(0, 0);
 			iv[0][0].setImageResource(R.raw.ttt_oh);
@@ -196,6 +199,13 @@ public class TTTWindow extends GameWindow {
 				|| msg.equals(FOUR_MSG) || msg.equals(FIVE_MSG) || msg.equals(SIX_MSG)
 				|| msg.equals(SEVEN_MSG) || msg.equals(EIGHT_MSG) || msg.equals(NINE_MSG)){
 			checkWinner();
+		}
+		else if(msg.equals(STATUS_MSG)){
+			String status = msg.replaceFirst(STATUS_MSG, "");
+			txtStatusUp.setText(status);
+		}
+		else if(msg.equals(EXIT_MSG)){
+			sheLeft();
 		}
 	}
 
@@ -318,6 +328,11 @@ public class TTTWindow extends GameWindow {
 		nextRound(true);
 	}
 	
+	@Override
+	protected Game getGame() {
+		return game;
+	}
+	
 	private void nextRound(boolean isNewGame){
 		final Handler handler = new Handler();
 		if(!isNewGame){
@@ -330,7 +345,10 @@ public class TTTWindow extends GameWindow {
 			    }
 			}, 2000);
 		}
-		game.nextRound();
+		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore())
+			game.nextRound();
+		else
+			endGame();
 	}
 	
 	@Override

@@ -10,6 +10,7 @@ import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPException;
 import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.util.ConnectionState;
 import ir.blackgrape.bereshtook.util.LogConstants;
+import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.StatusMode;
 
 import java.io.File;
@@ -253,9 +254,11 @@ public class SmackableImp implements Smackable {
 
 	private void initPrivateData() {
 		DefaultPrivateData privateData = new DefaultPrivateData("game", "bereshtook.ir");
-		privateData.setValue("coins", "1000");
-		privateData.setValue("wins", "0");
-		privateData.setValue("losses", "0");
+		privateData.setValue(PRIVATE_DATA.COINS, "900");
+		privateData.setValue(PRIVATE_DATA.PLAYED_GAMES, "0");
+		privateData.setValue(PRIVATE_DATA.WINS, "0");
+		privateData.setValue(PRIVATE_DATA.LOSSES, "0");
+		privateData.setValue(PRIVATE_DATA.LEFTS, "0");
 		savePrivateData(privateData);
 	}
 

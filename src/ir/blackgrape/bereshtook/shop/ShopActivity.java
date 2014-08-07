@@ -16,18 +16,22 @@
 package ir.blackgrape.bereshtook.shop;
 
 import ir.blackgrape.bereshtook.R;
+import ir.blackgrape.bereshtook.chat.ChatWindow;
 import ir.blackgrape.bereshtook.game.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
+import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 
 /**
@@ -96,7 +100,8 @@ public class ShopActivity extends Activity {
     // (arbitrary) request code for the purchase flow
     static final int RC_REQUEST = 10001;
 
-    Integer mCoins;
+    private Integer mCoins;
+    private TextView currentCoins;
     
     // The helper object
     IabHelper mHelper;
@@ -109,6 +114,7 @@ public class ShopActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.coin_shop);
+        currentCoins = (TextView) findViewById(R.id.current_coins);
         setWaitScreen(true);
         registerDataService();
         
@@ -183,8 +189,6 @@ public class ShopActivity extends Activity {
                 //mHelper.consumeAsync(inventory.getPurchase(SKU_PACK0), mConsumeFinishedListener);
                 return;
             }
-
-            updateUi();
             setWaitScreen(false);
             Log.d(TAG, "Initial inventory query finished; enabling main UI.");
         }
@@ -200,7 +204,7 @@ public class ShopActivity extends Activity {
     	buy(SKU_PACK3);
     }
     public void onClickPack4(View arg0) {
-    	buy(SKU_PACK0);
+    	buy(SKU_PACK4);
     }
     
     public void buy(String sku){
@@ -214,7 +218,7 @@ public class ShopActivity extends Activity {
          *        an empty string, but on a production app you should carefully generate this. */
         String payload = "";
 
-        mHelper.launchPurchaseFlow(this, SKU_PACK0, RC_REQUEST,
+        mHelper.launchPurchaseFlow(this, sku, RC_REQUEST,
                 mPurchaseFinishedListener, payload);
     }
 
@@ -306,22 +310,27 @@ public class ShopActivity extends Activity {
                 // game world's logic, which in our case means filling the gas tank a bit
                 Log.d(TAG, "Consumption successful. Provisioning.");
                 
+                int extraCoins = 0;
                 if(purchase.getSku().equals(SKU_PACK0))
-                	mCoins += 100;
+                	extraCoins += 100;
                 else if(purchase.getSku().equals(SKU_PACK1))
-                	mCoins += 500;
+                	extraCoins += 500;
                 else if(purchase.getSku().equals(SKU_PACK2))
-                	mCoins += 1000;
+                	extraCoins += 1000;
                 else if(purchase.getSku().equals(SKU_PACK3))
-                	mCoins += 2000;
+                	extraCoins += 2000;
                 else if(purchase.getSku().equals(SKU_PACK4))
-                	mCoins += 9000;
-                saveData();
+                	extraCoins += 9000;
+                
+                mCoins += extraCoins;
+                saveCoins(mCoins);
+                mCoins = loadCoins();
+                currentCoins.setText(getString(R.string.current_amount_coins, mCoins));
+                successDialog(extraCoins);
             }
             else {
                 complain("مشکل در اضافه کردن سکه به حساب" + "\n" + result);
             }
-            updateUi();
             setWaitScreen(false);
             Log.d(TAG, "End consumption flow.");
         }
@@ -340,10 +349,21 @@ public class ShopActivity extends Activity {
         }
     }
 
-    // updates UI to reflect model
-    public void updateUi() {
+    protected void successDialog(int extraCoins) {
+		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+		dialog.setIcon(R.drawable.ic_coins);
+		dialog.setTitle(R.string.successful_payment);
+		dialog.setMessage(getString(R.string.add_coins_success, extraCoins));
+		dialog.setPositiveButton(R.string.ok,
+				new DialogInterface.OnClickListener() {
 
-    }
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    	dialog.cancel();
+                    }
+                });
+		dialog.show();
+	}
 
     // Enables or disables the "please wait" screen.
     void setWaitScreen(boolean set) {
@@ -364,16 +384,13 @@ public class ShopActivity extends Activity {
         bld.create().show();
     }
 
-    void saveData() {
-    	dataServiceAdapter.saveGameData("coins", mCoins.toString());
+    void saveCoins(Integer coins) {
+    	dataServiceAdapter.saveGameData(PRIVATE_DATA.COINS, coins.toString());
     }
 
-    void loadData() {
-		String strCoins = dataServiceAdapter.loadGameData("coins");
-		if(strCoins != null){
-			mCoins = Integer.parseInt(strCoins);
-			setWaitScreen(false);
-		}
+    Integer loadCoins() {
+		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
+		return Integer.parseInt(strCoins);
     }
 
     @Override
@@ -400,7 +417,9 @@ public class ShopActivity extends Activity {
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				loadData();
+				mCoins = loadCoins();
+				currentCoins.setText(getString(R.string.current_amount_coins, mCoins));
+				setWaitScreen(false);
 			}
 			
 			@Override

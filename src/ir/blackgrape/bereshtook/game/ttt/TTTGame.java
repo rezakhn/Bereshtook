@@ -1,9 +1,10 @@
 package ir.blackgrape.bereshtook.game.ttt;
 
+import ir.blackgrape.bereshtook.game.Game;
 import android.util.Pair;
 
 
-public class TTTGame {
+public class TTTGame extends Game {
 	
 	public enum Turn {MY, HER};
 	public enum Winner {ME, SHE, DRAW};
@@ -25,6 +26,7 @@ public class TTTGame {
 		this.trn = turn;
 	}
 	
+	@Override
 	public Integer getMyScore() {
 		return myScore;
 	}
@@ -32,6 +34,7 @@ public class TTTGame {
 		this.myScore = myScore;
 	}
 
+	@Override
 	public Integer getHerScore() {
 		return herScore;
 	}
@@ -39,6 +42,7 @@ public class TTTGame {
 		this.herScore = herScore;
 	}
 
+	@Override
 	public Integer getMaxScore() {
 		return maxScore;
 	}
