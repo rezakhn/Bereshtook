@@ -52,16 +52,20 @@
 			android:label="@string/account_settings_title">
 		</activity>
 		
-		<activity android:name=".shop.ShopActivity">
+		<activity android:name=".shop.ShopActivity"
+		    android:screenOrientation="portrait">
 		</activity>
 				
-		<activity android:name=".game.rps.RPSWindow">
+		<activity android:name=".game.rps.RPSWindow"
+		    android:screenOrientation="portrait">
 		</activity>
 		
-		<activity android:name=".game.ttt.TTTWindow">
+		<activity android:name=".game.ttt.TTTWindow"
+		    android:screenOrientation="portrait">
 		</activity>
 		
-		<activity android:name=".game.battleship.BattleshipWindow">
+		<activity android:name=".game.battleship.BattleshipWindow"
+		    android:screenOrientation="portrait">
 		</activity>
 						
 		<receiver android:name=".game.GameBroadcastReceiver">

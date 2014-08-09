@@ -489,7 +489,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		//if coins still is null >> serious problem!!!
 		if(mCoins == null)
 			mCoins = 0;
-		if(mCoins < 100){
+		if(mCoins < 100 && !isGuest){
 			lowCoinAlert();
 			return;
 		}

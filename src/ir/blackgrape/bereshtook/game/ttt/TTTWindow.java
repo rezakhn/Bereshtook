@@ -200,7 +200,7 @@ public class TTTWindow extends GameWindow {
 				|| msg.equals(SEVEN_MSG) || msg.equals(EIGHT_MSG) || msg.equals(NINE_MSG)){
 			checkWinner();
 		}
-		else if(msg.equals(STATUS_MSG)){
+		else if(msg.startsWith(STATUS_MSG)){
 			String status = msg.replaceFirst(STATUS_MSG, "");
 			txtStatusUp.setText(status);
 		}
