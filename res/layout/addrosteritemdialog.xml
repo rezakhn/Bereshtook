@@ -46,7 +46,7 @@
 			android:maxWidth="200sp"
 			android:hint="@string/addFriend_aliasHint"
 			/>
-		<ir.bereshtook.androidclient.dialogs.GroupNameView
+		<ir.blackgrape.bereshtook.dialogs.GroupNameView
 			android:id="@+id/AddRosterItem_GroupName"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"

@@ -8,8 +8,8 @@
 		android:summary="">
 
 		<intent android:action="android.intent.action.MAIN"
-			android:targetPackage="ir.bereshtook.androidclient"
-			android:targetClass="ir.bereshtook.androidclient.preferences.AccountPrefs" />
+			android:targetPackage="ir.blackgrape.bereshtook"
+			android:targetClass="ir.blackgrape.bereshtook.preferences.AccountPrefs" />
 	</PreferenceScreen>
 	</PreferenceCategory>
 

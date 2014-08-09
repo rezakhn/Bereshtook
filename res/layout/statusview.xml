@@ -33,7 +33,7 @@
 		android:hint="@string/setStatusmsgHint"
 		android:inputType="textCapSentences"
 		android:singleLine="true"
-		android:visibility="invisible"
+		android:visibility="gone"
 	  />
 	  <Button
 	      android:id="@+id/statusview_message_button_clear"
@@ -43,7 +43,7 @@
 	      android:background="@android:drawable/ic_menu_close_clear_cancel"
 	      android:layout_centerVertical="true"
 	      android:layout_marginRight="5dip"
-	      android:visibility="invisible"
+	      android:visibility="gone"
 	      />
 	</RelativeLayout>
 

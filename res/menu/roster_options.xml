@@ -1,26 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
 	<item android:id="@+id/menu_show_hide" android:title="@string/Menu_HideOff"
-		android:alphabeticShortcut="o"
-		android:icon="@android:drawable/ic_menu_delete" android:showAsAction="ifRoom"/>
+		android:alphabeticShortcut="o" android:showAsAction="always"/>
 
+	<item android:id="@+id/menu_coins" android:title="@string/coin"
+		android:alphabeticShortcut="o"
+		android:icon="@drawable/ic_coins" android:showAsAction="always|withText"/>
+		
 	<item android:id="@+id/menu_connect" android:title="@string/Menu_connect"
 		android:alphabeticShortcut="c"
 		android:icon="@drawable/ic_menu_plug"/>
-
-	<item android:id="@+id/menu_add_friend" android:title="@string/Menu_addFriend"
-		android:alphabeticShortcut="a"
-		android:icon="@android:drawable/ic_menu_add"
-		android:visible="false" />
 
 	<item android:id="@+id/menu_status" android:title="@string/Menu_Status"
 		android:alphabeticShortcut="s" android:icon="@android:drawable/ic_menu_myplaces"
 		android:showAsAction="never"/>
 
-	<item android:id="@+id/menu_settings" android:title="@string/Menu_Settings"
-		android:alphabeticShortcut="p"
-		android:icon="@android:drawable/ic_menu_preferences"
-		android:visible="false" />
-	
 	<item android:id="@+id/menu_account" android:title="@string/Menu_Account" />
 
 	<item android:id="@+id/menu_about" android:title="@string/Menu_about"
@@ -30,4 +25,15 @@
 	<item android:id="@+id/menu_exit" android:title="@string/Global_Exit"
 		android:alphabeticShortcut="x"
 		android:icon="@android:drawable/ic_menu_close_clear_cancel" />
+	
+	
+	<item android:id="@+id/menu_add_friend" android:title="@string/Menu_addFriend"
+		android:alphabeticShortcut="a"
+		android:icon="@android:drawable/ic_menu_add"
+		android:visible="false" />
+	
+	<item android:id="@+id/menu_settings" android:title="@string/Menu_Settings"
+		android:alphabeticShortcut="p"
+		android:icon="@android:drawable/ic_menu_preferences"
+		android:visible="false" />	
 </menu>

@@ -81,9 +81,10 @@
 	    android:layout_centerHorizontal="true"
 	    android:layout_below="@id/llu"
 	    android:layout_above="@id/rlm"
-	    android:text="@string/zero"
 	    android:textColor="@android:color/black" 
 	    android:enabled="false"
+	    android:gravity="center"
+	    android:textAlignment="textStart"
 	    />
      
      <TextView android:id="@+id/txt_status_up"
@@ -94,6 +95,7 @@
         android:layout_alignBottom="@id/btn_score_up"
         android:textColor="@android:color/black"
         android:gravity="center"
+        android:layout_margin="5dp"
         />      
     
     <Button
@@ -103,9 +105,10 @@
         android:layout_below="@id/rlm"
         android:layout_above="@id/lld"
         android:layout_centerHorizontal="true"
-        android:text="@string/zero"
         android:textColor="@android:color/black"
         android:enabled="false"
+        android:gravity="center"
+	    android:textAlignment="textStart"
         />
     
      <TextView android:id="@+id/txt_status_down"
@@ -117,6 +120,8 @@
         android:textColor="@android:color/black"
         android:gravity="center"
         android:clickable="true"
-        />          
+        android:text="@string/send_status"
+        android:layout_margin="5dp"
+        />
         
 </RelativeLayout>
