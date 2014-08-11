@@ -115,8 +115,8 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 	}
 
 	private void loadPrefs(SharedPreferences prefs) {
-		this.jid_configured = false;
-
+		this.jid_configured = prefs.getBoolean(PreferenceConstants.JID_CONFIGURED,
+				false);
 		this.isLEDNotify = prefs.getBoolean(PreferenceConstants.LEDNOTIFY,
 				false);
 		this.vibraNotify = prefs.getString(
@@ -161,7 +161,6 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 
 		try {
 			splitAndSetJabberID(XMPPHelper.verifyJabberID(jabberID));
-			this.jid_configured = true;
 		} catch (BereshtookXMPPAdressMalformedException e) {
 			Log.e(TAG, "Exception in getPreferences(): " + e);
 		}

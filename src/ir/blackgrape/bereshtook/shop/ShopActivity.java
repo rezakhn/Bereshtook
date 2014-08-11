@@ -16,8 +16,7 @@
 package ir.blackgrape.bereshtook.shop;
 
 import ir.blackgrape.bereshtook.R;
-import ir.blackgrape.bereshtook.chat.ChatWindow;
-import ir.blackgrape.bereshtook.game.XMPPDataServiceAdapter;
+import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;

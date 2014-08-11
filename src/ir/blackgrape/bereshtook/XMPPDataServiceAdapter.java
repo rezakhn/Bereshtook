@@ -1,4 +1,4 @@
-package ir.blackgrape.bereshtook.game;
+package ir.blackgrape.bereshtook;
 
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import android.os.RemoteException;

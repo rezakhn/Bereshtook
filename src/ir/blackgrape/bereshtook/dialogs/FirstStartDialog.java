@@ -38,7 +38,7 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	private BereshtookConfiguration mConfig;
 
 	public FirstStartDialog(MainWindow mainWindow,
-			XMPPRosterServiceAdapter serviceAdapter) {
+			XMPPRosterServiceAdapter serviceAdapter, boolean disabled) {
 		super(mainWindow);
 		this.mainWindow = mainWindow;
 
@@ -60,6 +60,13 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		mConfig = BereshtookApplication.getConfig(mainWindow);
 		mEditJabberID.setText(mConfig.userName);
 		mEditPassword.setText(mConfig.password);
+		
+		if(disabled){
+			mEditJabberID.setEnabled(false);
+			mEditPassword.setEnabled(false);
+			mRepeatPassword.setEnabled(false);
+			mCreateAccount.setEnabled(false);
+		}
 		
 		//mEditJabberID.addTextChangedListener(this);
 		//mEditPassword.addTextChangedListener(this);
