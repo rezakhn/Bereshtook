@@ -109,6 +109,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		mConfig = BereshtookApplication.getConfig(this);
 		mTheme = mConfig.theme;
 		setTheme(mConfig.getTheme());
+		StatusUtil.setContext(getApplicationContext());
 		super.onCreate(savedInstanceState);
 
 		Crashlytics.start(this);
@@ -707,7 +708,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		// This and many other things like it should be done with observer
 		actionBar.setIcon(getStatusActionIcon());
 		if (mCoins != null)
-			actionBar.setSubtitle(mCoins.toString() + getString(R.string.coin));
+			actionBar.setSubtitle(mCoins.toString() + " " + getString(R.string.coin));
 	}
 
 	private void aboutDialog() {
@@ -1359,11 +1360,16 @@ public class MainWindow extends SherlockExpandableListActivity {
 					&& statusMsg.getText().length() > 0;
 			statusMsg.setVisibility(hasStatus ? View.VISIBLE : View.GONE);
 
-			if (hasStatus) {
-				String herStatus = statusMsg.getText().toString();
+			String herStatus;
+			if (hasStatus && mLocation != null) {
+				herStatus = statusMsg.getText().toString();
 				statusMsg.setText(StatusUtil.makeStatusWithLocation(mLocation,
 						herStatus));
-			} else
+			} else if(hasStatus){
+				herStatus = statusMsg.getText().toString();
+				statusMsg.setText(StatusUtil.makeStatus(herStatus));
+			}
+			else
 				statusMsg.setText("");
 
 			String jid = cursor.getString(cursor

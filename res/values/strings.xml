@@ -228,6 +228,9 @@
 	<string name="friends_group">دوستان</string>
 	<string name="bereshtooks_group">همه برشتوک ها</string>
 	
+	<string name="meter">متر</string>
+	<string name="kilometer">کیلومتر</string>
+	
 	<string name="coin">سکه</string>
 	<string name="current_amount_coins">شما در حال حاضر %d سکه دارید</string>
 	<string name="coin_info_description">برای بدست آوردن سکه میتوانید بازی کنید و برنده شوید یا سکه بخرید و به ما در بهتر کردن برشتوک کمک کنید.</string>
