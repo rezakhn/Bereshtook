@@ -14,6 +14,8 @@ import ir.blackgrape.bereshtook.location.BestLocationListener;
 import ir.blackgrape.bereshtook.location.BestLocationProvider;
 import ir.blackgrape.bereshtook.location.BestLocationProvider.LocationType;
 import ir.blackgrape.bereshtook.preferences.MainPrefs;
+import ir.blackgrape.bereshtook.scoreboard.FragmentTabScoreboard;
+import ir.blackgrape.bereshtook.scoreboard.ScoreboardActivity;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.service.XMPPService;
@@ -577,6 +579,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 				}
 				moveRosterItemToBereshtooksGroup(userJid);
 				return true;
+				
 			}
 		} else {
 
@@ -662,8 +665,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 	}
 
 	private String getShowHideMenuText() {
-		return mConfig.showOffline ? getString(R.string.Menu_HideOff)
-				: getString(R.string.Menu_ShowOff);
+		return mConfig.showOffline ? getString(R.string.menu_hideOff)
+				: getString(R.string.menu_showOff);
 	}
 
 	public StatusMode getStatusMode() {
@@ -800,6 +803,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 			if(isConnected())
 				startActivity(new Intent(this, ShopActivity.class));
 			return true;
+		case R.id.menu_scoreboard:
+			if(isConnected())
+				startActivity(new Intent(this, ScoreboardActivity.class).putExtra("username", mConfig.userName));
+			return true;
 		}
 
 		return false;
@@ -922,9 +929,9 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	private String getConnectDisconnectText() {
 		if (isConnected() || isConnecting()) {
-			return getString(R.string.Menu_disconnect);
+			return getString(R.string.menu_disconnect);
 		}
-		return getString(R.string.Menu_connect);
+		return getString(R.string.menu_connect);
 	}
 
 	private void registerXMPPService() {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="preferExternal"
-	android:versionCode="24" android:versionName="@string/version_name" package="ir.blackgrape.bereshtook">
+	android:versionCode="25" android:versionName="@string/version_name" package="ir.blackgrape.bereshtook">
 
 	<uses-sdk android:targetSdkVersion="19" android:minSdkVersion="8"/>
 
@@ -45,7 +45,7 @@
 		</activity>
 
 		<activity android:name=".preferences.MainPrefs"
-			android:label="@string/Menu_Settings">
+			android:label="@string/menu_settings">
 		</activity>
 
 		<activity android:name=".preferences.AccountPrefs"
@@ -67,6 +67,10 @@
 		<activity android:name=".game.battleship.BattleshipWindow"
 		    android:screenOrientation="portrait">
 		</activity>
+		
+		<activity android:name=".scoreboard.ScoreboardActivity"
+		    android:screenOrientation="portrait">
+		</activity>		
 						
 		<receiver android:name=".game.GameBroadcastReceiver">
           <intent-filter>

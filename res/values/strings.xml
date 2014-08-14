@@ -100,16 +100,28 @@
 	</string-array>
 
 	<!-- Mainmenu 	-->
-	<string name="Menu_addFriend">مخاطب جدید</string>
-	<string name="Menu_ShowOff">نمایش آفلاین ها</string>
-	<string name="Menu_HideOff">نمایش ندادن آفلاین ها</string>
-	<string name="Menu_AccSettings">ویرایش اکانت</string>
-	<string name="Menu_Settings">تنظیمات</string>
-	<string name="Menu_Account">حساب کاربری</string>
-	<string name="Menu_Status">وضیعت</string>
-	<string name="Menu_connect">اتصال</string>
-	<string name="Menu_disconnect">قطع ارتباط</string>
-	<string name="Menu_about">درباره برشتوک</string>
+	<string name="menu_addFriend">مخاطب جدید</string>
+	<string name="menu_showOff">نمایش آفلاین ها</string>
+	<string name="menu_hideOff">نمایش ندادن آفلاین ها</string>
+	<string name="menu_accSettings">ویرایش اکانت</string>
+	<string name="menu_settings">تنظیمات</string>
+	<string name="menu_account">حساب کاربری</string>
+	<string name="menu_scoreboard">برترین ها</string>
+	<string name="menu_status">وضیعت</string>
+	<string name="menu_connect">اتصال</string>
+	<string name="menu_disconnect">قطع ارتباط</string>
+	<string name="menu_about">درباره برشتوک</string>
+	
+	<string name="top_bereshtooks">برترین برشتوک ها</string>
+	<string name="top_percents">درصد پیروزی</string>
+	<string name="top_wins">تعداد پیروزی</string>
+	<string name="top_coins">تعداد سکه</string>
+	<string name="tops_loading">در حال گرفتن آخرین اطلاعات...</string>
+	<string name="my_rank_is">رتبه من: %d</string>
+	
+	<string name="my_wins_num">تعداد پیروزی من:</string>
+	<string name="my_win_percent">درصد پیروزی من:</string>
+	<string name="my_coins_num">تعداد سکه های من:</string>
 
 	<!-- AddFriend -->
 	<string name="addFriend_Title">Add a Contact</string>
@@ -231,6 +243,7 @@
 	<string name="meter">متر</string>
 	<string name="kilometer">کیلومتر</string>
 	
+	<string name="shop_bereshtook">فروشگاه برشتوک</string>
 	<string name="coin">سکه</string>
 	<string name="current_amount_coins">شما در حال حاضر %d سکه دارید</string>
 	<string name="coin_info_description">برای بدست آوردن سکه میتوانید بازی کنید و برنده شوید یا سکه بخرید و به ما در بهتر کردن برشتوک کمک کنید.</string>

@@ -624,7 +624,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 
 			if (row == null) {
 				LayoutInflater inflater = getLayoutInflater();
-				row = inflater.inflate(R.layout.chatrow, null);
+				row = inflater.inflate(R.layout.chat_row, null);
 				wrapper = new ChatItemWrapper(row, ChatWindow.this);
 				row.setTag(wrapper);
 			} else {

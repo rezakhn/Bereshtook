@@ -20,7 +20,6 @@ import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -31,6 +30,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
 
 
 /**
@@ -86,7 +88,7 @@ import android.widget.TextView;
  *
  * @author Bruno Oliveira (Google)
  */
-public class ShopActivity extends Activity {
+public class ShopActivity extends SherlockActivity {
     // Debug tag, for logging
     static final String TAG = "CoinShop";
 
@@ -101,6 +103,7 @@ public class ShopActivity extends Activity {
 
     private Integer mCoins;
     private TextView currentCoins;
+    private ActionBar mActionbar;
     
     // The helper object
     IabHelper mHelper;
@@ -114,6 +117,10 @@ public class ShopActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.coin_shop);
         currentCoins = (TextView) findViewById(R.id.current_coins);
+        
+        mActionbar = getSupportActionBar();
+        mActionbar.setTitle(R.string.shop_bereshtook);
+        
         setWaitScreen(true);
         registerDataService();
         

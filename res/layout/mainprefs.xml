@@ -4,7 +4,7 @@
 
 	<PreferenceCategory android:title="@string/account_settings_title">
 	<PreferenceScreen
-		android:title="@string/Menu_AccSettings"
+		android:title="@string/menu_accSettings"
 		android:summary="">
 
 		<intent android:action="android.intent.action.MAIN"
