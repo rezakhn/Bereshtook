@@ -14,7 +14,6 @@ import ir.blackgrape.bereshtook.location.BestLocationListener;
 import ir.blackgrape.bereshtook.location.BestLocationProvider;
 import ir.blackgrape.bereshtook.location.BestLocationProvider.LocationType;
 import ir.blackgrape.bereshtook.preferences.MainPrefs;
-import ir.blackgrape.bereshtook.scoreboard.FragmentTabScoreboard;
 import ir.blackgrape.bereshtook.scoreboard.ScoreboardActivity;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.IXMPPRosterService;
