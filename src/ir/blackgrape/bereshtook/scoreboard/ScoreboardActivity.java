@@ -63,13 +63,13 @@ public class ScoreboardActivity extends SherlockFragmentActivity {
 			}
 		};
 		
-		Tab tabTopWins = mActionBar.newTab().setText(getString(R.string.top_wins)).setTabListener(tabListener);
+		Tab tabTopWins = mActionBar.newTab().setText(getString(R.string.wins_num)).setTabListener(tabListener);
 		mActionBar.addTab(tabTopWins);
 		
-		Tab tabTopCoins = mActionBar.newTab().setText(getString(R.string.top_coins)).setTabListener(tabListener);
+		Tab tabTopCoins = mActionBar.newTab().setText(getString(R.string.coins_num)).setTabListener(tabListener);
 		mActionBar.addTab(tabTopCoins);
 		
-		Tab tabTopPercents = mActionBar.newTab().setText(getString(R.string.top_percents)).setTabListener(tabListener);
+		Tab tabTopPercents = mActionBar.newTab().setText(getString(R.string.win_percent)).setTabListener(tabListener);
 		mActionBar.addTab(tabTopPercents);
 		
 	}

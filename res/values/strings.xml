@@ -113,15 +113,18 @@
 	<string name="menu_about">درباره برشتوک</string>
 	
 	<string name="top_bereshtooks">برترین برشتوک ها</string>
-	<string name="top_percents">درصد پیروزی</string>
-	<string name="top_wins">تعداد پیروزی</string>
-	<string name="top_coins">تعداد سکه</string>
+	<string name="win_percent">درصد پیروزی</string>
+	<string name="wins_num">تعداد پیروزی</string>
+	<string name="coins_num">تعداد سکه</string>
 	<string name="tops_loading">در حال گرفتن آخرین اطلاعات...</string>
 	<string name="my_rank_is">رتبه من: %d</string>
 	
+	<string name="rank">رتبه</string>
+	<string name="bereshtook_user">نام برشتوک</string>
+	
 	<string name="my_wins_num">تعداد پیروزی من:</string>
-	<string name="my_win_percent">درصد پیروزی من:</string>
 	<string name="my_coins_num">تعداد سکه های من:</string>
+	<string name="my_win_percent">درصد پیروزی من:</string>
 
 	<!-- AddFriend -->
 	<string name="addFriend_Title">Add a Contact</string>

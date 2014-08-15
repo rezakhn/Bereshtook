@@ -29,11 +29,51 @@
          android:textAppearance="?android:attr/textAppearanceLarge"/>
      </LinearLayout>
      
+    
+    
+	<LinearLayout android:id="@+id/header"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal"
+	    android:layout_below="@id/my_info"
+	    android:layout_marginTop="10dp"
+	     >
+	    <TextView
+	        android:layout_width="40dp"
+	        android:layout_height="match_parent"
+	        android:layout_margin="5dp"
+	        android:textAppearance="?android:attr/textAppearanceLarge"
+	        android:layout_gravity="center"
+	        android:gravity="center"
+	        android:text="@string/rank"
+	        />
+	    <TextView
+	        android:layout_width="150dp"
+	        android:layout_height="match_parent"
+	        android:layout_margin="5dp"
+	        android:textAppearance="?android:attr/textAppearanceLarge"
+	        android:layout_gravity="center"
+	        android:gravity="center"
+	         android:text="@string/bereshtook_user"
+	        />    
+	    <TextView
+	        android:id="@+id/score"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_margin="5dp"
+	        android:textAppearance="?android:attr/textAppearanceLarge"
+	        android:layout_gravity="center"
+	        android:gravity="center"
+	        android:text="@string/win_percent"        
+	        />
+	</LinearLayout>
+    
+     
      <ListView
         android:id="@+id/tops_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/my_info"
+        android:layout_below="@id/header"
         android:textAlignment="center"
         />     
  

@@ -6,23 +6,29 @@
      >
     <TextView
         android:id="@+id/rank"
-        android:layout_width="wrap_content"
+        android:layout_width="40dp"
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_gravity="center"
+        android:gravity="center"
         />
     <TextView
         android:id="@+id/username"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_gravity="center"
+        android:gravity="center"
         />    
     <TextView
         android:id="@+id/score"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_gravity="center"
+        android:gravity="center"        
         />
 </LinearLayout>
