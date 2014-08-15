@@ -4,15 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="right"
-    android:gravity="right" >
+    android:gravity="right"
+    android:background="@color/tops_tab_background"
+    >
  
     <LinearLayout
         android:id="@+id/my_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:gravity="right"
-        android:orientation="vertical" >
+        android:gravity="center"
+        android:orientation="vertical"
+        >
 
      <TextView
          android:id="@+id/my_rank"
@@ -37,6 +40,7 @@
 	    android:orientation="horizontal"
 	    android:layout_below="@id/my_info"
 	    android:layout_marginTop="10dp"
+	    android:background="@color/tops_header_background"
 	     >
 	    <TextView
 	        android:layout_width="40dp"
