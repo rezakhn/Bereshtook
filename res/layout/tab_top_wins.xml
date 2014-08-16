@@ -15,6 +15,7 @@
         android:layout_alignParentTop="true"
         android:gravity="center"
         android:orientation="vertical"
+        android:visibility="gone"
         >
 
      <TextView

@@ -42,8 +42,11 @@
 
     <color name="conversation_active_background">#ff229DC9</color>
     
+    <color name="shop_background">#FFCC99</color>
+    
     <color name="tops_tab_background">#FFCC99</color>
     <color name="tops_header_background">#CCA37A</color>
     <color name="tops_row_background">#E6B88A</color>
+    <color name="top_me_background">#FFFF00</color>
 </resources>
 

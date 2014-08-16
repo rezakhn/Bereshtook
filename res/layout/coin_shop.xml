@@ -15,7 +15,7 @@
 	    android:layout_height="match_parent"
 	    android:orientation="vertical"
 	    android:gravity="right"
-	    android:background="@android:color/darker_gray"
+	    android:background="@color/shop_background"
 	    >
 	    
     <TextView

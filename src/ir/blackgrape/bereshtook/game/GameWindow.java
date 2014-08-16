@@ -101,7 +101,7 @@ public abstract class GameWindow extends SherlockActivity {
 			soundCheer.start();
 			if (mCoins == null)
 				mCoins = loadCoins();
-			mCoins += 190;
+			mCoins += 200;
 			saveCoins(mCoins);
 			saveData(PRIVATE_DATA.WINS, loadData(PRIVATE_DATA.WINS) + 1);
 			saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.LEFTS) - 1);
@@ -147,7 +147,7 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void sheLeft() {
-		mCoins += 90;
+		mCoins += 100;
 		saveCoins(mCoins);
 		saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.LEFTS) - 1);
 
@@ -248,7 +248,7 @@ public abstract class GameWindow extends SherlockActivity {
 				if (!dataSaved) {
 					mCoins = loadCoins();
 					if (mCoins != null) {
-						mCoins -= 90;
+						mCoins -= 100;
 						saveCoins(mCoins);
 					}
 					saveData(PRIVATE_DATA.PLAYED_GAMES,

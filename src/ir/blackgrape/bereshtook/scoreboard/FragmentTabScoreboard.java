@@ -20,9 +20,7 @@ import org.json.JSONObject;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -32,8 +30,8 @@ public class FragmentTabScoreboard extends SherlockFragment {
 	protected String username;
 	protected TextView txtRank;
 	protected TextView txtScore;
-	protected Integer rank;
-	protected Integer score;
+	protected Integer myRank;
+	protected Integer myScore;
 	protected ListView lstTop10;
 	protected ArrayList<HashMap<String, String>> oslist = new ArrayList<HashMap<String, String>>();
 
@@ -54,7 +52,7 @@ public class FragmentTabScoreboard extends SherlockFragment {
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (rank == null) {
+		if (myRank == null) {
 			String serverURL = URL + factor + "/" + username;
 			new DataFetcher().execute(serverURL);
 		}
@@ -88,7 +86,7 @@ public class FragmentTabScoreboard extends SherlockFragment {
 				if (inputStream != null)
 					result = convertInputStreamToString(inputStream);
 				else
-					result = "Did not work!";
+					result = "problem";
 
 				try {
 					return new JSONObject(result);
@@ -107,16 +105,20 @@ public class FragmentTabScoreboard extends SherlockFragment {
 		@Override
 		protected void onPostExecute(JSONObject result) {
 			try {
-				if(result == null)
+				if(result == null || result.equals("problem"))
 					return;
-				rank = result.getInt("myRank");
-				score = result.getInt("myScore");
-				
-				if(rank == null || score == null)
+				String status = result.getString("result");
+				if(status == null || !status.equals("success"))
 					return;
 				
-				txtRank.setText(getString(R.string.my_rank_is, rank));
-				txtScore.setText(txtScore.getText() + score.toString());
+				myRank = result.getInt("myRank");
+				myScore = result.getInt("myScore");
+				
+				if(myRank == null || myScore == null)
+					return;
+				
+				txtRank.setText(getString(R.string.my_rank_is, myRank));
+				txtScore.setText(txtScore.getText() + myScore.toString());
 				
 				JSONObject tops = result.getJSONObject("json");
 				
@@ -131,8 +133,17 @@ public class FragmentTabScoreboard extends SherlockFragment {
 					oslist.add(map);
 				}
 				
-				ListAdapter adaptor = new SimpleAdapter(FragmentTabScoreboard.this.getActivity(), oslist, R.layout.tops_row,
+				if(myRank > tops.length()){
+					HashMap<String, String> me = new HashMap<String, String>();
+					me.put(RANK, myRank.toString());
+					me.put(USERNAME, username);
+					me.put(SCORE, myScore.toString());
+					oslist.add(me);
+				}
+				
+				TopsListAdaptor adaptor = new TopsListAdaptor(FragmentTabScoreboard.this.getActivity(), oslist, R.layout.tops_row,
 						new String[] { RANK, USERNAME, SCORE}, new int[] {R.id.rank, R.id.username, R.id.score});
+				adaptor.setMyRank(myRank);
 				lstTop10.setAdapter(adaptor);
 			} catch (JSONException e) {
 				e.printStackTrace();
