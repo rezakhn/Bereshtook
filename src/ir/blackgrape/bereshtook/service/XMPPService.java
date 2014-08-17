@@ -9,6 +9,7 @@ import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.util.ConnectionState;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.StatusMode;
+import ir.blackgrape.bereshtook.util.StringUtil;
 
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -441,7 +442,7 @@ public class XMPPService extends GenericService {
 			mSmackable.requestConnectionState(ConnectionState.RECONNECT_NETWORK);
 
 		} else if (mConnectionDemanded.get()) {
-				mReconnectInfo = getString(R.string.conn_reconnect, mReconnectTimeout);
+				mReconnectInfo = getString(R.string.conn_reconnect, StringUtil.convertToPersian(Integer.valueOf(mReconnectTimeout).toString()));
 				mSmackable.requestConnectionState(ConnectionState.RECONNECT_DELAYED);
 				logInfo("connectionFailed(): registering reconnect in " + mReconnectTimeout + "s");
 				((AlarmManager)getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP,

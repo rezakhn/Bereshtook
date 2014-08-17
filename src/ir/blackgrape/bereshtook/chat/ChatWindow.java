@@ -5,12 +5,12 @@ import ir.blackgrape.bereshtook.service.IXMPPChatService;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
+import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.data.ChatProvider;
 import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.ChatProvider.ChatConstants;
 import ir.blackgrape.bereshtook.game.GameBroadcastReceiver;
 import ir.blackgrape.bereshtook.game.GameWindow;
-import ir.blackgrape.bereshtook.game.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.game.battleship.BattleshipWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSWindow;
 import ir.blackgrape.bereshtook.game.ttt.TTTWindow;
@@ -42,6 +42,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.ClipboardManager;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
@@ -624,7 +626,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 
 			if (row == null) {
 				LayoutInflater inflater = getLayoutInflater();
-				row = inflater.inflate(R.layout.chatrow, null);
+				row = inflater.inflate(R.layout.chat_row, null);
 				wrapper = new ChatItemWrapper(row, ChatWindow.this);
 				row.setTag(wrapper);
 			} else {
@@ -687,7 +689,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				getDateView().setTextColor(tv.data);
 				getFromView().setText(from + ":");
 				getFromView().setTextColor(tv.data);
-				getLinearLayout().setBackgroundResource(R.drawable.bubble_notme);
+				getLinearLayout().setBackgroundResource(R.drawable.bubble_her);
 				getLinearLayout().setGravity(Gravity.LEFT);
 				((LinearLayout)mRowView).setGravity(Gravity.LEFT);
 			}
@@ -783,7 +785,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				mRowView.setBackgroundColor(0x30ff0000); // default is transparent
 				break;
 			}
-			getMessageView().setText(myMessage);
+			
+			if(!from_me)
+				getIconView().setVisibility(View.GONE);
 			getMessageView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize);
 			if(isSystemMsg)
 				getMessageView().setTextColor(getResources().getColor(R.color.system_message_color));
@@ -792,6 +796,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			getDateView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize*2/3);
 			getFromView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize*2/3);
 			
+			SpannableStringBuilder ssb = new SpannableStringBuilder(myMessage);
+			MessageUtils.convertSmileys(ChatWindow.this, ssb, SmileyImageSpan.SIZE_EDITABLE);
+			getMessageView().setText(ssb);
 		}
 		
 		TextView getDateView() {

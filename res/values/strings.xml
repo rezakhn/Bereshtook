@@ -11,7 +11,7 @@
 	<string name="conn_online">آنلاین</string>
 	<string name="conn_offline">آفلاین</string>
 	<string name="conn_empty_roster">مخاطبی برای نمایش وجود ندارد</string>
-	<string name="conn_reconnect">تلاش مجدد برای وصل شدن تا %d ثانیه دیگر</string>
+	<string name="conn_reconnect">تلاش مجدد برای وصل شدن تا %s ثانیه دیگر</string>
 	<string name="conn_disconnected">ارتباط قطع شد</string>
 	<string name="conn_no_network">شبکه ایی پیدا نشد</string>
 	<string name="conn_authentication_fail">نام کاربری یا رمز عبور اشتباه است</string>
@@ -22,18 +22,22 @@
 	<string name="Global_authenticate_first">لطفا ابتدا وصل شوید</string>
 	<string name="Global_JID_hint">مثلا: محمد21</string>
 	<!-- tooltip message when the user entered an invalid XMPP address -->
-	<string name="Global_JID_malformed">چک کردن آدرس</string>
+	<string name="Global_JID_malformed">نام کاربری خوب نیست</string>
+	<string name="space_is_no_allowed">استفاده از فاصله مجاز نیست</string>
+	<string name="min_char_is_4">حداقل ۴ حرف</string>
 
 	<!-- FirstStartUpDialog -->
 	<string name="StartupDialog_Title">به برشتوک خوش آمدید</string>
 	<string name="StartupDialog_Summary">اطلاعات ورود به برشتوک</string>
-	<string name="StartupDialog_pwHint">مثلا: 151494</string>
+	<string name="StartupDialog_pwHint">مثلا: ۴۱۲۳۹۷</string>
 	<string name="StartupDialog_pwrHint">تکرار رمز</string>
-	<string name="StartupDialog_Username_title">نام کاربری(فارسی)</string>
-	<string name="StartupDialog_passwd_title">رمز(حداقل 6 کاراکتر)</string>
+	<string name="StartupDialog_Username_title">نام برشتوکی</string>
+	<string name="StartupDialog_passwd_title">رمز(حداقل ۶ کاراکتر)</string>
 	<string name="StartupDialog_advanced">پیشرفته…</string>
 	<string name="StartupDialog_create_new">کاربر جدید هستم</string>
 	<string name="StartupDialog_error_password">رمزها مطابقت ندارند</string>
+	
+	<string name="no_internet_connection">اینترنت وصل نیست</string>
 
 	<!-- Notifications -->
 	<string name="notification_message">پیام جدید از %s</string>
@@ -100,16 +104,34 @@
 	</string-array>
 
 	<!-- Mainmenu 	-->
-	<string name="Menu_addFriend">مخاطب جدید</string>
-	<string name="Menu_ShowOff">نمایش آفلاین ها</string>
-	<string name="Menu_HideOff">نمایش ندادن آفلاین ها</string>
-	<string name="Menu_AccSettings">ویرایش اکانت</string>
-	<string name="Menu_Settings">تنظیمات</string>
-	<string name="Menu_Account">حساب کاربری</string>
-	<string name="Menu_Status">وضیعت</string>
-	<string name="Menu_connect">اتصال</string>
-	<string name="Menu_disconnect">قطع ارتباط</string>
-	<string name="Menu_about">درباره برشتوک</string>
+	<string name="menu_addFriend">مخاطب جدید</string>
+	<string name="menu_showOff">نمایش آفلاین ها</string>
+	<string name="menu_hideOff">نمایش ندادن آفلاین ها</string>
+	<string name="menu_accSettings">ویرایش اکانت</string>
+	<string name="menu_settings">تنظیمات</string>
+	<string name="menu_account">حساب کاربری</string>
+	<string name="menu_scoreboard">برترین ها</string>
+	<string name="menu_status">وضیعت</string>
+	<string name="menu_connect">اتصال</string>
+	<string name="menu_disconnect">قطع ارتباط</string>
+	<string name="menu_about">درباره برشتوک</string>
+	
+	<string name="top_bereshtooks">برترین برشتوک ها</string>
+	<string name="win_percent">درصد پیروزی</string>
+	<string name="wins_num">تعداد پیروزی</string>
+	<string name="coins_num">تعداد سکه</string>
+	<string name="tops_loading">در حال گرفتن آخرین اطلاعات...</string>
+	<string name="creating_account">در حال ساختن یه برشتوک جدید...</string>
+	<string name="connecting_bereshtook">در حال برقراری ارتباط با سرور...</string>
+	
+	<string name="error_fetch_data">خطا در گرفتن اطلاعات</string>
+	
+	<string name="rank">رتبه</string>
+	<string name="bereshtook_user">نام برشتوک</string>
+	
+	<string name="my_wins_num">تعداد پیروزی من:</string>
+	<string name="my_coins_num">تعداد سکه های من:</string>
+	<string name="my_win_percent">درصد پیروزی من:</string>
 
 	<!-- AddFriend -->
 	<string name="addFriend_Title">Add a Contact</string>
@@ -228,13 +250,17 @@
 	<string name="friends_group">دوستان</string>
 	<string name="bereshtooks_group">همه برشتوک ها</string>
 	
+	<string name="meter">متر</string>
+	<string name="kilometer">کیلومتر</string>
+	
+	<string name="shop_bereshtook">فروشگاه برشتوک</string>
 	<string name="coin">سکه</string>
-	<string name="current_amount_coins">شما در حال حاضر %d سکه دارید</string>
+	<string name="current_amount_coins">شما در حال حاضر %s سکه دارید</string>
 	<string name="coin_info_description">برای بدست آوردن سکه میتوانید بازی کنید و برنده شوید یا سکه بخرید و به ما در بهتر کردن برشتوک کمک کنید.</string>
-	<string name="coin_pack1_desc">500 سکه فقط 450 تومان</string>
-	<string name="coin_pack2_desc">1000 سکه فقط 900 تومان</string>
-	<string name="coin_pack3_desc">2000 سکه فقط 1500 تومان</string>
-	<string name="coin_pack4_desc">9000 سکه فقط 4000 تومان</string>
+	<string name="coin_pack1_desc">۵۰۰ سکه فقط ۴۵۰ تومان</string>
+	<string name="coin_pack2_desc">۱۰۰۰ سکه فقط ۹۰۰ تومان</string>
+	<string name="coin_pack3_desc">۲۰۰۰ سکه فقط ۱۵۰۰ تومان</string>
+	<string name="coin_pack4_desc">۹۰۰۰ سکه فقط ۴۰۰۰ تومان</string>
 	
 	<string name="play_request">بازی</string>
 	    
@@ -257,11 +283,11 @@
     <string name="battleship_game">نبرد کشتی ها</string>
     
     <string name="attention">توجه</string>
-    <string name="win_lose_condition_desc">اگه بازیو ببری 100 سکه جایزه میگیری ولی اگه خدایی ناکرده ببازی 90 سکه ازت کم میشه! قبوله؟</string>
-    <string name="coin_lack_desc">برای دعوت به بازی به حداقل 100 سکه نیاز داری</string>
+    <string name="win_lose_condition_desc">اگه بازیو ببری ۱۰۰ سکه جایزه میگیری ولی اگه خدایی ناکرده ببازی ۱۰۰ سکه ازت کم میشه! قبوله؟</string>
+    <string name="coin_lack_desc">برای دعوت به بازی به حداقل ۱۰۰ سکه نیاز داری</string>
     <string name="buy_coin">خرید سکه</string>
     <string name="successful_payment">پرداخت موفق</string>
-    <string name="add_coins_success">%d سکه به حساب شما اضافه شد</string>
+    <string name="add_coins_success">%s سکه به حساب شما اضافه شد</string>
     
     <string name="choose_a_game">یک بازی را انتخاب کن</string>
     <string name="you_invited_to_game">دعوت به بازی کردی</string>
@@ -285,13 +311,13 @@
     
     <string name="type_your_message">یه پیام بنویس:</string>
     <string name="send_status">ارسال پیام</string>
-    <string name="max_score_is_3">بازی 3 امتیازی است.</string>
+    <string name="max_score_is_3">بازی ۳ امتیازی است.</string>
     
     <string name="won_game_title">تبریک میگم</string>
-    <string name="won_game_message"> ایول! بازی رو بردی و %d سکه گرفتی.</string>
+    <string name="won_game_message"> ایول! بازی رو بردی و %s سکه گرفتی.</string>
     <string name="won_game_button">خدا رو شکر</string>
     <string name="lose_game_title">تسلیت میگم</string>
-    <string name="lose_game_message">متاسفانه باختی و %d سکه از دست دادی</string>
+    <string name="lose_game_message">متاسفانه باختی و %s سکه از دست دادی</string>
     <string name="lose_game_button">فدای سرم</string>
     
     <string name="you_won">بردی</string>

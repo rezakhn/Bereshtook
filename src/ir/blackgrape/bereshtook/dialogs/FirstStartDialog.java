@@ -1,8 +1,8 @@
 package ir.blackgrape.bereshtook.dialogs;
 
-import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
+import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPRosterServiceAdapter;
 import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPAdressMalformedException;
@@ -33,12 +33,11 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	private Button mOkButton;
 	private EditText mEditJabberID;
 	private EditText mEditPassword;
-	private EditText mRepeatPassword;
+	////private EditText mRepeatPassword;
 	private CheckBox mCreateAccount;
-	private BereshtookConfiguration mConfig;
-
+	
 	public FirstStartDialog(MainWindow mainWindow,
-			XMPPRosterServiceAdapter serviceAdapter) {
+			XMPPRosterServiceAdapter serviceAdapter, boolean enable, String username, String password) {
 		super(mainWindow);
 		this.mainWindow = mainWindow;
 
@@ -54,16 +53,19 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 
 		mEditJabberID = (EditText) group.findViewById(R.id.StartupDialog_JID_EditTextField);
 		mEditPassword = (EditText) group.findViewById(R.id.StartupDialog_PASSWD_EditTextField);
-		mRepeatPassword = (EditText) group.findViewById(R.id.startup_password_repeat);
+		////mRepeatPassword = (EditText) group.findViewById(R.id.startup_password_repeat);
 		mCreateAccount = (CheckBox) group.findViewById(R.id.create_account);
 
-		mConfig = BereshtookApplication.getConfig(mainWindow);
-		mEditJabberID.setText(mConfig.userName);
-		mEditPassword.setText(mConfig.password);
+		if(username != null && password != null){
+			mEditJabberID.setText(username);
+			mEditPassword.setText(password);
+		}
 		
-		//mEditJabberID.addTextChangedListener(this);
-		//mEditPassword.addTextChangedListener(this);
-		mRepeatPassword.addTextChangedListener(this);
+		enableDialog(enable);
+		
+		mEditJabberID.addTextChangedListener(this);
+		mEditPassword.addTextChangedListener(this);
+		////mRepeatPassword.addTextChangedListener(this);
 		mCreateAccount.setOnCheckedChangeListener(this);
 	}
 
@@ -73,7 +75,14 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		mOkButton = getButton(BUTTON_POSITIVE);
 	}
 
-
+	private void enableDialog(boolean e){
+		mEditJabberID.setEnabled(e);
+		mEditPassword.setEnabled(e);
+		////mRepeatPassword.setEnabled(e);
+		mCreateAccount.setEnabled(e);
+		mCreateAccount.setChecked(e);
+	}
+	
 	public void onClick(DialogInterface dialog, int which) {
 		switch (which) {
 		case BUTTON_POSITIVE:
@@ -103,6 +112,8 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 
 		savePreferences(jabberID, password, resource);
 		cancel();
+		if(mCreateAccount.isChecked())
+			mainWindow.setIsNewAccount(true);
 	}
 
 	private void updateDialog() {
@@ -114,17 +125,24 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 			//mOkButton.setOnClickListener(this);
 			mEditJabberID.setError(null);
 		} catch (BereshtookXMPPAdressMalformedException e) {
-			if (jid.length() > 0)
+			is_ok = false;
+			if(jid.toString().contains(" "))
+				mEditJabberID.setError(mainWindow.getString(R.string.space_is_no_allowed));
+			else if(jid.length() < 4)
+				mEditJabberID.setError(mainWindow.getString(R.string.min_char_is_4));
+			else if (jid.length() > 0)
 				mEditJabberID.setError(mainWindow.getString(R.string.Global_JID_malformed));
 		}
 		if (mEditPassword.length() == 0)
 			is_ok = false;
 		if (mCreateAccount.isChecked()) {
+			/*
 			boolean passwords_match = mEditPassword.getText().toString().equals(
 					mRepeatPassword.getText().toString());
 			is_ok = is_ok && passwords_match;
 			mRepeatPassword.setError((passwords_match || mRepeatPassword.length() == 0) ?
 					null : mainWindow.getString(R.string.StartupDialog_error_password));
+			*/
 		}
 		mOkButton.setEnabled(is_ok);
 	}
@@ -132,7 +150,7 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	/* CompoundButton.OnCheckedChangeListener for mCreateAccount */
 	@Override
 	public void onCheckedChanged(CompoundButton btn,boolean isChecked) {
-		mRepeatPassword.setVisibility(isChecked? View.VISIBLE : View.GONE);
+		////mRepeatPassword.setVisibility(isChecked? View.VISIBLE : View.GONE);
 		updateDialog();
 	}
 	@Override
@@ -158,5 +176,4 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		editor.putString(PreferenceConstants.PORT, PreferenceConstants.DEFAULT_PORT);
 		editor.commit();
 	}
-
 }

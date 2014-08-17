@@ -16,12 +16,11 @@
 package ir.blackgrape.bereshtook.shop;
 
 import ir.blackgrape.bereshtook.R;
-import ir.blackgrape.bereshtook.chat.ChatWindow;
-import ir.blackgrape.bereshtook.game.XMPPDataServiceAdapter;
+import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
-import android.app.Activity;
+import ir.blackgrape.bereshtook.util.StringUtil;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -32,6 +31,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
 
 
 /**
@@ -87,7 +89,7 @@ import android.widget.TextView;
  *
  * @author Bruno Oliveira (Google)
  */
-public class ShopActivity extends Activity {
+public class ShopActivity extends SherlockActivity {
     // Debug tag, for logging
     static final String TAG = "CoinShop";
 
@@ -102,6 +104,7 @@ public class ShopActivity extends Activity {
 
     private Integer mCoins;
     private TextView currentCoins;
+    private ActionBar mActionbar;
     
     // The helper object
     IabHelper mHelper;
@@ -115,6 +118,10 @@ public class ShopActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.coin_shop);
         currentCoins = (TextView) findViewById(R.id.current_coins);
+        
+        mActionbar = getSupportActionBar();
+        mActionbar.setTitle(R.string.shop_bereshtook);
+        
         setWaitScreen(true);
         registerDataService();
         
@@ -147,7 +154,7 @@ public class ShopActivity extends Activity {
 
                 if (!result.isSuccess()) {
                     // Oh noes, there was a problem.
-                    complain("مشکل در ارتباط با کافه بازار" + "\n" + result);
+                    complain("مشکل در ارتباط با کافه بازار");
                     return;
                 }
 
@@ -171,7 +178,7 @@ public class ShopActivity extends Activity {
 
             // Is it a failure?
             if (result.isFailure()) {
-                complain("مشکل در گرفتن اطلاعات حساب" + "\n" + result);
+                complain("مشکل در گرفتن اطلاعات حساب");
                 return;
             }
 
@@ -278,7 +285,7 @@ public class ShopActivity extends Activity {
             if (mHelper == null) return;
 
             if (result.isFailure()) {
-                complain("خرید انجام نشد" + "\n" + result);
+                complain("خرید انجام نشد");
                 setWaitScreen(false);
                 return;
             }
@@ -329,7 +336,7 @@ public class ShopActivity extends Activity {
                 successDialog(extraCoins);
             }
             else {
-                complain("مشکل در اضافه کردن سکه به حساب" + "\n" + result);
+                complain("مشکل در اضافه کردن سکه به حساب");
             }
             setWaitScreen(false);
             Log.d(TAG, "End consumption flow.");
@@ -349,11 +356,11 @@ public class ShopActivity extends Activity {
         }
     }
 
-    protected void successDialog(int extraCoins) {
+    protected void successDialog(Integer extraCoins) {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.successful_payment);
-		dialog.setMessage(getString(R.string.add_coins_success, extraCoins));
+		dialog.setMessage(getString(R.string.add_coins_success, StringUtil.convertToPersian(extraCoins.toString())));
 		dialog.setPositiveButton(R.string.ok,
 				new DialogInterface.OnClickListener() {
 
@@ -418,7 +425,7 @@ public class ShopActivity extends Activity {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
 				mCoins = loadCoins();
-				currentCoins.setText(getString(R.string.current_amount_coins, mCoins));
+				currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mCoins.toString())));
 				setWaitScreen(false);
 			}
 			

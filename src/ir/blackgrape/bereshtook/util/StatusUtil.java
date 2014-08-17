@@ -1,13 +1,21 @@
 package ir.blackgrape.bereshtook.util;
 
+import ir.blackgrape.bereshtook.R;
+import android.content.Context;
 import android.location.Location;
 
 public class StatusUtil {
 	
+	private static Context mContext;
+	
+	public static void setContext(Context context){
+		mContext = context;
+	}
+	
 	public static CharSequence makeStatus(String herStatus) {
 		if(herStatus.contains("S")){
 			String coins = herStatus.substring(0, herStatus.indexOf('S'));
-			return coins + "سکه";
+			return StringUtil.convertToPersian(coins) + " " + mContext.getString(R.string.coin);
 		}
 		else
 			return "";
@@ -44,22 +52,23 @@ public class StatusUtil {
 		 
 		 StringBuilder sb = new StringBuilder();
 		 if(coins != null && distance != null){
-			 sb.append(coins);
-			 sb.append("سکه ");
+			 sb.append(StringUtil.convertToPersian(coins));
+			 sb.append(" ");
+			 sb.append(mContext.getString(R.string.coin));
 			 sb.append(" (");
 			 sb.append(distance);
 			 sb.append(")");
 			 return sb;
 		 }
 		 else if(coins != null)
-			 return coins + "سکه ";
+			 return coins + " " + mContext.getString(R.string.coin);
 		 else if(distance != null)
 			 return "(" + distance + ")";
 		 else
 			 return "";
 	}
 	 
-	public static String findDistance(Location mLocation, String strStatus){
+	private static String findDistance(Location mLocation, String strStatus){
 		
 		String[] splited = strStatus.split("#");
 		Location farLoc = new Location("far");
@@ -71,12 +80,12 @@ public class StatusUtil {
 		Integer iDis = fDis.intValue();
 		
 		if(fDis < 2000){
-			strDis += iDis.toString() + "متر ";
+			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + mContext.getString(R.string.meter);
 		}
 		else{
 			Double dDis = iDis.doubleValue() / 1000;
 			iDis = dDis.intValue();
-			strDis += iDis.toString() + "کیلومتر ";
+			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + mContext.getString(R.string.kilometer);
 		}
 		return strDis;
 	}
