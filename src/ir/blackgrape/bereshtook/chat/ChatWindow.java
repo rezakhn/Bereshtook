@@ -689,7 +689,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				getDateView().setTextColor(tv.data);
 				getFromView().setText(from + ":");
 				getFromView().setTextColor(tv.data);
-				getLinearLayout().setBackgroundResource(R.drawable.bubble_notme);
+				getLinearLayout().setBackgroundResource(R.drawable.bubble_her);
 				getLinearLayout().setGravity(Gravity.LEFT);
 				((LinearLayout)mRowView).setGravity(Gravity.LEFT);
 			}
@@ -785,6 +785,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				mRowView.setBackgroundColor(0x30ff0000); // default is transparent
 				break;
 			}
+			
+			if(!from_me)
+				getIconView().setVisibility(View.GONE);
 			getMessageView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize);
 			if(isSystemMsg)
 				getMessageView().setTextColor(getResources().getColor(R.color.system_message_color));
