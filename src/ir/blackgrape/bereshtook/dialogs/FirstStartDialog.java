@@ -1,21 +1,8 @@
 package ir.blackgrape.bereshtook.dialogs;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
+import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPRosterServiceAdapter;
 import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPAdressMalformedException;
@@ -23,16 +10,13 @@ import ir.blackgrape.bereshtook.preferences.AccountPrefs;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.XMPPHelper;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.Settings.Secure;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -49,16 +33,11 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	private Button mOkButton;
 	private EditText mEditJabberID;
 	private EditText mEditPassword;
-	private EditText mRepeatPassword;
+	////private EditText mRepeatPassword;
 	private CheckBox mCreateAccount;
-	private BereshtookConfiguration mConfig;
 	
-	private String androidId;
-	private static final String URL_FIND = "http://bereshtook.ir:3372/users/find/";
-	private static final String URL_INSERT = "http://bereshtook.ir:3372/users/insert/";
-
 	public FirstStartDialog(MainWindow mainWindow,
-			XMPPRosterServiceAdapter serviceAdapter, boolean disabled) {
+			XMPPRosterServiceAdapter serviceAdapter, boolean enable, String username, String password) {
 		super(mainWindow);
 		this.mainWindow = mainWindow;
 
@@ -74,24 +53,19 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 
 		mEditJabberID = (EditText) group.findViewById(R.id.StartupDialog_JID_EditTextField);
 		mEditPassword = (EditText) group.findViewById(R.id.StartupDialog_PASSWD_EditTextField);
-		mRepeatPassword = (EditText) group.findViewById(R.id.startup_password_repeat);
+		////mRepeatPassword = (EditText) group.findViewById(R.id.startup_password_repeat);
 		mCreateAccount = (CheckBox) group.findViewById(R.id.create_account);
 
-		mConfig = BereshtookApplication.getConfig(mainWindow);
-		mEditJabberID.setText(mConfig.userName);
-		mEditPassword.setText(mConfig.password);
+		if(username != null && password != null){
+			mEditJabberID.setText(username);
+			mEditPassword.setText(password);
+		}
 		
-		enableDialog(!disabled);
-		
-		androidId = Secure.getString(getContext().getContentResolver(), Secure.ANDROID_ID);
-		String serverURL = URL_FIND + "/" + androidId;
-		DataFetcher df = new DataFetcher();
-		df.setCmd(COMMAND.FIND);
-		//df.execute(serverURL);
+		enableDialog(enable);
 		
 		//mEditJabberID.addTextChangedListener(this);
 		//mEditPassword.addTextChangedListener(this);
-		mRepeatPassword.addTextChangedListener(this);
+		////mRepeatPassword.addTextChangedListener(this);
 		mCreateAccount.setOnCheckedChangeListener(this);
 	}
 
@@ -104,14 +78,11 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	private void enableDialog(boolean e){
 		mEditJabberID.setEnabled(e);
 		mEditPassword.setEnabled(e);
-		mRepeatPassword.setEnabled(e);
+		////mRepeatPassword.setEnabled(e);
 		mCreateAccount.setEnabled(e);
+		mCreateAccount.setChecked(e);
 	}
 	
-	private void enableCreateAccount(boolean e){
-		mCreateAccount.setEnabled(e);
-	}
-
 	public void onClick(DialogInterface dialog, int which) {
 		switch (which) {
 		case BUTTON_POSITIVE:
@@ -141,6 +112,8 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 
 		savePreferences(jabberID, password, resource);
 		cancel();
+		if(mCreateAccount.isChecked())
+			mainWindow.pushNewAccount();
 	}
 
 	private void updateDialog() {
@@ -163,11 +136,13 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		if (mEditPassword.length() == 0)
 			is_ok = false;
 		if (mCreateAccount.isChecked()) {
+			/*
 			boolean passwords_match = mEditPassword.getText().toString().equals(
 					mRepeatPassword.getText().toString());
 			is_ok = is_ok && passwords_match;
 			mRepeatPassword.setError((passwords_match || mRepeatPassword.length() == 0) ?
 					null : mainWindow.getString(R.string.StartupDialog_error_password));
+			*/
 		}
 		mOkButton.setEnabled(is_ok);
 	}
@@ -175,7 +150,7 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	/* CompoundButton.OnCheckedChangeListener for mCreateAccount */
 	@Override
 	public void onCheckedChanged(CompoundButton btn,boolean isChecked) {
-		mRepeatPassword.setVisibility(isChecked? View.VISIBLE : View.GONE);
+		////mRepeatPassword.setVisibility(isChecked? View.VISIBLE : View.GONE);
 		updateDialog();
 	}
 	@Override
@@ -201,101 +176,4 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		editor.putString(PreferenceConstants.PORT, PreferenceConstants.DEFAULT_PORT);
 		editor.commit();
 	}
-	
-	enum COMMAND{
-		FIND, INSERT
-	}
-	
-	class DataFetcher extends AsyncTask<String, Void, JSONObject> {
-
-		private final HttpClient client = new DefaultHttpClient();
-		private ProgressDialog dialog = new ProgressDialog(
-				mainWindow);
-		private COMMAND cmd;
-		
-		public void setCmd(COMMAND cmd){
-			this.cmd = cmd;
-		}
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-			dialog.setMessage(mainWindow.getString(R.string.tops_loading));
-			dialog.show();
-
-		}
-
-		@Override
-		protected JSONObject doInBackground(String... urls) {
-			String url = urls[0];
-			InputStream inputStream = null;
-			String result = "";
-
-			try {
-				HttpResponse httpResponse = client.execute(new HttpGet(url));
-				inputStream = httpResponse.getEntity().getContent();
-
-				if (inputStream != null)
-					result = convertInputStreamToString(inputStream);
-				else
-					result = "problem";
-
-				try {
-					return new JSONObject(result);
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(JSONObject json) {
-			try {
-				if(json == null || json.equals("problem"))
-					return;
-				String result = json.getString("result");
-				if(result == null || result.equals("error"))
-					return;
-				
-				enableDialog(true);
-				
-				if(result.equals("not_exist"))
-					enableCreateAccount(true);
-				else if(result.equals("user_exist")){
-					String username = json.getString("username");
-					String password = json.getString("password");
-					enableCreateAccount(false);
-				}
-				
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-			dialog.cancel();
-			
-		}
-
-		private String convertInputStreamToString(InputStream inputStream)
-				throws IOException {
-			BufferedReader bufferedReader = new BufferedReader(
-					new InputStreamReader(inputStream));
-			String line = "";
-			String result = "";
-			while ((line = bufferedReader.readLine()) != null)
-				result += line;
-
-			inputStream.close();
-			return result;
-
-		}
-
-	}		
-
 }

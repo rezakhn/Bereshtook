@@ -27,12 +27,26 @@ import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StatusUtil;
 import ir.blackgrape.bereshtook.util.StringUtil;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -46,13 +60,17 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
@@ -104,12 +122,21 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private ServiceConnection dataServiceConnection;
 	private XMPPDataServiceAdapter dataServiceAdapter;
 	private Integer mCoins = null;
+	
+	private String androidId;
+	private static final String URL_FIND = "http://bereshtook.ir:3373/users/find/";
+	private static final String URL_INSERT = "http://bereshtook.ir:3373/users/insert/";
+	
+	enum COMMAND{
+		FIND, INSERT
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.i(TAG, getString(R.string.version_name));
 		mConfig = BereshtookApplication.getConfig(this);
 		mTheme = mConfig.theme;
+		androidId = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 		setTheme(mConfig.getTheme());
 		StatusUtil.setContext(getApplicationContext());
 		super.onCreate(savedInstanceState);
@@ -126,7 +153,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		registerCrashReporter();
 
 		if (!mConfig.jid_configured)
-			showFirstStartUpDialog();
+			checkUserAccounts();
 		getContentResolver().registerContentObserver(
 				RosterProvider.CONTENT_URI, true, mRosterObserver);
 		getContentResolver().registerContentObserver(ChatProvider.CONTENT_URI,
@@ -136,6 +163,31 @@ public class MainWindow extends SherlockExpandableListActivity {
 		setupContenView();
 		registerListAdapter();
 		registerDataService();
+	}
+	
+	private void checkUserAccounts() {
+		if(isNetworkConnected()){
+			String serverURL = URL_FIND + androidId;
+			UserChecker df = new UserChecker();
+			df.setCmd(COMMAND.FIND);
+			df.execute(serverURL);
+		}
+		else
+			showToastNotification(R.string.no_internet_connection);
+	}
+	public void pushNewAccount() {
+		String serverURL = URL_INSERT + androidId + "/" + mConfig.userName + "/" + mConfig.password;
+		UserChecker df = new UserChecker();
+		df.setCmd(COMMAND.INSERT);
+		df.execute(serverURL);
+	}
+	
+	private boolean isNetworkConnected(){
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo ni = cm.getActiveNetworkInfo();
+		if(ni == null)
+			return false;
+		return true;
 	}
 
 	@Override
@@ -796,7 +848,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			return true;
 
 		case R.id.menu_account:
-			showFirstStartUpDialog();
+			showFirstStartUpDialog(false, mConfig.userName, mConfig.password);
 			return true;
 
 		case R.id.menu_coins:
@@ -904,8 +956,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 	// according to the requested state
 	private void toggleConnection() {
 		if (!mConfig.jid_configured) {
-			// startActivity(new Intent(this, AccountPrefs.class));
-			showFirstStartUpDialog();
+			checkUserAccounts();
 			return;
 		}
 		boolean oldState = isConnected() || isConnecting();
@@ -1070,7 +1121,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		}
 	}
 
-	private void showFirstStartUpDialog() {
+	private void showFirstStartUpDialog(boolean enable, String username, String password) {
 		Log.i(TAG, "showFirstStartUpDialog, JID: " + mConfig.jabberID);
 		// load preference defaults
 		PreferenceManager.setDefaultValues(this, R.layout.mainprefs, false);
@@ -1083,8 +1134,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 				.commit();
 
 		// show welcome dialog
-		new FirstStartDialog(this, serviceAdapter, mConfig.jid_configured)
-				.show();
+		new FirstStartDialog(this, serviceAdapter, enable, username, password).show();
 	}
 
 	public static Intent createIntent(Context context) {
@@ -1402,5 +1452,102 @@ public class MainWindow extends SherlockExpandableListActivity {
 			return StatusMode.values()[presenceMode].getDrawableId();
 		}
 	}
+
+	class UserChecker extends AsyncTask<String, Void, JSONObject> {
+
+		private final HttpClient client = new DefaultHttpClient();
+		private ProgressDialog dialog = new ProgressDialog(MainWindow.this);
+		private COMMAND cmd;
+		
+		public void setCmd(COMMAND cmd){
+			this.cmd = cmd;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+
+			if(cmd == COMMAND.FIND)
+				dialog.setMessage(MainWindow.this.getString(R.string.connecting_bereshtook));
+			else if(cmd == COMMAND.INSERT)
+				dialog.setMessage(MainWindow.this.getString(R.string.creating_account));
+			dialog.setCancelable(false);
+			dialog.show();
+
+		}
+
+		@Override
+		protected JSONObject doInBackground(String... urls) {
+			String url = urls[0];
+			InputStream inputStream = null;
+			String result = "";
+
+			try {
+				HttpResponse httpResponse = client.execute(new HttpGet(url));
+				inputStream = httpResponse.getEntity().getContent();
+
+				if (inputStream != null)
+					result = convertInputStreamToString(inputStream);
+				else
+					result = "problem";
+
+				try {
+					return new JSONObject(result);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(JSONObject json) {
+			try {
+				if(json == null || json.equals("problem")){
+					dialog.cancel();
+					showToastNotification(R.string.error_fetch_data);
+					return;
+				}
+				String result = json.getString("result");
+				if(result == null || result.equals("error"))
+					return;
+				if(cmd == COMMAND.FIND){
+					if(result.equals("not_exist"))
+						showFirstStartUpDialog(true, null, null);
+					else if(result.equals("user_exist")){
+						String username = json.getString("username");
+						String password = json.getString("password");
+						showFirstStartUpDialog(false, username, password);
+					}
+				}
+				
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			dialog.cancel();
+			
+		}
+
+		private String convertInputStreamToString(InputStream inputStream)
+				throws IOException {
+			BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(inputStream));
+			String line = "";
+			String result = "";
+			while ((line = bufferedReader.readLine()) != null)
+				result += line;
+
+			inputStream.close();
+			return result;
+
+		}
+		
+	}	
 	
 }

@@ -36,6 +36,8 @@
 	<string name="StartupDialog_advanced">پیشرفته…</string>
 	<string name="StartupDialog_create_new">کاربر جدید هستم</string>
 	<string name="StartupDialog_error_password">رمزها مطابقت ندارند</string>
+	
+	<string name="no_internet_connection">اینترنت وصل نیست</string>
 
 	<!-- Notifications -->
 	<string name="notification_message">پیام جدید از %s</string>
@@ -119,6 +121,10 @@
 	<string name="wins_num">تعداد پیروزی</string>
 	<string name="coins_num">تعداد سکه</string>
 	<string name="tops_loading">در حال گرفتن آخرین اطلاعات...</string>
+	<string name="creating_account">در حال ساختن یه برشتوک جدید...</string>
+	<string name="connecting_bereshtook">در حال برقراری ارتباط با سرور...</string>
+	
+	<string name="error_fetch_data">خطا در گرفتن اطلاعات</string>
 	
 	<string name="rank">رتبه</string>
 	<string name="bereshtook_user">نام برشتوک</string>
