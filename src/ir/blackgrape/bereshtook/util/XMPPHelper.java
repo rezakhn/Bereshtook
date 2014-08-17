@@ -13,7 +13,7 @@ public class XMPPHelper {
 			throws BereshtookXMPPAdressMalformedException {
 		try {
 			String parts[] = jid.split("@");
-			if (parts.length != 2 || parts[0].length() == 0 || parts[1].length() == 0)
+			if (parts.length != 2 || parts[0].length() == 0 || parts[0].length() < 4 || parts[0].contains(" "))
 				throw new BereshtookXMPPAdressMalformedException(
 						"Configured Jabber-ID is incorrect!");
 			StringBuilder sb = new StringBuilder();

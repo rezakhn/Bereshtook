@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class FragmentTabTopCoins extends FragmentTabScoreboard {
 	
@@ -18,9 +17,6 @@ public class FragmentTabTopCoins extends FragmentTabScoreboard {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.tab_top_coins, container, false);
-		txtRank = (TextView) view.findViewById(R.id.my_rank);
-		txtScore = (TextView) view.findViewById(R.id.my_score);
-		txtScore.setText(getString(R.string.my_coins_num) + " ");
 		lstTop10 = (ListView) view.findViewById(R.id.tops_list);
 		
 		return view;

@@ -6,6 +6,7 @@ import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Choice;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Turn;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Winner;
+import ir.blackgrape.bereshtook.util.StringUtil;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -71,8 +72,8 @@ public class RPSWindow extends GameWindow {
 		txtStatusDown.setOnClickListener(statusClickListener);
 		
 		startGame();
-		txtScoreUp.setText(game.getHerScore().toString() + "/" + game.getMaxScore());
-		txtScoreDown.setText(game.getMyScore().toString() + "/" + game.getMaxScore());
+		txtScoreUp.setText(StringUtil.convertToPersian(game.getHerScore().toString()) + "/" + StringUtil.convertToPersian(game.getMaxScore().toString()));
+		txtScoreDown.setText(StringUtil.convertToPersian(game.getMyScore().toString()) + "/" + StringUtil.convertToPersian(game.getMaxScore().toString()));
 	}
 
 	private OnClickListener buttonClickListener = new OnClickListener() {

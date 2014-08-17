@@ -20,6 +20,7 @@ import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
+import ir.blackgrape.bereshtook.util.StringUtil;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -153,7 +154,7 @@ public class ShopActivity extends SherlockActivity {
 
                 if (!result.isSuccess()) {
                     // Oh noes, there was a problem.
-                    complain("مشکل در ارتباط با کافه بازار" + "\n" + result);
+                    complain("مشکل در ارتباط با کافه بازار");
                     return;
                 }
 
@@ -177,7 +178,7 @@ public class ShopActivity extends SherlockActivity {
 
             // Is it a failure?
             if (result.isFailure()) {
-                complain("مشکل در گرفتن اطلاعات حساب" + "\n" + result);
+                complain("مشکل در گرفتن اطلاعات حساب");
                 return;
             }
 
@@ -284,7 +285,7 @@ public class ShopActivity extends SherlockActivity {
             if (mHelper == null) return;
 
             if (result.isFailure()) {
-                complain("خرید انجام نشد" + "\n" + result);
+                complain("خرید انجام نشد");
                 setWaitScreen(false);
                 return;
             }
@@ -335,7 +336,7 @@ public class ShopActivity extends SherlockActivity {
                 successDialog(extraCoins);
             }
             else {
-                complain("مشکل در اضافه کردن سکه به حساب" + "\n" + result);
+                complain("مشکل در اضافه کردن سکه به حساب");
             }
             setWaitScreen(false);
             Log.d(TAG, "End consumption flow.");
@@ -355,11 +356,11 @@ public class ShopActivity extends SherlockActivity {
         }
     }
 
-    protected void successDialog(int extraCoins) {
+    protected void successDialog(Integer extraCoins) {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.successful_payment);
-		dialog.setMessage(getString(R.string.add_coins_success, extraCoins));
+		dialog.setMessage(getString(R.string.add_coins_success, StringUtil.convertToPersian(extraCoins.toString())));
 		dialog.setPositiveButton(R.string.ok,
 				new DialogInterface.OnClickListener() {
 
@@ -424,7 +425,7 @@ public class ShopActivity extends SherlockActivity {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
 				mCoins = loadCoins();
-				currentCoins.setText(getString(R.string.current_amount_coins, mCoins));
+				currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mCoins.toString())));
 				setWaitScreen(false);
 			}
 			

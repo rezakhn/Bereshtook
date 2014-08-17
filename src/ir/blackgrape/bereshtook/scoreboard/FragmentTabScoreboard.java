@@ -1,6 +1,7 @@
 package ir.blackgrape.bereshtook.scoreboard;
 
 import ir.blackgrape.bereshtook.R;
+import ir.blackgrape.bereshtook.util.StringUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,15 +22,12 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
 public class FragmentTabScoreboard extends SherlockFragment {
 	protected String factor;
 	protected String username;
-	protected TextView txtRank;
-	protected TextView txtScore;
 	protected Integer myRank;
 	protected Integer myScore;
 	protected ListView lstTop10;
@@ -117,27 +115,24 @@ public class FragmentTabScoreboard extends SherlockFragment {
 				if(myRank == null || myScore == null)
 					return;
 				
-				txtRank.setText(getString(R.string.my_rank_is, myRank));
-				txtScore.setText(txtScore.getText() + myScore.toString());
-				
 				JSONObject tops = result.getJSONObject("json");
 				
 				for(Integer i=0; i<tops.length(); i++){
 					JSONObject item = tops.getJSONObject(i.toString());
 					HashMap<String, String> map = new HashMap<String, String>();
 					Integer rank = i+1;
-					map.put(RANK, rank.toString());
+					map.put(RANK, StringUtil.convertToPersian(rank.toString()));
 					map.put(USERNAME, item.getString(USERNAME));
 					Integer score = item.getInt(factor);
-					map.put(SCORE, score.toString());
+					map.put(SCORE, StringUtil.convertToPersian(score.toString()));
 					oslist.add(map);
 				}
 				
 				if(myRank > tops.length()){
 					HashMap<String, String> me = new HashMap<String, String>();
-					me.put(RANK, myRank.toString());
+					me.put(RANK, StringUtil.convertToPersian(myRank.toString()));
 					me.put(USERNAME, username);
-					me.put(SCORE, myScore.toString());
+					me.put(SCORE, StringUtil.convertToPersian(myScore.toString()));
 					oslist.add(me);
 				}
 				
@@ -166,6 +161,6 @@ public class FragmentTabScoreboard extends SherlockFragment {
 			return result;
 
 		}
-
+		
 	}
 }

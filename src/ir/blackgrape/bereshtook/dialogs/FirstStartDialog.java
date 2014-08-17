@@ -1,5 +1,18 @@
 package ir.blackgrape.bereshtook.dialogs;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
@@ -10,13 +23,16 @@ import ir.blackgrape.bereshtook.preferences.AccountPrefs;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.XMPPHelper;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -36,6 +52,10 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 	private EditText mRepeatPassword;
 	private CheckBox mCreateAccount;
 	private BereshtookConfiguration mConfig;
+	
+	private String androidId;
+	private static final String URL_FIND = "http://bereshtook.ir:3372/users/find/";
+	private static final String URL_INSERT = "http://bereshtook.ir:3372/users/insert/";
 
 	public FirstStartDialog(MainWindow mainWindow,
 			XMPPRosterServiceAdapter serviceAdapter, boolean disabled) {
@@ -61,12 +81,13 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		mEditJabberID.setText(mConfig.userName);
 		mEditPassword.setText(mConfig.password);
 		
-		if(disabled){
-			mEditJabberID.setEnabled(false);
-			mEditPassword.setEnabled(false);
-			mRepeatPassword.setEnabled(false);
-			mCreateAccount.setEnabled(false);
-		}
+		enableDialog(!disabled);
+		
+		androidId = Secure.getString(getContext().getContentResolver(), Secure.ANDROID_ID);
+		String serverURL = URL_FIND + "/" + androidId;
+		DataFetcher df = new DataFetcher();
+		df.setCmd(COMMAND.FIND);
+		//df.execute(serverURL);
 		
 		//mEditJabberID.addTextChangedListener(this);
 		//mEditPassword.addTextChangedListener(this);
@@ -80,6 +101,16 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		mOkButton = getButton(BUTTON_POSITIVE);
 	}
 
+	private void enableDialog(boolean e){
+		mEditJabberID.setEnabled(e);
+		mEditPassword.setEnabled(e);
+		mRepeatPassword.setEnabled(e);
+		mCreateAccount.setEnabled(e);
+	}
+	
+	private void enableCreateAccount(boolean e){
+		mCreateAccount.setEnabled(e);
+	}
 
 	public void onClick(DialogInterface dialog, int which) {
 		switch (which) {
@@ -121,7 +152,12 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 			//mOkButton.setOnClickListener(this);
 			mEditJabberID.setError(null);
 		} catch (BereshtookXMPPAdressMalformedException e) {
-			if (jid.length() > 0)
+			is_ok = false;
+			if(jid.toString().contains(" "))
+				mEditJabberID.setError(mainWindow.getString(R.string.space_is_no_allowed));
+			else if(jid.length() < 4)
+				mEditJabberID.setError(mainWindow.getString(R.string.min_char_is_4));
+			else if (jid.length() > 0)
 				mEditJabberID.setError(mainWindow.getString(R.string.Global_JID_malformed));
 		}
 		if (mEditPassword.length() == 0)
@@ -165,5 +201,101 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		editor.putString(PreferenceConstants.PORT, PreferenceConstants.DEFAULT_PORT);
 		editor.commit();
 	}
+	
+	enum COMMAND{
+		FIND, INSERT
+	}
+	
+	class DataFetcher extends AsyncTask<String, Void, JSONObject> {
+
+		private final HttpClient client = new DefaultHttpClient();
+		private ProgressDialog dialog = new ProgressDialog(
+				mainWindow);
+		private COMMAND cmd;
+		
+		public void setCmd(COMMAND cmd){
+			this.cmd = cmd;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+
+			dialog.setMessage(mainWindow.getString(R.string.tops_loading));
+			dialog.show();
+
+		}
+
+		@Override
+		protected JSONObject doInBackground(String... urls) {
+			String url = urls[0];
+			InputStream inputStream = null;
+			String result = "";
+
+			try {
+				HttpResponse httpResponse = client.execute(new HttpGet(url));
+				inputStream = httpResponse.getEntity().getContent();
+
+				if (inputStream != null)
+					result = convertInputStreamToString(inputStream);
+				else
+					result = "problem";
+
+				try {
+					return new JSONObject(result);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(JSONObject json) {
+			try {
+				if(json == null || json.equals("problem"))
+					return;
+				String result = json.getString("result");
+				if(result == null || result.equals("error"))
+					return;
+				
+				enableDialog(true);
+				
+				if(result.equals("not_exist"))
+					enableCreateAccount(true);
+				else if(result.equals("user_exist")){
+					String username = json.getString("username");
+					String password = json.getString("password");
+					enableCreateAccount(false);
+				}
+				
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			dialog.cancel();
+			
+		}
+
+		private String convertInputStreamToString(InputStream inputStream)
+				throws IOException {
+			BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(inputStream));
+			String line = "";
+			String result = "";
+			while ((line = bufferedReader.readLine()) != null)
+				result += line;
+
+			inputStream.close();
+			return result;
+
+		}
+
+	}		
 
 }

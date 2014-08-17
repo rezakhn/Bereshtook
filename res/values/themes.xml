@@ -33,7 +33,7 @@
     </style>
 
     <style name="MyActionBarLight" parent="Widget.Sherlock.Light.ActionBar">
-        <item name="android:background">#3000</item>
+        <item name="android:background">#CC5200</item>
         <item name="background">#3000</item>
         <item name="android:indeterminateProgressStyle">@style/IndeterminateProgress</item>
         <item name="indeterminateProgressStyle">@style/IndeterminateProgress</item>

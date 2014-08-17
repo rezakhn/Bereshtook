@@ -7,6 +7,7 @@ import ir.blackgrape.bereshtook.service.IXMPPChatService;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
+import ir.blackgrape.bereshtook.util.StringUtil;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
@@ -118,7 +119,7 @@ public abstract class GameWindow extends SherlockActivity {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.lose_game_title);
-		dialog.setMessage(getString(R.string.lose_game_message, 90));
+		dialog.setMessage(getString(R.string.lose_game_message, StringUtil.convertToPersian(Integer.valueOf(100).toString())));
 		dialog.setPositiveButton(R.string.lose_game_button,
 				new DialogInterface.OnClickListener() {
 					@Override
@@ -134,7 +135,7 @@ public abstract class GameWindow extends SherlockActivity {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.won_game_title);
-		dialog.setMessage(getString(R.string.won_game_message, 100));
+		dialog.setMessage(getString(R.string.won_game_message, StringUtil.convertToPersian(Integer.valueOf(100).toString())));
 		dialog.setPositiveButton(R.string.won_game_button,
 				new DialogInterface.OnClickListener() {
 					@Override

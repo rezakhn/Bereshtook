@@ -19,11 +19,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/bg_main">
 
     <ListView android:id="@android:id/list"
         style="?android:attr/listViewWhiteStyle"
-        android:background="@color/compose_message_list_background"
         android:cacheColorHint="@color/compose_message_list_background"
         android:divider="@null"
         android:dividerHeight="0.0sp"

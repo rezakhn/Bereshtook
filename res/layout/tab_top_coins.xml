@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:layout_gravity="right"
     android:gravity="right"
-    android:background="@color/tops_tab_background"
     >
  
     <LinearLayout

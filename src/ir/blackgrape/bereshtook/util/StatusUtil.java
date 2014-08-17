@@ -15,7 +15,7 @@ public class StatusUtil {
 	public static CharSequence makeStatus(String herStatus) {
 		if(herStatus.contains("S")){
 			String coins = herStatus.substring(0, herStatus.indexOf('S'));
-			return coins + " " + mContext.getString(R.string.coin);
+			return StringUtil.convertToPersian(coins) + " " + mContext.getString(R.string.coin);
 		}
 		else
 			return "";
@@ -52,18 +52,18 @@ public class StatusUtil {
 		 
 		 StringBuilder sb = new StringBuilder();
 		 if(coins != null && distance != null){
-			 sb.append(coins);
+			 sb.append(StringUtil.convertToPersian(coins));
 			 sb.append(" ");
 			 sb.append(mContext.getString(R.string.coin));
 			 sb.append(" (");
-			 sb.append(distance);
+			 sb.append(StringUtil.convertToPersian(distance));
 			 sb.append(")");
 			 return sb;
 		 }
 		 else if(coins != null)
-			 return coins + " " + mContext.getString(R.string.coin);
+			 return StringUtil.convertToPersian(coins) + " " + mContext.getString(R.string.coin);
 		 else if(distance != null)
-			 return "(" + distance + ")";
+			 return "(" + StringUtil.convertToPersian(distance) + ")";
 		 else
 			 return "";
 	}
@@ -80,12 +80,12 @@ public class StatusUtil {
 		Integer iDis = fDis.intValue();
 		
 		if(fDis < 2000){
-			strDis += iDis.toString() + " " + mContext.getString(R.string.meter);
+			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + mContext.getString(R.string.meter);
 		}
 		else{
 			Double dDis = iDis.doubleValue() / 1000;
 			iDis = dDis.intValue();
-			strDis += iDis.toString() + " " + mContext.getString(R.string.kilometer);
+			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + mContext.getString(R.string.kilometer);
 		}
 		return strDis;
 	}

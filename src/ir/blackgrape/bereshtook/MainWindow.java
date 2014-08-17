@@ -25,6 +25,7 @@ import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.SimpleCursorTreeAdapter;
 import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StatusUtil;
+import ir.blackgrape.bereshtook.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -710,7 +711,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		// This and many other things like it should be done with observer
 		actionBar.setIcon(getStatusActionIcon());
 		if (mCoins != null)
-			actionBar.setSubtitle(mCoins.toString() + " " + getString(R.string.coin));
+			actionBar.setSubtitle(StringUtil.convertToPersian(mCoins.toString()) + " " + getString(R.string.coin));
 	}
 
 	private void aboutDialog() {
@@ -1274,10 +1275,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 			mCoins = loadCoins();
 
 		if (mLocation != null && mCoins != null)
-			return mCoins + "S" + mLocation.getLatitude() + "#"
+			return StringUtil.convertToPersian(mCoins.toString()) + "S" + mLocation.getLatitude() + "#"
 					+ mLocation.getLongitude();
 		else if (mCoins != null)
-			return mCoins + "S";
+			return StringUtil.convertToPersian(mCoins.toString()) + "S";
 		else
 			return ""; // never should happens but...
 	}
@@ -1401,4 +1402,5 @@ public class MainWindow extends SherlockExpandableListActivity {
 			return StatusMode.values()[presenceMode].getDrawableId();
 		}
 	}
+	
 }
