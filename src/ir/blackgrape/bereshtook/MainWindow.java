@@ -126,6 +126,11 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private String androidId;
 	private static final String URL_FIND = "http://bereshtook.ir:3373/users/find/";
 	private static final String URL_INSERT = "http://bereshtook.ir:3373/users/insert/";
+	private boolean isNewAccount = false;
+	
+	public void setIsNewAccount(boolean isNew){
+		isNewAccount = isNew;
+	}
 	
 	enum COMMAND{
 		FIND, INSERT
@@ -170,16 +175,22 @@ public class MainWindow extends SherlockExpandableListActivity {
 			String serverURL = URL_FIND + androidId;
 			UserChecker df = new UserChecker();
 			df.setCmd(COMMAND.FIND);
-			df.execute(serverURL);
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				df.executeOnExecutor(UserChecker.THREAD_POOL_EXECUTOR, serverURL);
+			else
+				df.execute(serverURL);
 		}
 		else
 			showToastNotification(R.string.no_internet_connection);
 	}
-	public void pushNewAccount() {
+	private void pushNewAccount() {
 		String serverURL = URL_INSERT + androidId + "/" + mConfig.userName + "/" + mConfig.password;
 		UserChecker df = new UserChecker();
 		df.setCmd(COMMAND.INSERT);
-		df.execute(serverURL);
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			df.executeOnExecutor(UserChecker.THREAD_POOL_EXECUTOR, serverURL);
+		else
+			df.execute(serverURL);
 	}
 	
 	private boolean isNetworkConnected(){
@@ -848,7 +859,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			return true;
 
 		case R.id.menu_account:
-			showFirstStartUpDialog(false, mConfig.userName, mConfig.password);
+			checkUserAccounts();;
 			return true;
 
 		case R.id.menu_coins:
@@ -935,6 +946,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 				PreferenceManager.getDefaultSharedPreferences(this).edit()
 						.putBoolean(PreferenceConstants.JID_CONFIGURED, true)
 						.commit();
+				if(isNewAccount)
+					pushNewAccount();
 			}
 			String strStatus = getMyStatusMsg();
 			if (strStatus.contains("S")
@@ -1467,12 +1480,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 		protected void onPreExecute() {
 			super.onPreExecute();
 
-			if(cmd == COMMAND.FIND)
+			if(cmd == COMMAND.FIND){
 				dialog.setMessage(MainWindow.this.getString(R.string.connecting_bereshtook));
-			else if(cmd == COMMAND.INSERT)
-				dialog.setMessage(MainWindow.this.getString(R.string.creating_account));
-			dialog.setCancelable(false);
-			dialog.show();
+				dialog.show();
+			}
 
 		}
 
@@ -1486,8 +1497,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 				HttpResponse httpResponse = client.execute(new HttpGet(url));
 				inputStream = httpResponse.getEntity().getContent();
 
-				if (inputStream != null)
+				if (inputStream != null){
 					result = convertInputStreamToString(inputStream);
+					inputStream.close();
+				}
 				else
 					result = "problem";
 
@@ -1529,8 +1542,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			
-			dialog.cancel();
+			if(dialog != null)
+				dialog.cancel();
 			
 		}
 

@@ -113,7 +113,7 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		savePreferences(jabberID, password, resource);
 		cancel();
 		if(mCreateAccount.isChecked())
-			mainWindow.pushNewAccount();
+			mainWindow.setIsNewAccount(true);
 	}
 
 	private void updateDialog() {
