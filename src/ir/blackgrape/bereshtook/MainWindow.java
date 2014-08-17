@@ -1275,10 +1275,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 			mCoins = loadCoins();
 
 		if (mLocation != null && mCoins != null)
-			return StringUtil.convertToPersian(mCoins.toString()) + "S" + mLocation.getLatitude() + "#"
+			return mCoins.toString() + "S" + mLocation.getLatitude() + "#"
 					+ mLocation.getLongitude();
 		else if (mCoins != null)
-			return StringUtil.convertToPersian(mCoins.toString()) + "S";
+			return mCoins.toString() + "S";
 		else
 			return ""; // never should happens but...
 	}

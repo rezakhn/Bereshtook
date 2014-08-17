@@ -56,14 +56,14 @@ public class StatusUtil {
 			 sb.append(" ");
 			 sb.append(mContext.getString(R.string.coin));
 			 sb.append(" (");
-			 sb.append(StringUtil.convertToPersian(distance));
+			 sb.append(distance);
 			 sb.append(")");
 			 return sb;
 		 }
 		 else if(coins != null)
-			 return StringUtil.convertToPersian(coins) + " " + mContext.getString(R.string.coin);
+			 return coins + " " + mContext.getString(R.string.coin);
 		 else if(distance != null)
-			 return "(" + StringUtil.convertToPersian(distance) + ")";
+			 return "(" + distance + ")";
 		 else
 			 return "";
 	}
