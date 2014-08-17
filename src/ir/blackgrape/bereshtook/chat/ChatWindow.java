@@ -42,6 +42,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.ClipboardManager;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
@@ -783,7 +785,6 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				mRowView.setBackgroundColor(0x30ff0000); // default is transparent
 				break;
 			}
-			getMessageView().setText(myMessage);
 			getMessageView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize);
 			if(isSystemMsg)
 				getMessageView().setTextColor(getResources().getColor(R.color.system_message_color));
@@ -792,6 +793,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			getDateView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize*2/3);
 			getFromView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize*2/3);
 			
+			SpannableStringBuilder ssb = new SpannableStringBuilder(myMessage);
+			MessageUtils.convertSmileys(ChatWindow.this, ssb, SmileyImageSpan.SIZE_EDITABLE);
+			getMessageView().setText(ssb);
 		}
 		
 		TextView getDateView() {

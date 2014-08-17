@@ -151,6 +151,7 @@ public abstract class GameWindow extends SherlockActivity {
 		mCoins += 100;
 		saveCoins(mCoins);
 		saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.LEFTS) - 1);
+		saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.PLAYED_GAMES) - 1);
 
 		new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)

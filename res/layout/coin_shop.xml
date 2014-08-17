@@ -60,6 +60,7 @@
 	        android:text="@string/coin_pack1_desc"
 	        android:singleLine="true"
         	android:textAppearance="?android:attr/textAppearanceLarge"
+        	android:ellipsize="none"
         	/>
     </RelativeLayout>
     
@@ -88,6 +89,7 @@
 	        android:text="@string/coin_pack2_desc"
 	        android:singleLine="true"
         	android:textAppearance="?android:attr/textAppearanceLarge"
+        	android:ellipsize="none"
         	/>
     </RelativeLayout>
     
@@ -116,6 +118,7 @@
 	        android:text="@string/coin_pack3_desc"
 	        android:singleLine="true"
 	        android:textAppearance="?android:attr/textAppearanceLarge"
+	        android:ellipsize="none"
 	        />
     </RelativeLayout>
     
@@ -144,6 +147,7 @@
 	        android:text="@string/coin_pack4_desc"
 	        android:singleLine="true"
 			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:ellipsize="none"
 			/>
     </RelativeLayout> 
 

@@ -63,8 +63,8 @@ public class FirstStartDialog extends AlertDialog implements DialogInterface.OnC
 		
 		enableDialog(enable);
 		
-		//mEditJabberID.addTextChangedListener(this);
-		//mEditPassword.addTextChangedListener(this);
+		mEditJabberID.addTextChangedListener(this);
+		mEditPassword.addTextChangedListener(this);
 		////mRepeatPassword.addTextChangedListener(this);
 		mCreateAccount.setOnCheckedChangeListener(this);
 	}
