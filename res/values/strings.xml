@@ -257,7 +257,7 @@
 	<string name="coin">سکه</string>
 	<string name="current_amount_coins">شما در حال حاضر %s سکه دارید</string>
 	<string name="coin_info_description">برای بدست آوردن سکه میتوانید بازی کنید و برنده شوید یا سکه بخرید و به ما در بهتر کردن برشتوک کمک کنید.</string>
-	<string name="coin_pack1_desc">۵۰۰ سکه فقط ۴۵۰ تومان</string>
+	<string name="coin_pack1_desc">۵۰۰ سکه فقط ۵۰۰ تومان</string>
 	<string name="coin_pack2_desc">۱۰۰۰ سکه فقط ۹۰۰ تومان</string>
 	<string name="coin_pack3_desc">۲۰۰۰ سکه فقط ۱۵۰۰ تومان</string>
 	<string name="coin_pack4_desc">۹۰۰۰ سکه فقط ۴۰۰۰ تومان</string>

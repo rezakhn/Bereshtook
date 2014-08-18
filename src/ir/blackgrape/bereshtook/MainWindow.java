@@ -31,7 +31,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -296,7 +295,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		GameBroadcastReceiver.setContext(this);
 
 		String strStatus = getMyStatusMsg();
-		if (strStatus.contains("S") && !strStatus.equals(mConfig.statusMessage)) {
+		if (isConnected() && strStatus.contains("S") && !strStatus.equals(mConfig.statusMessage)) {
 			mConfig.statusMessage = strStatus;
 			serviceAdapter.setStatusFromConfig();
 		}

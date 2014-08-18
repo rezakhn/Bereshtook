@@ -369,4 +369,11 @@ public class TTTWindow extends GameWindow {
 	    .setNegativeButton(R.string.exit_game_cancel, null)
 	    .show();
 	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+    	sendMsg(EXIT_MSG);
+        finish();
+	}
 }

@@ -1,26 +1,26 @@
 package ir.blackgrape.bereshtook.chat;
 
-import ir.blackgrape.bereshtook.R;
-import ir.blackgrape.bereshtook.service.IXMPPChatService;
-import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
+import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.data.ChatProvider;
-import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.ChatProvider.ChatConstants;
+import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.game.GameBroadcastReceiver;
 import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.game.battleship.BattleshipWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSWindow;
 import ir.blackgrape.bereshtook.game.ttt.TTTWindow;
+import ir.blackgrape.bereshtook.service.IXMPPChatService;
+import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StatusUtil;
 import ir.blackgrape.bereshtook.util.chat.MessageUtils;
-import ir.blackgrape.bereshtook.util.chat.QuickAction;
 import ir.blackgrape.bereshtook.util.chat.MessageUtils.SmileyImageSpan;
+import ir.blackgrape.bereshtook.util.chat.QuickAction;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,7 +42,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.text.ClipboardManager;
 import android.text.Editable;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -788,6 +787,9 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			
 			if(!from_me)
 				getIconView().setVisibility(View.GONE);
+			else
+				getIconView().setVisibility(View.VISIBLE);
+			
 			getMessageView().setTextSize(TypedValue.COMPLEX_UNIT_SP, chatWindow.mChatFontSize);
 			if(isSystemMsg)
 				getMessageView().setTextColor(getResources().getColor(R.color.system_message_color));
