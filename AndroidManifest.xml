@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="preferExternal"
-	android:versionCode="28" android:versionName="@string/version_name" package="ir.blackgrape.bereshtook">
+	android:versionCode="29" android:versionName="@string/version_name" package="ir.blackgrape.bereshtook">
 
 	<uses-sdk android:targetSdkVersion="19" android:minSdkVersion="8"/>
 
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />	
@@ -94,8 +95,10 @@
 		</receiver>
 
 		<provider android:name=".data.ChatProvider"
+		    android:exported="false"
 			android:authorities="ir.blackgrape.bereshtook.provider.Chats" />
 		<provider android:name=".data.RosterProvider"
+		    android:exported="false"
 			android:authorities="ir.blackgrape.bereshtook.provider.Roster" />
 
 		<activity android:name="de.duenndns.ssl.MemorizingActivity" />

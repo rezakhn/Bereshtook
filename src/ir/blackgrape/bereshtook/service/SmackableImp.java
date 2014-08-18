@@ -529,11 +529,6 @@ public class SmackableImp implements Smackable {
 			registerRosterListener();
 			boolean need_bind = !mStreamHandler.isResumePossible();
 
-			mXMPPConnection.connect(need_bind);
-			// the following should not happen as of smack 3.3.1
-			if (!mXMPPConnection.isConnected()) {
-				throw new BereshtookXMPPException("SMACK connect failed without exception!");
-			}
 			if (mConnectionListener != null)
 				mXMPPConnection.removeConnectionListener(mConnectionListener);
 			mConnectionListener = new ConnectionListener() {
@@ -551,6 +546,7 @@ public class SmackableImp implements Smackable {
 			};
 			mXMPPConnection.addConnectionListener(mConnectionListener);
 
+			mXMPPConnection.connect(need_bind);
 			// SMACK auto-logins if we were authenticated before
 			if (!mXMPPConnection.isAuthenticated()) {
 				if (create_account) {
@@ -567,8 +563,6 @@ public class SmackableImp implements Smackable {
 				setStatusFromConfig();
 			}
 
-		} catch (BereshtookXMPPException e) {
-			throw e;
 		} catch (Exception e) {
 			// actually we just care for IllegalState or NullPointer or XMPPEx.
 			throw new BereshtookXMPPException("tryToConnect failed", e);
@@ -875,8 +869,10 @@ public class SmackableImp implements Smackable {
 
 				String jabberID = getBareJID(presence.getFrom());
 				RosterEntry rosterEntry = mRoster.getEntry(jabberID);
-				updateRosterEntryInDB(rosterEntry);
-				mServiceCallBack.rosterChanged();
+				if(rosterEntry != null){
+					updateRosterEntryInDB(rosterEntry);
+					mServiceCallBack.rosterChanged();
+				}
 			}
 		};
 		mRoster.addRosterListener(mRosterListener);

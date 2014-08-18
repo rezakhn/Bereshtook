@@ -220,17 +220,16 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	// need this to workaround unwanted OnGroupCollapse/Expand events
 	boolean groupClicked = false;
-
 	void handleGroupChange(int groupPosition, boolean isExpanded) {
-		String groupName = getGroupName(groupPosition);
 		if (groupClicked) {
-			Log.d(TAG, "group status change: " + groupName + " -> "
-					+ isExpanded);
-			mGroupsExpanded.put(groupName, isExpanded);
+			try {
+				String groupName = getGroupName(groupPosition);
+				Log.d(TAG, "group status change: " + groupName + " -> " + isExpanded);
+				mGroupsExpanded.put(groupName, isExpanded);
+			} catch (NullPointerException e) {
+				// sometimes, it fails to obtain the cursor. We can ignore it
+			}
 			groupClicked = false;
-			// } else {
-			// if (!mGroupsExpanded.containsKey(name))
-			// restoreGroupsExpanded();
 		}
 	}
 
@@ -304,13 +303,6 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		// handle SEND action
 		handleSendIntent();
-
-		// handle imto:// intent after restoring service connection
-		mainHandler.post(new Runnable() {
-			public void run() {
-				handleJabberIntent();
-			}
-		});
 	}
 
 	public void handleSendIntent() {
@@ -1028,6 +1020,9 @@ public class MainWindow extends SherlockExpandableListActivity {
 					serviceAdapter.connect();
 				} else if (mConfig.presence_required && isConnected())
 					serviceAdapter.setStatusFromConfig();
+				
+				// handle server-related intents after connecting to the backend
+				handleJabberIntent();
 			}
 
 			public void onServiceDisconnected(ComponentName name) {
@@ -1381,7 +1376,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 					RosterConstants.GROUP);
 			Cursor oldCursor = getCursor();
 			changeCursor(cursor);
-			stopManagingCursor(oldCursor);
+			if(oldCursor != null)
+				stopManagingCursor(oldCursor);
 		}
 
 		@Override
