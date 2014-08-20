@@ -143,6 +143,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		androidId = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 		setTheme(mConfig.getTheme());
 		StatusUtil.setContext(getApplicationContext());
+		GameBroadcastReceiver.setContext(getApplicationContext());
 		super.onCreate(savedInstanceState);
 
 		Crashlytics.start(this);
@@ -291,7 +292,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		initLocation();
 		mBestLocationProvider
 				.startLocationUpdatesWithListener(mBestLocationListener);
-		GameBroadcastReceiver.setContext(this);
+		//GameBroadcastReceiver.setContext(this);
 
 		String strStatus = getMyStatusMsg();
 		if (isConnected() && strStatus.contains("S") && !strStatus.equals(mConfig.statusMessage)) {
@@ -1337,7 +1338,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		else if (mCoins != null)
 			return mCoins.toString() + "S";
 		else
-			return ""; // never should happens but...
+			return mConfig.statusMessage; // never should happens but...
 	}
 
 	private Integer loadCoins() {

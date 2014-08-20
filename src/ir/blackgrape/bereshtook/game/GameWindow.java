@@ -55,7 +55,8 @@ public abstract class GameWindow extends SherlockActivity {
 	protected TextView txtStatusDown;
 
 	protected String withJabberID;
-	protected Boolean isGuest;
+	protected boolean isGuest;
+	protected boolean noEffect;
 	protected Context mContext;
 
 	protected MediaPlayer soundCheer;
@@ -66,6 +67,7 @@ public abstract class GameWindow extends SherlockActivity {
 	protected MediaPlayer soundChoice;
 	protected MediaPlayer soundError;
 	protected boolean dataSaved = false;
+	protected boolean gameEnded = false;
 
 	protected abstract Game getGame();
 
@@ -85,6 +87,7 @@ public abstract class GameWindow extends SherlockActivity {
 		withJabberID = getIntent().getStringExtra("jid");
 		GameBroadcastReceiver.setGame(this, withJabberID);
 		isGuest = getIntent().getBooleanExtra("isGuest", false);
+		noEffect = getIntent().getBooleanExtra("noEffect", false);
 
 		soundCheer = MediaPlayer.create(this, R.raw.sound_cheer);
 		soundCry = MediaPlayer.create(this, R.raw.sound_cry);
@@ -98,6 +101,7 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void endGame() {
+		gameEnded = true;
 		if (getGame().getMyScore() > getGame().getHerScore()) {
 			soundCheer.start();
 			if (mCoins == null)
@@ -119,7 +123,8 @@ public abstract class GameWindow extends SherlockActivity {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.lose_game_title);
-		dialog.setMessage(getString(R.string.lose_game_message, StringUtil.convertToPersian(Integer.valueOf(100).toString())));
+		int amount = noEffect ? 0 : 100;
+		dialog.setMessage(getString(R.string.lose_game_message, StringUtil.convertToPersian(Integer.valueOf(amount).toString())));
 		dialog.setPositiveButton(R.string.lose_game_button,
 				new DialogInterface.OnClickListener() {
 					@Override
@@ -135,7 +140,8 @@ public abstract class GameWindow extends SherlockActivity {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.won_game_title);
-		dialog.setMessage(getString(R.string.won_game_message, StringUtil.convertToPersian(Integer.valueOf(100).toString())));
+		int amount = noEffect ? 0 : 100;
+		dialog.setMessage(getString(R.string.won_game_message, StringUtil.convertToPersian(Integer.valueOf(amount).toString())));
 		dialog.setPositiveButton(R.string.won_game_button,
 				new DialogInterface.OnClickListener() {
 					@Override
@@ -148,6 +154,7 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void sheLeft() {
+		gameEnded = true;
 		mCoins += 100;
 		saveCoins(mCoins);
 		saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.LEFTS) - 1);
@@ -318,6 +325,8 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void saveCoins(Integer coins) {
+		if(noEffect)
+			return;
 		if (dataServiceAdapter == null || coins == null)
 			return;
 		if (coins < 0)
@@ -336,6 +345,8 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void saveData(String key, Integer value) {
+		if(noEffect)
+			return;
 		if (dataServiceAdapter == null || value == null)
 			return;
 		dataServiceAdapter.saveGameData(key, value.toString());

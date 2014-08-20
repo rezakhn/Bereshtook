@@ -261,7 +261,9 @@ public class RPSWindow extends GameWindow {
 	@Override
 	protected void onStop() {
 		super.onStop();
-    	sendMsg(EXIT_MSG);
-        finish();
+		if(!gameEnded){
+			sendMsg(EXIT_MSG);
+        	finish();
+		}
 	}
 }

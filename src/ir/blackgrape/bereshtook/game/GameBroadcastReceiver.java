@@ -11,10 +11,14 @@ public class GameBroadcastReceiver extends BroadcastReceiver {
 
 	private static GameWindow mGameWindow;
 	private static Context mContext;
-	private static Boolean isGameSet = false;
+	private static boolean isGameSet = false;
+	private static boolean noEffect = false;
 	
 	public static void setContext(Context context){
 		mContext = context;
+	}
+	public static void setNoEffect(boolean _noEffect){
+		noEffect = _noEffect;
 	}
 	
 	public static void setGame(GameWindow gameWindow, String jid){
@@ -42,6 +46,8 @@ public class GameBroadcastReceiver extends BroadcastReceiver {
 			
 			game.putExtra("jid", from);
 			game.putExtra("isGuest", false);
+			game.putExtra("noEffect", noEffect);
+			game.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			mContext.startActivity(game);
 		}
 		else if(isGameSet)

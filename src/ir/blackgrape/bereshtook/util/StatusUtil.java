@@ -61,7 +61,7 @@ public class StatusUtil {
 			 return sb;
 		 }
 		 else if(coins != null)
-			 return coins + " " + mContext.getString(R.string.coin);
+			 return StringUtil.convertToPersian(coins) + " " + mContext.getString(R.string.coin);
 		 else if(distance != null)
 			 return "(" + distance + ")";
 		 else

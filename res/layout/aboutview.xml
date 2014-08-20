@@ -19,8 +19,14 @@
 		    style="?attr/dialogTextColor"
 		    android:layout_width="fill_parent"
 		    android:layout_height="wrap_content"
-		    android:autoLink="web"
-		    android:padding="2sp"
+		    android:layout_margin="10dp"
 		    android:text="@string/AboutDialog_LicenceText" />
+		
+		<TextView
+		    style="?attr/dialogTextColor"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:padding="10dp"
+		    android:text="@string/email" />
 
 </LinearLayout>	

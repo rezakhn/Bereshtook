@@ -230,6 +230,7 @@
 	<string name="AboutDialog_LicenceTitle">Licensing</string>
 	<string name="AboutDialog_Vote">Give Feedback</string>
 	<string name="AboutDialog_LicenceText">شرکت فناوری اطلاعات انگور سیاه</string>
+	<string name="email">mizdler@gmail.com</string>
 
 	<string name="status_available">آنلاین</string>
 	<string name="status_away">نیستم</string>
@@ -283,7 +284,8 @@
     <string name="battleship_game">نبرد کشتی ها</string>
     
     <string name="attention">توجه</string>
-    <string name="win_lose_condition_desc">اگه بازیو ببری ۱۰۰ سکه جایزه میگیری ولی اگه خدایی ناکرده ببازی ۱۰۰ سکه ازت کم میشه! قبوله؟</string>
+    <string name="win_lose_condition_desc">اگه بازیو ببری ۱۰۰ سکه جایزه میگیری ولی اگه خدایی ناکرده ببازی ۱۰۰ سکه ازت کم میشه!</string>
+    <string name="no_effect_desc">این بازی بدون تاثیر است</string>
     <string name="coin_lack_desc">برای دعوت به بازی به حداقل ۱۰۰ سکه نیاز داری</string>
     <string name="buy_coin">خرید سکه</string>
     <string name="successful_payment">پرداخت موفق</string>

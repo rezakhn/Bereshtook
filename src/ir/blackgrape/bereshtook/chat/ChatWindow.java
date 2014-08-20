@@ -15,6 +15,7 @@ import ir.blackgrape.bereshtook.game.ttt.TTTWindow;
 import ir.blackgrape.bereshtook.service.IXMPPChatService;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
+import ir.blackgrape.bereshtook.shop.ShopActivity;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StatusUtil;
@@ -113,7 +114,8 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	private Intent dataServiceIntent;
 	private ServiceConnection dataServiceConnection;
 	private XMPPDataServiceAdapter dataServiceAdapter;
-	private Integer mCoins = null;
+	private Integer mCoins;
+	private int herCoins;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -186,7 +188,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	protected void onResume() {
 		super.onResume();
 		updateContactStatus();
-		GameBroadcastReceiver.setContext(this);
+		//GameBroadcastReceiver.setContext(this);
 	}
 
 	@Override
@@ -498,7 +500,14 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				ChatWindow.this);
 		chooseNotifyDialog.setIcon(R.drawable.ic_launcher);
 		chooseNotifyDialog.setTitle(R.string.attention);
-		chooseNotifyDialog.setMessage(R.string.win_lose_condition_desc);
+		if(herCoins < 100 || mCoins < 100){
+			GameBroadcastReceiver.setNoEffect(true);
+			chooseNotifyDialog.setMessage(R.string.no_effect_desc);
+		}
+		else{
+			GameBroadcastReceiver.setNoEffect(false);
+			chooseNotifyDialog.setMessage(R.string.win_lose_condition_desc);
+		}
 		chooseNotifyDialog.setPositiveButton(R.string.confirm,
 				new DialogInterface.OnClickListener() {
 
@@ -531,7 +540,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                    	
+                    	startActivity(new Intent(ChatWindow.this, ShopActivity.class));
                     }
                 });
 		chooseNotifyDialog.setNegativeButton(R.string.cancel,
@@ -557,6 +566,10 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		
 		game.putExtra("jid", mWithJabberID);
 		game.putExtra("isGuest", true);
+		if(herCoins < 100 || mCoins <100)
+			game.putExtra("noEffect", true);
+		else
+			game.putExtra("noEffect", false);
 		mActivity.startActivity(game);
 	}
 	
@@ -906,10 +919,14 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 					View.VISIBLE : View.GONE);
 			
 			String mStatus = BereshtookApplication.getConfig(this).statusMessage;
-			if(herStatus != null && mStatus.contains("S") && mStatus.contains("#"))
-				mSubTitle.setText(StatusUtil.makeStatusWithLocation(mStatus.substring(mStatus.indexOf('S')+1), herStatus));
-			else if(herStatus != null && mStatus.contains("S"))
-				mSubTitle.setText(StatusUtil.makeStatus(herStatus));
+			if((herStatus != null && mStatus.contains("S"))){
+				if(mStatus.contains("#"))
+					mSubTitle.setText(StatusUtil.makeStatusWithLocation(mStatus.substring(mStatus.indexOf('S')+1), herStatus));
+				else
+					mSubTitle.setText(StatusUtil.makeStatus(herStatus));
+				if(herStatus.contains("S"))
+					herCoins = Integer.valueOf(herStatus.substring(0, herStatus.indexOf('S')));
+			}
 			
 			if (mServiceAdapter == null || !mServiceAdapter.isServiceAuthenticated())
 				status_mode = 0; // override icon if we are offline
