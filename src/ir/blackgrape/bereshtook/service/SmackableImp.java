@@ -604,7 +604,7 @@ public class SmackableImp implements Smackable {
 		Collection<RosterGroup> oldGroups = rosterEntry.getGroups();
 
 		for (RosterGroup group : oldGroups) {
-			if(!group.getName().equals("همه"))
+			if(!group.getName().contains("همه"))
 				tryToRemoveUserFromGroup(group, rosterEntry);
 		}
 	}

@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -126,6 +127,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private static final String URL_FIND = "http://bereshtook.ir:3373/users/find/";
 	private static final String URL_INSERT = "http://bereshtook.ir:3373/users/insert/";
 	private boolean isNewAccount = false;
+	
+	private HashSet<String> groups = new HashSet<String>();
 	
 	public void setIsNewAccount(boolean isNew){
 		isNewAccount = isNew;
@@ -558,8 +561,12 @@ public class MainWindow extends SherlockExpandableListActivity {
 	}
 
 	void moveRosterItemToBereshtooksGroup(final String jabberID) {
-		serviceAdapter.moveRosterItemToGroup(jabberID,
-				getString(R.string.bereshtooks_group));
+		if(groups.size() == 2){
+			for(String groupName : groups){
+				if(!groupName.equals(getString(R.string.friends_group)))
+				serviceAdapter.moveRosterItemToGroup(jabberID, groupName);
+			}
+		}
 	}
 
 	public boolean onContextItemSelected(MenuItem item) {
@@ -1411,9 +1418,9 @@ public class MainWindow extends SherlockExpandableListActivity {
 					.length() == 0) {
 				TextView groupname = (TextView) view
 						.findViewById(R.id.groupname);
-				groupname.setText(mConfig.enableGroups ? R.string.default_group
-						: R.string.all_contacts_group);
+				groupname.setText(R.string.friends_group);
 			}
+			groups.add(cursor.getString(cursor.getColumnIndex(RosterConstants.GROUP)));
 		}
 
 		@Override
