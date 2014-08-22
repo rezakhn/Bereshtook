@@ -1,8 +1,0 @@
-bin
-gen
-local.properties
-example/bin
-example/gen
-tags
-.project
-.classpath

@@ -50,6 +50,10 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 	public String jabberID;
 	public boolean jid_configured;
 	public boolean require_ssl;
+	
+	public Integer coins;
+	public boolean isAvatarSet;
+	public String versionName;
 
 	public String statusMode;
 	public String statusMessage;
@@ -81,7 +85,8 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 	protected void finalize() {
 		prefs.unregisterOnSharedPreferenceChangeListener(this);
 	}
-
+	
+	@Override
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		Log.i(TAG, "onSharedPreferenceChanged(): " + key);
 		loadPrefs(prefs);
@@ -117,6 +122,11 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 	private void loadPrefs(SharedPreferences prefs) {
 		this.jid_configured = prefs.getBoolean(PreferenceConstants.JID_CONFIGURED,
 				false);
+		this.coins = prefs.getInt(PreferenceConstants.COINS, -1);
+		if(this.coins == -1)
+			coins = null;
+		this.isAvatarSet = prefs.getBoolean(PreferenceConstants.IS_AVATAR_SET, false);
+		this.versionName = prefs.getString(versionName, "-1");
 		this.isLEDNotify = prefs.getBoolean(PreferenceConstants.LEDNOTIFY,
 				false);
 		this.vibraNotify = prefs.getString(

@@ -229,8 +229,8 @@
 	<string name="AboutDialog_DevelopersTitle">توسعه دهنده</string>
 	<string name="AboutDialog_LicenceTitle">Licensing</string>
 	<string name="AboutDialog_Vote">Give Feedback</string>
-	<string name="AboutDialog_LicenceText">شرکت فناوری اطلاعات انگور سیاه</string>
-	<string name="email">mizdler@gmail.com</string>
+	<string name="AboutDialog_LicenceText">گروه انگور سیاه</string>
+	<string name="email">bereshtook.app@gmail.com</string>
 
 	<string name="status_available">آنلاین</string>
 	<string name="status_away">نیستم</string>
@@ -247,7 +247,7 @@
 	<!-- SEND listener popup -->
 	<string name="chooseContact">یک مخاطب را انتخاب کن</string>
 	
-	<string name="friends_group">دوستان برشتوکی</string>
+	<string name="friends_group">دوستان</string>
 	
 	<string name="meter">متر</string>
 	<string name="kilometer">کیلومتر</string>
@@ -325,4 +325,10 @@
     <string name="draw">مساوی</string>
     <string name="not_your_turn">الان نوبت شما نیست!</string>
     <string name="you_are_not_online">شما آنلاین نیستید</string>
+    
+    <string name="choose_profile_image">انتخاب عکس پروفایل</string>
+    <string name="gallery">گالری</string>
+    <string name="camera">دوربین</string>
+    <string name="crop_app_not_found">ابزار ویرایش عکس پیدا نشد</string>
+    <string name="choose_cropper">یک ابزار را انتخاب کنید</string>
 </resources>

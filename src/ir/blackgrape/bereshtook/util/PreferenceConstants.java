@@ -26,4 +26,7 @@ public class PreferenceConstants {
 	public final static String STATUS_MESSAGE_HISTORY = "status_message_history";
 	public final static String THEME = "theme";
 	public final static String JID_CONFIGURED = "jid_configured";
+	public final static String COINS = "coins";
+	public final static String IS_AVATAR_SET = "isAvatarSet";
+	public final static String VERSION_NAME = "versionName";
 }

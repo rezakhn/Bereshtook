@@ -15,11 +15,15 @@
 
 package ir.blackgrape.bereshtook.shop;
 
+import ir.blackgrape.bereshtook.BereshtookApplication;
+import ir.blackgrape.bereshtook.MainWindow;
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
+import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
+import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.StringUtil;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -28,6 +32,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -105,6 +110,7 @@ public class ShopActivity extends SherlockActivity {
     private Integer mCoins;
     private TextView currentCoins;
     private ActionBar mActionbar;
+    private BereshtookConfiguration mConfig;
     
     // The helper object
     IabHelper mHelper;
@@ -117,6 +123,7 @@ public class ShopActivity extends SherlockActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.coin_shop);
+        mConfig = BereshtookApplication.getConfig(this);
         currentCoins = (TextView) findViewById(R.id.current_coins);
         
         mActionbar = getSupportActionBar();
@@ -331,8 +338,7 @@ public class ShopActivity extends SherlockActivity {
                 
                 mCoins += extraCoins;
                 saveCoins(mCoins);
-                mCoins = loadCoins();
-                currentCoins.setText(getString(R.string.current_amount_coins, mCoins));
+                currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mConfig.coins.toString())));
                 successDialog(extraCoins);
             }
             else {
@@ -392,12 +398,20 @@ public class ShopActivity extends SherlockActivity {
     }
 
     void saveCoins(Integer coins) {
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+		.putInt(PreferenceConstants.COINS, coins)
+		.commit();
     	dataServiceAdapter.saveGameData(PRIVATE_DATA.COINS, coins.toString());
     }
 
-    Integer loadCoins() {
+    void loadCoins() {
 		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
-		return Integer.parseInt(strCoins);
+		if(strCoins != null){
+			Integer coins = Integer.parseInt(strCoins);
+			PreferenceManager.getDefaultSharedPreferences(this).edit()
+			.putInt(PreferenceConstants.COINS, coins)
+			.commit();
+		}
     }
 
     @Override
@@ -424,8 +438,8 @@ public class ShopActivity extends SherlockActivity {
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				mCoins = loadCoins();
-				currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mCoins.toString())));
+				loadCoins();
+				currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mConfig.coins.toString())));
 				setWaitScreen(false);
 			}
 			

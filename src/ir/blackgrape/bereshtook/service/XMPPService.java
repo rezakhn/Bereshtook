@@ -306,6 +306,21 @@ public class XMPPService extends GenericService {
 				}
 				return null;
 			}
+
+			@Override
+			public void saveAvatar(byte[] avatarBytes) throws RemoteException {
+				if(mSmackable != null && mSmackable.isAuthenticated()){
+					mSmackable.saveAvatar(avatarBytes);
+				}
+			}
+
+			@Override
+			public byte[] loadAvatar(String username) throws RemoteException {
+				if(mSmackable != null && mSmackable.isAuthenticated()){
+					return mSmackable.loadAvatar(username);
+				}
+				return null;
+			}
 		};
 	}
 

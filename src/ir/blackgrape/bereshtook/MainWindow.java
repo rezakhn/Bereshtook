@@ -7,7 +7,6 @@ import ir.blackgrape.bereshtook.data.ChatProvider.ChatConstants;
 import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.data.RosterProvider.RosterConstants;
 import ir.blackgrape.bereshtook.dialogs.AddRosterItemDialog;
-import ir.blackgrape.bereshtook.dialogs.ChangeStatusDialog;
 import ir.blackgrape.bereshtook.dialogs.FirstStartDialog;
 import ir.blackgrape.bereshtook.game.GameBroadcastReceiver;
 import ir.blackgrape.bereshtook.location.BestLocationListener;
@@ -20,6 +19,8 @@ import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.shop.ShopActivity;
 import ir.blackgrape.bereshtook.util.ConnectionState;
+import ir.blackgrape.bereshtook.util.CropOption;
+import ir.blackgrape.bereshtook.util.CropOptionAdapter;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.SimpleCursorTreeAdapter;
@@ -28,6 +29,9 @@ import ir.blackgrape.bereshtook.util.StatusUtil;
 import ir.blackgrape.bereshtook.util.StringUtil;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,6 +51,7 @@ import org.json.JSONObject;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -55,10 +60,16 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -66,10 +77,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.util.Log;
 import android.util.TypedValue;
@@ -78,6 +91,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
@@ -121,14 +135,16 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private Intent dataServiceIntent;
 	private ServiceConnection dataServiceConnection;
 	private XMPPDataServiceAdapter dataServiceAdapter;
-	private Integer mCoins = null;
 	
 	private String androidId;
 	private static final String URL_FIND = "http://bereshtook.ir:3373/users/find/";
 	private static final String URL_INSERT = "http://bereshtook.ir:3373/users/insert/";
 	private boolean isNewAccount = false;
 	
+	private boolean isStatusSet = false;
 	private HashSet<String> groups = new HashSet<String>();
+	private Drawable mAvatar;
+	private Uri mImageCaptureUri;
 	
 	public void setIsNewAccount(boolean isNew){
 		isNewAccount = isNew;
@@ -162,6 +178,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		if (!mConfig.jid_configured)
 			checkUserAccounts();
+		
 		getContentResolver().registerContentObserver(
 				RosterProvider.CONTENT_URI, true, mRosterObserver);
 		getContentResolver().registerContentObserver(ChatProvider.CONTENT_URI,
@@ -171,8 +188,20 @@ public class MainWindow extends SherlockExpandableListActivity {
 		setupContenView();
 		registerListAdapter();
 		registerDataService();
+		checkVersion();
 	}
 	
+	private void checkVersion() {
+		if (!mConfig.jid_configured)
+			return;
+		VersionChecker vc = new VersionChecker();
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			vc.executeOnExecutor(VersionChecker.THREAD_POOL_EXECUTOR);
+		else
+			vc.execute();
+		
+	}
+
 	private void checkUserAccounts() {
 		if(isNetworkConnected()){
 			String serverURL = URL_FIND + androidId;
@@ -295,18 +324,23 @@ public class MainWindow extends SherlockExpandableListActivity {
 		initLocation();
 		mBestLocationProvider
 				.startLocationUpdatesWithListener(mBestLocationListener);
-		//GameBroadcastReceiver.setContext(this);
-
-		String strStatus = getMyStatusMsg();
-		if (isConnected() && strStatus.contains("S") && !strStatus.equals(mConfig.statusMessage)) {
-			mConfig.statusMessage = strStatus;
-			serviceAdapter.setStatusFromConfig();
-		}
-
+		
+		updateStatus();
 		// BereshtookApplication.getApp(this).mMTM.bindDisplayActivity(this);
 
 		// handle SEND action
 		handleSendIntent();
+	}
+
+	private void updateStatus() {
+		String strStatus = getMyStatusMsg();
+		if (isConnected() && strStatus.contains("S") && (!isStatusSet || !strStatus.equals(mConfig.statusMessage))) {
+			isStatusSet = true;
+			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
+			.putString(PreferenceConstants.STATUS_MESSAGE, strStatus)
+			.commit();
+			serviceAdapter.setStatusFromConfig();
+		}
 	}
 
 	public void handleSendIntent() {
@@ -754,8 +788,6 @@ public class MainWindow extends SherlockExpandableListActivity {
 		prefedit.putString(PreferenceConstants.STATUS_MESSAGE, message);
 		prefedit.commit();
 
-		displayOwnStatus();
-
 		// check if we are connected and want to go offline
 		boolean needToDisconnect = (statusMode == StatusMode.offline)
 				&& isConnected();
@@ -770,11 +802,43 @@ public class MainWindow extends SherlockExpandableListActivity {
 	}
 
 	private void displayOwnStatus() {
-		// This and many other things like it should be done with observer
-		actionBar.setIcon(getStatusActionIcon());
-		if (mCoins != null)
-			actionBar.setSubtitle(StringUtil.convertToPersian(mCoins.toString()) + " " + getString(R.string.coin));
+		loadCoins();
+		loadAvatar();
 	}
+	
+	private void loadCoins(){
+		actionBar.setSubtitle(mConfig.statusMessage);
+		if(!isConnected() || dataServiceAdapter == null)
+			return;
+		CoinLoader cl = new CoinLoader();
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			cl.executeOnExecutor(CoinLoader.THREAD_POOL_EXECUTOR);
+		else
+			cl.execute();
+	}
+	
+	private void loadAvatar() {
+		actionBar.setIcon(getStatusActionIcon());
+		if(mAvatar != null && isConnected())
+			actionBar.setIcon(mAvatar);
+		if(mConfig.isAvatarSet){
+			OfflineAvatarLoader offlineLoader = new OfflineAvatarLoader();
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				offlineLoader.executeOnExecutor(OfflineAvatarLoader.THREAD_POOL_EXECUTOR);
+			else
+				offlineLoader.execute();			
+			return;
+		}
+		
+		if(!isConnected() || dataServiceAdapter == null)
+			return;
+		OnlineAvatarLoader onlineLoader = new OnlineAvatarLoader();
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			onlineLoader.executeOnExecutor(OnlineAvatarLoader.THREAD_POOL_EXECUTOR);
+		else
+			onlineLoader.execute();
+	}
+	
 
 	private void aboutDialog() {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -835,10 +899,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		case android.R.id.home:
 		case R.id.menu_status:
-			mConfig.statusMessage = getMyStatusMsg();
-			new ChangeStatusDialog(this,
-					StatusMode.fromString(mConfig.statusMode),
-					mConfig.statusMessage, mConfig.statusMessageHistory).show();
+			if(isConnected())
+				chooseAvatar();
+			else if(!isConnecting())
+				toggleConnection();
 			return true;
 
 		case R.id.menu_exit:
@@ -864,15 +928,170 @@ public class MainWindow extends SherlockExpandableListActivity {
 		case R.id.menu_coins:
 			if(isConnected())
 				startActivity(new Intent(this, ShopActivity.class));
+			else if(!isConnecting())
+				toggleConnection();
 			return true;
 		case R.id.menu_scoreboard:
 			if(isConnected())
 				startActivity(new Intent(this, ScoreboardActivity.class).putExtra("username", mConfig.userName));
+			else if(!isConnecting())
+				toggleConnection();
 			return true;
 		}
 
 		return false;
 
+	}
+	
+	private final int REQUEST_GALLERY = 0;
+	private final int REQUEST_CAMERA = 1;
+	private final int REQUEST_CROP_IMAGE = 2;
+	
+	private void chooseAvatar(){
+        final String [] items = new String [] {getString(R.string.camera), getString(R.string.gallery)};				
+		ArrayAdapter<String> adapter = new ArrayAdapter<String> (this, android.R.layout.select_dialog_item,items);
+		AlertDialog.Builder builder	= new AlertDialog.Builder(this);
+		
+		builder.setTitle(R.string.choose_profile_image);
+		builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
+			public void onClick( DialogInterface dialog, int item ) { //pick from camera
+				if (item == 0) {
+					Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					
+					mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
+									   "tmp_avatar_" + String.valueOf(System.currentTimeMillis()) + ".jpg"));
+
+					intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+
+					try {
+						intent.putExtra("return-data", true);
+						
+						startActivityForResult(intent, REQUEST_CAMERA);
+					} catch (ActivityNotFoundException e) {
+						e.printStackTrace();
+					}
+				} else {
+					Intent intent = new Intent();
+					
+	                intent.setType("image/*");
+	                intent.setAction(Intent.ACTION_GET_CONTENT);
+	                
+	                startActivityForResult(Intent.createChooser(intent, "Complete action using"), REQUEST_GALLERY);
+				}
+			}
+		} );
+		
+		final AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+		super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+		
+		if(resultCode != RESULT_OK)
+			return;
+		
+			switch (requestCode) {
+			case REQUEST_GALLERY:
+		    	mImageCaptureUri = imageReturnedIntent.getData();
+		    	doCrop();
+				
+			case REQUEST_CAMERA:
+				doCrop();
+				break;
+				
+			case REQUEST_CROP_IMAGE:
+		        Bundle extras = imageReturnedIntent.getExtras();
+		    	
+		        if (extras != null){  	
+		            Bitmap photo = extras.getParcelable("data");
+		            if(photo == null)
+		            	return;
+		            
+		            mAvatar = new BitmapDrawable(getResources(), photo);
+		            actionBar.setIcon(mAvatar);
+		            
+					AvatarUploader as = new AvatarUploader();
+					if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+						as.executeOnExecutor(AvatarUploader.THREAD_POOL_EXECUTOR, photo);
+					else
+						as.execute(photo);
+		        }
+				break;
+			}
+		
+	}
+	
+    private void doCrop() {
+		final ArrayList<CropOption> cropOptions = new ArrayList<CropOption>();
+    	
+    	Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setType("image/*");
+        
+        List<ResolveInfo> list = getPackageManager().queryIntentActivities( intent, 0 );
+        
+        int size = list.size();
+        
+        if (size == 0) {	        
+        	Toast.makeText(this, R.string.crop_app_not_found, Toast.LENGTH_SHORT).show();
+        	
+            return;
+        } else {
+        	intent.setData(mImageCaptureUri);
+            
+            intent.putExtra("outputX", 100);
+            intent.putExtra("outputY", 100);
+            intent.putExtra("aspectX", 1);
+            intent.putExtra("aspectY", 1);
+            intent.putExtra("scale", true);
+            intent.putExtra("return-data", true);
+            
+        	if (size == 0) {
+        		Intent i 		= new Intent(intent);
+	        	ResolveInfo res	= list.get(0);
+	        	
+	        	i.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+	        	
+	        	startActivityForResult(i, REQUEST_CROP_IMAGE);
+        	} else {
+		        for (ResolveInfo res : list) {
+		        	final CropOption co = new CropOption();
+		        	
+		        	co.title 	= getPackageManager().getApplicationLabel(res.activityInfo.applicationInfo);
+		        	co.icon		= getPackageManager().getApplicationIcon(res.activityInfo.applicationInfo);
+		        	co.appIntent= new Intent(intent);
+		        	
+		        	co.appIntent.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+		        	
+		            cropOptions.add(co);
+		        }
+	        
+		        CropOptionAdapter adapter = new CropOptionAdapter(getApplicationContext(), cropOptions);
+		        
+		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		        builder.setTitle(R.string.choose_cropper);
+		        builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
+		            public void onClick( DialogInterface dialog, int item ) {
+		                startActivityForResult( cropOptions.get(item).appIntent, REQUEST_CROP_IMAGE);
+		            }
+		        });
+	        
+		        builder.setOnCancelListener( new DialogInterface.OnCancelListener() {
+		            @Override
+		            public void onCancel( DialogInterface dialog ) {
+		               
+		                if (mImageCaptureUri != null ) {
+		                    getContentResolver().delete(mImageCaptureUri, null, null );
+		                    mImageCaptureUri = null;
+		                }
+		            }
+		        } );
+		        
+		        AlertDialog croppersdialog = builder.create();
+		        croppersdialog.show();
+        	}
+        }
 	}
 
 	/** Sets if all contacts are shown in the roster or online contacts only. */
@@ -919,6 +1138,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private void updateConnectionState(ConnectionState cs) {
 		Log.d(TAG, "updateConnectionState: " + cs);
 		displayOwnStatus();
+		updateStatus();
 		boolean spinTheSpinner = false;
 		switch (cs) {
 		case CONNECTING:
@@ -947,14 +1167,17 @@ public class MainWindow extends SherlockExpandableListActivity {
 						.commit();
 				if(isNewAccount)
 					pushNewAccount();
+				checkVersion();
 			}
 			String strStatus = getMyStatusMsg();
 			if (strStatus.contains("S")
 					&& !strStatus.equals(mConfig.statusMessage)) {
-				mConfig.statusMessage = strStatus;
+				isStatusSet = true;
+				PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
+				.putString(PreferenceConstants.STATUS_MESSAGE, strStatus)
+				.commit();
 				serviceAdapter.setStatusFromConfig();
 			}
-			displayOwnStatus();
 			break;
 		}
 	}
@@ -1051,8 +1274,6 @@ public class MainWindow extends SherlockExpandableListActivity {
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				mCoins = loadCoins();
-				displayOwnStatus();
 			}
 
 			@Override
@@ -1304,12 +1525,12 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 				@Override
 				public void onProviderEnabled(String provider) {
-					// Log.i(TAG, "onProviderEnabled PROVIDER:" + provider);
+					isStatusSet = false;
 				}
 
 				@Override
 				public void onProviderDisabled(String provider) {
-					// Log.i(TAG, "onProviderDisabled PROVIDER:" + provider);
+					isStatusSet = false;
 				}
 
 				@Override
@@ -1336,26 +1557,13 @@ public class MainWindow extends SherlockExpandableListActivity {
 	}
 
 	private String getMyStatusMsg() {
-		if (mCoins == null && dataServiceAdapter != null)
-			mCoins = loadCoins();
-
-		if (mLocation != null && mCoins != null)
-			return mCoins.toString() + "S" + mLocation.getLatitude() + "#"
+		if (mLocation != null && mConfig.coins != null)
+			return mConfig.coins.toString() + "S" + mLocation.getLatitude() + "#"
 					+ mLocation.getLongitude();
-		else if (mCoins != null)
-			return mCoins.toString() + "S";
+		else if (mConfig.coins != null)
+			return mConfig.coins.toString() + "S";
 		else
 			return mConfig.statusMessage; // never should happens but...
-	}
-
-	private Integer loadCoins() {
-		if (dataServiceAdapter == null)
-			return null;
-
-		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
-		if (strCoins != null)
-			return Integer.parseInt(strCoins);
-		return null;
 	}
 
 	public class RosterExpListAdapter extends SimpleCursorTreeAdapter {
@@ -1468,6 +1676,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 			return StatusMode.values()[presenceMode].getDrawableId();
 		}
 	}
+	
+	
+	/////////////////////////////////////// Async Tasks //////////////////////////////////////////////
+	
 
 	class UserChecker extends AsyncTask<String, Void, JSONObject> {
 
@@ -1550,20 +1762,181 @@ public class MainWindow extends SherlockExpandableListActivity {
 			
 		}
 
-		private String convertInputStreamToString(InputStream inputStream)
-				throws IOException {
-			BufferedReader bufferedReader = new BufferedReader(
-					new InputStreamReader(inputStream));
-			String line = "";
-			String result = "";
-			while ((line = bufferedReader.readLine()) != null)
-				result += line;
+	}
+	
+	class OfflineAvatarLoader extends AsyncTask<Void, Void, Drawable>{
 
-			inputStream.close();
-			return result;
-
+		@Override
+		protected Drawable doInBackground(Void... arg0) {
+			Bitmap tempBitmap = loadAvatarFromStorage(mConfig.userName);
+			if(tempBitmap != null);
+				return new BitmapDrawable(getResources(), tempBitmap);
 		}
 		
+		@Override
+		protected void onPostExecute(Drawable result) {
+			super.onPostExecute(result);
+			if(result != null){
+				mAvatar = result;
+				actionBar.setIcon(mAvatar);
+			}
+		}
 	}	
+	
+	class OnlineAvatarLoader extends AsyncTask<Void, Void, Drawable>{
+
+		@Override
+		protected Drawable doInBackground(Void... arg0) {
+			Bitmap bm = dataServiceAdapter.loadAvatar(mConfig.jabberID);
+			
+			if(bm != null){
+				saveAvatarToStorage(bm, mConfig.userName);
+				return new BitmapDrawable(getResources(), bm);
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Drawable result) {
+			super.onPostExecute(result);
+			if(result != null)
+				actionBar.setIcon(result);
+		}
+	}
+	
+	class AvatarUploader extends AsyncTask<Bitmap, Void, Drawable>{
+
+		@Override
+		protected Drawable doInBackground(Bitmap... args) {
+			if(dataServiceAdapter != null)
+				dataServiceAdapter.saveAvatar(args[0]);
+			
+			saveAvatarToStorage(args[0], mConfig.userName);
+			
+			Drawable avatar = new BitmapDrawable(getResources(), args[0]);
+			return avatar; 
+		}
+		
+		@Override
+		protected void onPostExecute(Drawable result) {
+			super.onPostExecute(result);
+			if(result != null)
+				actionBar.setIcon(result);
+		}
+	}
+	
+	private boolean saveAvatarToStorage(Bitmap image, String filename) {
+
+		try {
+			FileOutputStream fos = MainWindow.this.openFileOutput(
+					filename, Context.MODE_PRIVATE);
+
+			image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+			fos.close();
+			
+			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
+			.putBoolean(PreferenceConstants.IS_AVATAR_SET, true)
+			.commit();
+			return true;
+		} catch (Exception e) {
+			Log.e("saveToInternalStorage()", e.getMessage());
+			return false;
+		}
+	}
+	
+	private Bitmap loadAvatarFromStorage(String filename) {
+		Bitmap thumbnail = null;
+		try {
+			File filePath = MainWindow.this.getFileStreamPath(filename);
+			FileInputStream fi = new FileInputStream(filePath);
+			thumbnail = BitmapFactory.decodeStream(fi);
+		} catch (Exception ex) {
+			Log.e("getThumbnail() on internal storage", ex.getMessage());
+		}
+		return thumbnail;
+	}	
+
+	class CoinLoader extends AsyncTask<Void, Void, String>{
+
+		@Override
+		protected String doInBackground(Void... arg0) {
+			return dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
+		}
+		
+		@Override
+		protected void onPostExecute(String coins) {
+			super.onPostExecute(coins);
+			if(coins == null)
+				return;
+			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
+			.putInt(PreferenceConstants.COINS, Integer.parseInt(coins))
+			.commit();
+			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins.toString()) + " " + getString(R.string.coin));
+			updateStatus();
+		}
+
+	}
+	
+	class VersionChecker extends AsyncTask<Void, Void, String> {
+		private static final String URL_VERSION = "http://bereshtook.ir:3373/users/version/";
+		private final HttpClient client = new DefaultHttpClient();
+		
+		@Override
+		protected String doInBackground(Void... urls) {
+			try {
+				PackageManager manager = MainWindow.this.getPackageManager();
+				PackageInfo info = manager.getPackageInfo(
+						MainWindow.this.getPackageName(), 0);
+				String version = info.versionName;
+				
+				if(version == null || version.equals(mConfig.versionName))
+					return null;
+				
+				String url = URL_VERSION + mConfig.userName + "/" + version;
+
+				HttpResponse httpResponse = client.execute(new HttpGet(url));
+				InputStream inputStream = httpResponse.getEntity().getContent();
+
+				if (inputStream != null){
+					inputStream.close();
+				}
+				
+				return version;
+
+			}catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}catch (Exception e) {
+				Log.e("Bereshtook", "Error getting version");
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String versionName) {
+			super.onPostExecute(versionName);
+			if(versionName != null){
+				PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
+				.putString(PreferenceConstants.VERSION_NAME, versionName)
+				.commit();
+			}
+		}
+
+	}
+
+	private String convertInputStreamToString(InputStream inputStream)
+			throws IOException {
+		BufferedReader bufferedReader = new BufferedReader(
+				new InputStreamReader(inputStream));
+		String line = "";
+		String result = "";
+		while ((line = bufferedReader.readLine()) != null)
+			result += line;
+	
+		inputStream.close();
+		return result;
+	
+	}
 	
 }

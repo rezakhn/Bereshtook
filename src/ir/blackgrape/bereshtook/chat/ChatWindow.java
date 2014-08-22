@@ -4,6 +4,7 @@ import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
+import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.data.ChatProvider;
 import ir.blackgrape.bereshtook.data.ChatProvider.ChatConstants;
 import ir.blackgrape.bereshtook.data.RosterProvider;
@@ -35,9 +36,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -110,11 +116,13 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	private XMPPChatServiceAdapter mServiceAdapter;
 	private int mChatFontSize;
 	private Context mActivity;
+	private ActionBar actionBar;
+	private BereshtookConfiguration mConfig;
 
 	private Intent dataServiceIntent;
 	private ServiceConnection dataServiceConnection;
 	private XMPPDataServiceAdapter dataServiceAdapter;
-	private Integer mCoins;
+	private int mCoins;
 	private int herCoins;
 	
 	@Override
@@ -122,7 +130,8 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		setTheme(BereshtookApplication.getConfig(this).getTheme());
 		super.onCreate(savedInstanceState);
 		mActivity = this;
-	
+		mConfig = BereshtookApplication.getConfig(this);
+		mCoins = mConfig.coins == null ? 0 : mConfig.coins;
 		mChatFontSize = Integer.valueOf(BereshtookApplication.getConfig(this).chatFontSize);
 
 		requestWindowFeature(Window.FEATURE_ACTION_BAR);
@@ -131,9 +140,10 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		getContentResolver().registerContentObserver(RosterProvider.CONTENT_URI,
 				true, mContactObserver);
 
-		ActionBar actionBar = getSupportActionBar();
+		actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 
 		registerForContextMenu(getListView());
 		setContactFromUri();
@@ -158,6 +168,16 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		setChatWindowAdapter();
 	}
 
+	private void loadAvatar() {
+		if(mServiceAdapter == null || !mServiceAdapter.isServiceAuthenticated() || dataServiceAdapter == null)
+			return;
+		AvatarLoader al = new AvatarLoader();
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			al.executeOnExecutor(AvatarLoader.THREAD_POOL_EXECUTOR);
+		else
+			al.execute();
+	}
+
 	private void setCustomTitle(String title) {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 		View layout = inflater.inflate(R.layout.chat_action_title, null);
@@ -170,8 +190,8 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		mRequestPlayButton.setOnClickListener(clickLisener);
 
 		setTitle(null);
-		getSupportActionBar().setCustomView(layout);
-		getSupportActionBar().setDisplayShowCustomEnabled(true);
+		actionBar.setCustomView(layout);
+		actionBar.setDisplayShowCustomEnabled(true);
 	}
 
 	private void setChatWindowAdapter() {
@@ -221,7 +241,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 				mServiceAdapter = new XMPPChatServiceAdapter(
 						IXMPPChatService.Stub.asInterface(service),
 						mWithJabberID);
-				
+				loadAvatar();
 				mServiceAdapter.clearNotifications(mWithJabberID);
 				updateContactStatus();
 			}
@@ -246,7 +266,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				mCoins = loadCoins();
+				loadAvatar();
 			}
 			
 			@Override
@@ -487,11 +507,6 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	}
 	
 	private void showGameRules(final String inviteOrAcceptMsg, final boolean isGuest) {
-		if(mCoins == null)
-			mCoins = loadCoins();
-		//if coins still is null >> serious problem!!!
-		if(mCoins == null)
-			mCoins = 0;
 		if(mCoins < 100 && !isGuest){
 			lowCoinAlert();
 			return;
@@ -573,16 +588,6 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		mActivity.startActivity(game);
 	}
 	
-	private Integer loadCoins(){
-		if(dataServiceAdapter == null)
-			return null;
-		
-		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
-		if(strCoins != null)
-			return Integer.parseInt(strCoins);
-		return null;
-	}
-
 	private void markAsReadDelayed(final int id, final int delay) {
 		new Thread() {
 			@Override
@@ -945,4 +950,23 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			updateContactStatus();
 		}
 	}
+	
+	class AvatarLoader extends AsyncTask<Void, Void, Drawable>{
+
+		@Override
+		protected Drawable doInBackground(Void... arg0) {
+			Bitmap bm = dataServiceAdapter.loadAvatar(mWithJabberID);
+			if(bm != null)
+				return new BitmapDrawable(getResources(), bm);
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Drawable result) {
+			super.onPostExecute(result);
+			if(result != null)
+				actionBar.setIcon(result);
+		}
+	}
+	
 }

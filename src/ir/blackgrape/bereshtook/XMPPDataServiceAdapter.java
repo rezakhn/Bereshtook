@@ -1,6 +1,11 @@
 package ir.blackgrape.bereshtook;
 
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
+
+import java.io.ByteArrayOutputStream;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.RemoteException;
 
 public class XMPPDataServiceAdapter {
@@ -23,8 +28,32 @@ public class XMPPDataServiceAdapter {
 			return serviceStub.loadData(key);
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			return null;
 		}
+		return null;
+	}
+	
+	public void saveAvatar(Bitmap avatar){
+		try {
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			avatar.compress(Bitmap.CompressFormat.PNG, 100, stream);
+			serviceStub.saveAvatar(stream.toByteArray());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Bitmap loadAvatar(String username){
+		byte[] avatarBytes;
+		try {
+			avatarBytes = serviceStub.loadAvatar(username);
+			if(avatarBytes == null)
+				return null;
+			Bitmap avatar = BitmapFactory.decodeByteArray(avatarBytes, 0, avatarBytes.length);
+			return avatar;
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

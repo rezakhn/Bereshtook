@@ -1,12 +1,15 @@
 package ir.blackgrape.bereshtook.game;
 
+import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.chat.XMPPChatServiceAdapter;
+import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.service.IXMPPChatService;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
+import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.StringUtil;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -20,6 +23,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,6 +72,8 @@ public abstract class GameWindow extends SherlockActivity {
 	protected MediaPlayer soundError;
 	protected boolean dataSaved = false;
 	protected boolean gameEnded = false;
+	
+	private BereshtookConfiguration mConfig;
 
 	protected abstract Game getGame();
 
@@ -79,6 +85,8 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
+		mConfig = BereshtookApplication.getConfig(this);
+		
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
@@ -327,6 +335,9 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void saveCoins(Integer coins) {
 		if(noEffect)
 			return;
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+		.putInt(PreferenceConstants.COINS, coins)
+		.commit();
 		if (dataServiceAdapter == null || coins == null)
 			return;
 		if (coins < 0)

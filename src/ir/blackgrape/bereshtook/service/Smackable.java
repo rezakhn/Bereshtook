@@ -32,5 +32,8 @@ public interface Smackable {
 	void savePrivateData(DefaultPrivateData privateData);
 	DefaultPrivateData loadPrivateData(String elementName, String namespace);
 	
+	void saveAvatar(byte[] avatarBytes);
+	byte[] loadAvatar(String username);
+	
 	String getNameForJID(String jid);
 }

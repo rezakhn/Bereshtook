@@ -50,6 +50,7 @@ import org.jivesoftware.smackx.packet.DefaultPrivateData;
 import org.jivesoftware.smackx.packet.DelayInfo;
 import org.jivesoftware.smackx.packet.DelayInformation;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
+import org.jivesoftware.smackx.packet.VCard;
 import org.jivesoftware.smackx.packet.Version;
 import org.jivesoftware.smackx.ping.PingManager;
 import org.jivesoftware.smackx.ping.packet.Ping;
@@ -57,6 +58,7 @@ import org.jivesoftware.smackx.ping.provider.PingProvider;
 import org.jivesoftware.smackx.provider.DelayInfoProvider;
 import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
 import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
+import org.jivesoftware.smackx.provider.VCardProvider;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
@@ -106,6 +108,8 @@ public class SmackableImp implements Smackable {
 		ProviderManager pm = ProviderManager.getInstance();
 		//Private Data Storage
 		pm.addIQProvider("query", "jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
+		//avatar
+		pm.addIQProvider("vCard", "vcard-temp", new VCardProvider());
 		// add IQ handling
 		pm.addIQProvider("query","http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
 		pm.addIQProvider("query","http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
@@ -1213,7 +1217,7 @@ public class SmackableImp implements Smackable {
 	@Override
 	public void savePrivateData(DefaultPrivateData privateData) {
 		try {
-			if(mPrivateDataManager != null && mXMPPConnection.isAuthenticated())
+			if(mPrivateDataManager != null)
 				mPrivateDataManager.setPrivateData(privateData);
 		} catch (XMPPException e) {
 			e.printStackTrace();
@@ -1223,7 +1227,7 @@ public class SmackableImp implements Smackable {
 	@Override
 	public DefaultPrivateData loadPrivateData(String elementName, String namespace) {
 		try {
-			if(mPrivateDataManager != null && mXMPPConnection.isAuthenticated())
+			if(mPrivateDataManager != null)
 				return (DefaultPrivateData) mPrivateDataManager.getPrivateData(elementName, namespace);
 			else
 				return null;
@@ -1231,5 +1235,29 @@ public class SmackableImp implements Smackable {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public void saveAvatar(byte[] avatarBytes) {
+		try {
+			VCard card = new VCard();
+			card.load(mXMPPConnection);
+			card.setAvatar(avatarBytes, "image/jpeg");
+			card.save(mXMPPConnection);
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public byte[] loadAvatar(String username) {
+		try {
+			VCard card = new VCard();
+			card.load(mXMPPConnection, username);
+			return card.getAvatar();
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
