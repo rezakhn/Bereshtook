@@ -126,7 +126,7 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 		if(this.coins == -1)
 			coins = null;
 		this.isAvatarSet = prefs.getBoolean(PreferenceConstants.IS_AVATAR_SET, false);
-		this.versionName = prefs.getString(versionName, "-1");
+		this.versionName = prefs.getString(PreferenceConstants.VERSION_NAME, "-1");
 		this.isLEDNotify = prefs.getBoolean(PreferenceConstants.LEDNOTIFY,
 				false);
 		this.vibraNotify = prefs.getString(

@@ -216,7 +216,20 @@ public class MainWindow extends SherlockExpandableListActivity {
 			showToastNotification(R.string.no_internet_connection);
 	}
 	private void pushNewAccount() {
-		String serverURL = URL_INSERT + androidId + "/" + mConfig.userName + "/" + mConfig.password;
+		try {
+			PackageManager manager = MainWindow.this.getPackageManager();
+			PackageInfo info;
+			info = manager.getPackageInfo(
+					MainWindow.this.getPackageName(), 0);
+			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
+			.putString(PreferenceConstants.VERSION_NAME, info.versionName)
+			.commit();			
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		if(mConfig.versionName == null)
+			mConfig.versionName = "-1";
+		String serverURL = URL_INSERT + androidId + "/" + mConfig.userName + "/" + mConfig.password + "/" + mConfig.versionName;
 		UserChecker df = new UserChecker();
 		df.setCmd(COMMAND.INSERT);
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
