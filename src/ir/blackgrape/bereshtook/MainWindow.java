@@ -1096,7 +1096,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		            public void onCancel( DialogInterface dialog ) {
 		               
 		                if (mImageCaptureUri != null ) {
-		                    getContentResolver().delete(mImageCaptureUri, null, null );
+		                    //getContentResolver().delete(mImageCaptureUri, null, null );
 		                    mImageCaptureUri = null;
 		                }
 		            }
