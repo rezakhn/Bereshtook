@@ -807,7 +807,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 	}
 	
 	private void loadCoins(){
-		actionBar.setSubtitle(mConfig.statusMessage);
+		actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins.toString()) + " " + getString(R.string.coin));
 		if(!isConnected() || dataServiceAdapter == null)
 			return;
 		CoinLoader cl = new CoinLoader();
