@@ -1861,7 +1861,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private Bitmap loadAvatarFromStorage(String filename) {
 		Bitmap thumbnail = null;
 		try {
-			File filePath = MainWindow.this.getFileStreamPath(filename);
+			File filePath = getFileStreamPath(filename);
 			FileInputStream fi = new FileInputStream(filePath);
 			thumbnail = BitmapFactory.decodeStream(fi);
 		} catch (Exception ex) {

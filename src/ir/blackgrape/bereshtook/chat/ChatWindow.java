@@ -17,12 +17,16 @@ import ir.blackgrape.bereshtook.service.IXMPPChatService;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.shop.ShopActivity;
+import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StatusUtil;
 import ir.blackgrape.bereshtook.util.chat.MessageUtils;
 import ir.blackgrape.bereshtook.util.chat.MessageUtils.SmileyImageSpan;
 import ir.blackgrape.bereshtook.util.chat.QuickAction;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -36,6 +40,7 @@ import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -46,6 +51,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
@@ -123,6 +129,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	private XMPPDataServiceAdapter dataServiceAdapter;
 	private int mCoins;
 	private int herCoins;
+	private Drawable herAvatar;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -168,13 +175,13 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	}
 
 	private void loadAvatar() {
-		if(mServiceAdapter == null || !mServiceAdapter.isServiceAuthenticated() || dataServiceAdapter == null)
-			return;
-		AvatarLoader al = new AvatarLoader();
+		if(herAvatar != null)
+			actionBar.setIcon(herAvatar);
+		OfflineAvatarLoader avatarLoader = new OfflineAvatarLoader();
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-			al.executeOnExecutor(AvatarLoader.THREAD_POOL_EXECUTOR);
+			avatarLoader.executeOnExecutor(OfflineAvatarLoader.THREAD_POOL_EXECUTOR);
 		else
-			al.execute();
+			avatarLoader.execute();
 	}
 
 	private void setCustomTitle(String title) {
@@ -950,22 +957,82 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		}
 	}
 	
-	class AvatarLoader extends AsyncTask<Void, Void, Drawable>{
+	class OnlineAvatarLoader extends AsyncTask<Void, Void, Drawable>{
 
 		@Override
 		protected Drawable doInBackground(Void... arg0) {
 			Bitmap bm = dataServiceAdapter.loadAvatar(mWithJabberID);
-			if(bm != null)
+			if(bm != null){
+				saveAvatarToStorage(bm, mWithJabberID);
 				return new BitmapDrawable(getResources(), bm);
+			}
 			return null;
 		}
 		
 		@Override
 		protected void onPostExecute(Drawable result) {
 			super.onPostExecute(result);
-			if(result != null)
+			if(result != null){
+				herAvatar = result;
 				actionBar.setIcon(result);
+			}
 		}
 	}
+	
+	private boolean saveAvatarToStorage(Bitmap image, String filename) {
+
+		try {
+			FileOutputStream fos = openFileOutput(
+					filename, Context.MODE_PRIVATE);
+
+			image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+			fos.close();
+			
+			PreferenceManager.getDefaultSharedPreferences(this).edit()
+			.putBoolean(PreferenceConstants.IS_AVATAR_SET, true)
+			.commit();
+			return true;
+		} catch (Exception e) {
+			Log.e("saveToInternalStorage()", e.getMessage());
+			return false;
+		}
+	}
+	
+	class OfflineAvatarLoader extends AsyncTask<Void, Void, Drawable>{
+
+		@Override
+		protected Drawable doInBackground(Void... arg0) {
+			Bitmap tempBitmap = loadAvatarFromStorage(mWithJabberID);
+			if(tempBitmap != null)
+				return new BitmapDrawable(getResources(), tempBitmap);
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Drawable result) {
+			super.onPostExecute(result);
+			if(result != null){
+				herAvatar = result;
+				actionBar.setIcon(herAvatar);
+			}
+			OnlineAvatarLoader onlineLoader = new OnlineAvatarLoader();
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				onlineLoader.executeOnExecutor(OnlineAvatarLoader.THREAD_POOL_EXECUTOR);
+			else
+				onlineLoader.execute();				
+		}
+	}
+
+	private Bitmap loadAvatarFromStorage(String filename) {
+		Bitmap thumbnail = null;
+		try {
+			File filePath = getFileStreamPath(filename);
+			FileInputStream fi = new FileInputStream(filePath);
+			thumbnail = BitmapFactory.decodeStream(fi);
+		} catch (Exception ex) {
+			Log.e("getThumbnail() on internal storage", ex.getMessage());
+		}
+		return thumbnail;
+	}		
 	
 }
