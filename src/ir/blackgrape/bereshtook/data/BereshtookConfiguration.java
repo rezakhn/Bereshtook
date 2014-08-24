@@ -54,6 +54,7 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 	public Integer coins;
 	public boolean isAvatarSet;
 	public String versionName;
+	public boolean accountPushed;
 
 	public String statusMode;
 	public String statusMessage;
@@ -127,6 +128,7 @@ public class BereshtookConfiguration implements OnSharedPreferenceChangeListener
 			coins = null;
 		this.isAvatarSet = prefs.getBoolean(PreferenceConstants.IS_AVATAR_SET, false);
 		this.versionName = prefs.getString(PreferenceConstants.VERSION_NAME, "-1");
+		this.accountPushed = prefs.getBoolean(PreferenceConstants.ACCOUNT_PUSHED, false);
 		this.isLEDNotify = prefs.getBoolean(PreferenceConstants.LEDNOTIFY,
 				false);
 		this.vibraNotify = prefs.getString(

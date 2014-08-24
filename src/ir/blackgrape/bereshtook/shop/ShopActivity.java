@@ -16,15 +16,19 @@
 package ir.blackgrape.bereshtook.shop;
 
 import ir.blackgrape.bereshtook.BereshtookApplication;
-import ir.blackgrape.bereshtook.MainWindow;
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
+import ir.blackgrape.bereshtook.util.ConstantKeys;
+import ir.blackgrape.bereshtook.util.Decryptor;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.StringUtil;
+
+import java.lang.reflect.Field;
+
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -107,7 +111,6 @@ public class ShopActivity extends SherlockActivity {
     // (arbitrary) request code for the purchase flow
     static final int RC_REQUEST = 10001;
 
-    private Integer mCoins;
     private TextView currentCoins;
     private ActionBar mActionbar;
     private BereshtookConfiguration mConfig;
@@ -143,7 +146,12 @@ public class ShopActivity extends SherlockActivity {
          * want to make it easy for an attacker to replace the public key with one
          * of their own and then fake messages from the server.
          */
-        String base64EncodedPublicKey = "MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwDtmJzf4knEWv6TgFB+K83hMlyqXxCO/akd8XFKBx4Zuz7ZvMAhIREgMVPww2S/sMjjSL1ltXayJQ3Eo7U5FaQpl2BtoQvVFUpdETze9Y0ue0dteS+gQXsszLCn12XXn8S+PKA+TgtUfFj+g4jjGp4fIJJppBBGf0WCRazt7qTcC52kp0HidQRr8vKAFuTB37nEgkG73JjEsBgZWYX+2X2w02qiWW/MYpbCL8qbZ98CAwEAAQ==";
+        String base64EncodedPublicKey = null;
+		try {
+			base64EncodedPublicKey = Decryptor.convert(ConstantKeys.BAZAR_KEY);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
         // Create the helper, passing it our context and the public key to verify signatures with
         Log.d(TAG, "Creating IAB helper.");
@@ -336,8 +344,8 @@ public class ShopActivity extends SherlockActivity {
                 else if(purchase.getSku().equals(SKU_PACK4))
                 	extraCoins += 9000;
                 
-                mCoins += extraCoins;
-                saveCoins(mCoins);
+                mConfig.coins += extraCoins;
+                saveCoins();
                 currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mConfig.coins.toString())));
                 successDialog(extraCoins);
             }
@@ -397,11 +405,11 @@ public class ShopActivity extends SherlockActivity {
         bld.create().show();
     }
 
-    void saveCoins(Integer coins) {
+    void saveCoins() {
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
-		.putInt(PreferenceConstants.COINS, coins)
+		.putInt(PreferenceConstants.COINS, mConfig.coins)
 		.commit();
-    	dataServiceAdapter.saveGameData(PRIVATE_DATA.COINS, coins.toString());
+    	dataServiceAdapter.saveGameData(PRIVATE_DATA.COINS, mConfig.coins.toString());
     }
 
     void loadCoins() {

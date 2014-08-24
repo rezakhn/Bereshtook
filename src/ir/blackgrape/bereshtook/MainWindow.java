@@ -19,8 +19,10 @@ import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.shop.ShopActivity;
 import ir.blackgrape.bereshtook.util.ConnectionState;
+import ir.blackgrape.bereshtook.util.ConstantKeys;
 import ir.blackgrape.bereshtook.util.CropOption;
 import ir.blackgrape.bereshtook.util.CropOptionAdapter;
+import ir.blackgrape.bereshtook.util.Decryptor;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.SimpleCursorTreeAdapter;
@@ -135,22 +137,20 @@ public class MainWindow extends SherlockExpandableListActivity {
 	private Intent dataServiceIntent;
 	private ServiceConnection dataServiceConnection;
 	private XMPPDataServiceAdapter dataServiceAdapter;
-	
+
 	private String androidId;
-	private static final String URL_FIND = "http://bereshtook.ir:3373/users/find/";
-	private static final String URL_INSERT = "http://bereshtook.ir:3373/users/insert/";
+
 	private boolean isNewAccount = false;
-	
 	private boolean isStatusSet = false;
 	private HashSet<String> groups = new HashSet<String>();
 	private Drawable mAvatar;
 	private Uri mImageCaptureUri;
-	
-	public void setIsNewAccount(boolean isNew){
+
+	public void setIsNewAccount(boolean isNew) {
 		isNewAccount = isNew;
 	}
-	
-	enum COMMAND{
+
+	enum COMMAND {
 		FIND, INSERT
 	}
 
@@ -178,7 +178,9 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		if (!mConfig.jid_configured)
 			checkUserAccounts();
-		
+		else if (!mConfig.accountPushed)
+			pushNewAccount();
+
 		getContentResolver().registerContentObserver(
 				RosterProvider.CONTENT_URI, true, mRosterObserver);
 		getContentResolver().registerContentObserver(ChatProvider.CONTENT_URI,
@@ -190,58 +192,81 @@ public class MainWindow extends SherlockExpandableListActivity {
 		registerDataService();
 		checkVersion();
 	}
-	
+
 	private void checkVersion() {
 		if (!mConfig.jid_configured)
 			return;
-		VersionChecker vc = new VersionChecker();
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-			vc.executeOnExecutor(VersionChecker.THREAD_POOL_EXECUTOR);
-		else
-			vc.execute();
-		
+		try {
+			String serverURL = Decryptor.convert(ConstantKeys.URL_VERSION);
+			VersionChecker vc = new VersionChecker();
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				vc.executeOnExecutor(VersionChecker.THREAD_POOL_EXECUTOR,
+						serverURL);
+			else
+				vc.execute(serverURL);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private void checkUserAccounts() {
-		if(isNetworkConnected()){
-			String serverURL = URL_FIND + androidId;
-			UserChecker df = new UserChecker();
-			df.setCmd(COMMAND.FIND);
-			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-				df.executeOnExecutor(UserChecker.THREAD_POOL_EXECUTOR, serverURL);
-			else
-				df.execute(serverURL);
+		try {
+			if (isNetworkConnected()) {
+				String serverURL = Decryptor.convert(ConstantKeys.URL_FIND)
+						+ androidId;
+				UserChecker df = new UserChecker();
+				df.setCmd(COMMAND.FIND);
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+					df.executeOnExecutor(UserChecker.THREAD_POOL_EXECUTOR,
+							serverURL);
+				else
+					df.execute(serverURL);
+			} else
+				showToastNotification(R.string.no_internet_connection);
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		else
-			showToastNotification(R.string.no_internet_connection);
 	}
+
 	private void pushNewAccount() {
 		try {
 			PackageManager manager = MainWindow.this.getPackageManager();
 			PackageInfo info;
-			info = manager.getPackageInfo(
-					MainWindow.this.getPackageName(), 0);
-			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
-			.putString(PreferenceConstants.VERSION_NAME, info.versionName)
-			.commit();			
+			info = manager.getPackageInfo(MainWindow.this.getPackageName(), 0);
+			PreferenceManager
+					.getDefaultSharedPreferences(MainWindow.this)
+					.edit()
+					.putString(PreferenceConstants.VERSION_NAME,
+							info.versionName).commit();
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
-		if(mConfig.versionName == null)
+		if (mConfig.versionName == null)
 			mConfig.versionName = "-1";
-		String serverURL = URL_INSERT + androidId + "/" + mConfig.userName + "/" + mConfig.password + "/" + mConfig.versionName;
-		UserChecker df = new UserChecker();
-		df.setCmd(COMMAND.INSERT);
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-			df.executeOnExecutor(UserChecker.THREAD_POOL_EXECUTOR, serverURL);
-		else
-			df.execute(serverURL);
+		try {
+			String serverURL = Decryptor.convert(ConstantKeys.URL_INSERT)
+					+ androidId + "/" + mConfig.userName + "/"
+					+ mConfig.password + "/" + mConfig.versionName;
+			UserChecker df = new UserChecker();
+			df.setCmd(COMMAND.INSERT);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				df.executeOnExecutor(UserChecker.THREAD_POOL_EXECUTOR,
+						serverURL);
+			else
+				df.execute(serverURL);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-	
-	private boolean isNetworkConnected(){
+
+	private boolean isNetworkConnected() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo ni = cm.getActiveNetworkInfo();
-		if(ni == null)
+		if (ni == null)
 			return false;
 		return true;
 	}
@@ -266,11 +291,13 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	// need this to workaround unwanted OnGroupCollapse/Expand events
 	boolean groupClicked = false;
+
 	void handleGroupChange(int groupPosition, boolean isExpanded) {
 		if (groupClicked) {
 			try {
 				String groupName = getGroupName(groupPosition);
-				Log.d(TAG, "group status change: " + groupName + " -> " + isExpanded);
+				Log.d(TAG, "group status change: " + groupName + " -> "
+						+ isExpanded);
 				mGroupsExpanded.put(groupName, isExpanded);
 			} catch (NullPointerException e) {
 				// sometimes, it fails to obtain the cursor. We can ignore it
@@ -337,7 +364,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 		initLocation();
 		mBestLocationProvider
 				.startLocationUpdatesWithListener(mBestLocationListener);
-		
+
 		updateStatus();
 		// BereshtookApplication.getApp(this).mMTM.bindDisplayActivity(this);
 
@@ -347,11 +374,13 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	private void updateStatus() {
 		String strStatus = getMyStatusMsg();
-		if (isConnected() && strStatus.contains("S") && (!isStatusSet || !strStatus.equals(mConfig.statusMessage))) {
+		if (isConnected() && strStatus.contains("S")
+				&& (!isStatusSet || !strStatus.equals(mConfig.statusMessage))) {
 			isStatusSet = true;
-			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
-			.putString(PreferenceConstants.STATUS_MESSAGE, strStatus)
-			.commit();
+			PreferenceManager.getDefaultSharedPreferences(MainWindow.this)
+					.edit()
+					.putString(PreferenceConstants.STATUS_MESSAGE, strStatus)
+					.commit();
 			serviceAdapter.setStatusFromConfig();
 		}
 	}
@@ -430,7 +459,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			Log.e(TAG, "bad menuinfo: ", e);
 			return;
 		}
-		
+
 		long packedPosition = info.packedPosition;
 		boolean isChild = isChild(packedPosition);
 
@@ -440,8 +469,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			getMenuInflater().inflate(R.menu.roster_item_contextmenu, menu);
 			menuName = String.format("%s",
 					getPackedItemRow(packedPosition, RosterConstants.ALIAS));
-		} 
-		else {
+		} else {
 			menuName = getPackedItemRow(packedPosition, RosterConstants.GROUP);
 			if (menuName.equals(""))
 				return; // no options for default menu
@@ -608,10 +636,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 	}
 
 	void moveRosterItemToBereshtooksGroup(final String jabberID) {
-		if(groups.size() == 2){
-			for(String groupName : groups){
-				if(!groupName.equals(getString(R.string.friends_group)))
-				serviceAdapter.moveRosterItemToGroup(jabberID, groupName);
+		if (groups.size() == 2) {
+			for (String groupName : groups) {
+				if (!groupName.equals(getString(R.string.friends_group)))
+					serviceAdapter.moveRosterItemToGroup(jabberID, groupName);
 			}
 		}
 	}
@@ -688,7 +716,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 				}
 				moveRosterItemToBereshtooksGroup(userJid);
 				return true;
-				
+
 			}
 		} else {
 
@@ -818,41 +846,43 @@ public class MainWindow extends SherlockExpandableListActivity {
 		loadCoins();
 		loadAvatar();
 	}
-	
-	private void loadCoins(){
-		if(mConfig.coins != null)
-			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins.toString()) + " " + getString(R.string.coin));
-		if(!isConnected() || dataServiceAdapter == null)
+
+	private void loadCoins() {
+		if (mConfig.coins != null)
+			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins
+					.toString()) + " " + getString(R.string.coin));
+		if (!isConnected() || dataServiceAdapter == null)
 			return;
 		CoinLoader cl = new CoinLoader();
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 			cl.executeOnExecutor(CoinLoader.THREAD_POOL_EXECUTOR);
 		else
 			cl.execute();
 	}
-	
+
 	private void loadAvatar() {
 		actionBar.setIcon(getStatusActionIcon());
-		if(mAvatar != null && isConnected())
+		if (mAvatar != null && isConnected())
 			actionBar.setIcon(mAvatar);
-		if(mConfig.isAvatarSet){
+		if (mConfig.isAvatarSet) {
 			OfflineAvatarLoader offlineLoader = new OfflineAvatarLoader();
-			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-				offlineLoader.executeOnExecutor(OfflineAvatarLoader.THREAD_POOL_EXECUTOR);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+				offlineLoader
+						.executeOnExecutor(OfflineAvatarLoader.THREAD_POOL_EXECUTOR);
 			else
-				offlineLoader.execute();			
+				offlineLoader.execute();
 			return;
 		}
-		
-		if(!isConnected() || dataServiceAdapter == null)
+
+		if (!isConnected() || dataServiceAdapter == null)
 			return;
 		OnlineAvatarLoader onlineLoader = new OnlineAvatarLoader();
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-			onlineLoader.executeOnExecutor(OnlineAvatarLoader.THREAD_POOL_EXECUTOR);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			onlineLoader
+					.executeOnExecutor(OnlineAvatarLoader.THREAD_POOL_EXECUTOR);
 		else
 			onlineLoader.execute();
 	}
-	
 
 	private void aboutDialog() {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -913,9 +943,9 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		case android.R.id.home:
 		case R.id.menu_status:
-			if(isConnected())
+			if (isConnected())
 				chooseAvatar();
-			else if(!isConnecting())
+			else if (!isConnecting())
 				toggleConnection();
 			return true;
 
@@ -936,19 +966,21 @@ public class MainWindow extends SherlockExpandableListActivity {
 			return true;
 
 		case R.id.menu_account:
-			checkUserAccounts();;
+			checkUserAccounts();
+			;
 			return true;
 
 		case R.id.menu_coins:
-			if(isConnected())
+			if (isConnected())
 				startActivity(new Intent(this, ShopActivity.class));
-			else if(!isConnecting())
+			else if (!isConnecting())
 				toggleConnection();
 			return true;
 		case R.id.menu_scoreboard:
-			if(isConnected())
-				startActivity(new Intent(this, ScoreboardActivity.class).putExtra("username", mConfig.userName));
-			else if(!isConnecting())
+			if (isConnected())
+				startActivity(new Intent(this, ScoreboardActivity.class)
+						.putExtra("username", mConfig.userName));
+			else if (!isConnecting())
 				toggleConnection();
 			return true;
 		}
@@ -956,156 +988,178 @@ public class MainWindow extends SherlockExpandableListActivity {
 		return false;
 
 	}
-	
+
 	private final int REQUEST_GALLERY = 0;
 	private final int REQUEST_CAMERA = 1;
 	private final int REQUEST_CROP_IMAGE = 2;
-	
-	private void chooseAvatar(){
-        final String [] items = new String [] {getString(R.string.camera), getString(R.string.gallery)};				
-		ArrayAdapter<String> adapter = new ArrayAdapter<String> (this, android.R.layout.select_dialog_item,items);
-		AlertDialog.Builder builder	= new AlertDialog.Builder(this);
-		
+
+	private void chooseAvatar() {
+		final String[] items = new String[] { getString(R.string.camera),
+				getString(R.string.gallery) };
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.select_dialog_item, items);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
 		builder.setTitle(R.string.choose_profile_image);
-		builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
-			public void onClick( DialogInterface dialog, int item ) { //pick from camera
+		builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int item) { // pick from
+																	// camera
 				if (item == 0) {
 					Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					
-					mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
-									   "tmp_avatar_" + String.valueOf(System.currentTimeMillis()) + ".jpg"));
 
-					intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+					mImageCaptureUri = Uri.fromFile(new File(Environment
+							.getExternalStorageDirectory(), "tmp_avatar_"
+							+ String.valueOf(System.currentTimeMillis())
+							+ ".jpg"));
+
+					intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
+							mImageCaptureUri);
 
 					try {
 						intent.putExtra("return-data", true);
-						
+
 						startActivityForResult(intent, REQUEST_CAMERA);
 					} catch (ActivityNotFoundException e) {
 						e.printStackTrace();
 					}
 				} else {
 					Intent intent = new Intent();
-					
-	                intent.setType("image/*");
-	                intent.setAction(Intent.ACTION_GET_CONTENT);
-	                
-	                startActivityForResult(Intent.createChooser(intent, "Complete action using"), REQUEST_GALLERY);
+
+					intent.setType("image/*");
+					intent.setAction(Intent.ACTION_GET_CONTENT);
+
+					startActivityForResult(Intent.createChooser(intent,
+							"Complete action using"), REQUEST_GALLERY);
 				}
 			}
-		} );
-		
+		});
+
 		final AlertDialog dialog = builder.create();
 		dialog.show();
 	}
-	
+
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+	protected void onActivityResult(int requestCode, int resultCode,
+			Intent imageReturnedIntent) {
 		super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
-		
-		if(resultCode != RESULT_OK)
+
+		if (resultCode != RESULT_OK)
 			return;
-		
-			switch (requestCode) {
-			case REQUEST_GALLERY:
-		    	mImageCaptureUri = imageReturnedIntent.getData();
-		    	doCrop();
-				
-			case REQUEST_CAMERA:
-				doCrop();
-				break;
-				
-			case REQUEST_CROP_IMAGE:
-		        Bundle extras = imageReturnedIntent.getExtras();
-		    	
-		        if (extras != null){  	
-		            Bitmap photo = extras.getParcelable("data");
-		            if(photo == null)
-		            	return;
-		            
-		            mAvatar = new BitmapDrawable(getResources(), photo);
-		            actionBar.setIcon(mAvatar);
-		            
-					AvatarUploader as = new AvatarUploader();
-					if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-						as.executeOnExecutor(AvatarUploader.THREAD_POOL_EXECUTOR, photo);
-					else
-						as.execute(photo);
-		        }
-				break;
+
+		switch (requestCode) {
+		case REQUEST_GALLERY:
+			mImageCaptureUri = imageReturnedIntent.getData();
+			doCrop();
+
+		case REQUEST_CAMERA:
+			doCrop();
+			break;
+
+		case REQUEST_CROP_IMAGE:
+			Bundle extras = imageReturnedIntent.getExtras();
+
+			if (extras != null) {
+				Bitmap photo = extras.getParcelable("data");
+				if (photo == null)
+					return;
+
+				mAvatar = new BitmapDrawable(getResources(), photo);
+				actionBar.setIcon(mAvatar);
+
+				AvatarUploader as = new AvatarUploader();
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+					as.executeOnExecutor(AvatarUploader.THREAD_POOL_EXECUTOR,
+							photo);
+				else
+					as.execute(photo);
 			}
-		
+			break;
+		}
+
 	}
-	
-    private void doCrop() {
+
+	private void doCrop() {
 		final ArrayList<CropOption> cropOptions = new ArrayList<CropOption>();
-    	
-    	Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setType("image/*");
-        
-        List<ResolveInfo> list = getPackageManager().queryIntentActivities( intent, 0 );
-        
-        int size = list.size();
-        
-        if (size == 0) {	        
-        	Toast.makeText(this, R.string.crop_app_not_found, Toast.LENGTH_SHORT).show();
-        	
-            return;
-        } else {
-        	intent.setData(mImageCaptureUri);
-            
-            intent.putExtra("outputX", 100);
-            intent.putExtra("outputY", 100);
-            intent.putExtra("aspectX", 1);
-            intent.putExtra("aspectY", 1);
-            intent.putExtra("scale", true);
-            intent.putExtra("return-data", true);
-            
-        	if (size == 0) {
-        		Intent i 		= new Intent(intent);
-	        	ResolveInfo res	= list.get(0);
-	        	
-	        	i.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-	        	
-	        	startActivityForResult(i, REQUEST_CROP_IMAGE);
-        	} else {
-		        for (ResolveInfo res : list) {
-		        	final CropOption co = new CropOption();
-		        	
-		        	co.title 	= getPackageManager().getApplicationLabel(res.activityInfo.applicationInfo);
-		        	co.icon		= getPackageManager().getApplicationIcon(res.activityInfo.applicationInfo);
-		        	co.appIntent= new Intent(intent);
-		        	
-		        	co.appIntent.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-		        	
-		            cropOptions.add(co);
-		        }
-	        
-		        CropOptionAdapter adapter = new CropOptionAdapter(getApplicationContext(), cropOptions);
-		        
-		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		        builder.setTitle(R.string.choose_cropper);
-		        builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
-		            public void onClick( DialogInterface dialog, int item ) {
-		                startActivityForResult( cropOptions.get(item).appIntent, REQUEST_CROP_IMAGE);
-		            }
-		        });
-	        
-		        builder.setOnCancelListener( new DialogInterface.OnCancelListener() {
-		            @Override
-		            public void onCancel( DialogInterface dialog ) {
-		               
-		                if (mImageCaptureUri != null ) {
-		                    //getContentResolver().delete(mImageCaptureUri, null, null );
-		                    mImageCaptureUri = null;
-		                }
-		            }
-		        } );
-		        
-		        AlertDialog croppersdialog = builder.create();
-		        croppersdialog.show();
-        	}
-        }
+
+		Intent intent = new Intent("com.android.camera.action.CROP");
+		intent.setType("image/*");
+
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
+				intent, 0);
+
+		int size = list.size();
+
+		if (size == 0) {
+			Toast.makeText(this, R.string.crop_app_not_found,
+					Toast.LENGTH_SHORT).show();
+
+			return;
+		} else {
+			intent.setData(mImageCaptureUri);
+
+			intent.putExtra("outputX", 100);
+			intent.putExtra("outputY", 100);
+			intent.putExtra("aspectX", 1);
+			intent.putExtra("aspectY", 1);
+			intent.putExtra("scale", true);
+			intent.putExtra("return-data", true);
+
+			if (size == 0) {
+				Intent i = new Intent(intent);
+				ResolveInfo res = list.get(0);
+
+				i.setComponent(new ComponentName(res.activityInfo.packageName,
+						res.activityInfo.name));
+
+				startActivityForResult(i, REQUEST_CROP_IMAGE);
+			} else {
+				for (ResolveInfo res : list) {
+					final CropOption co = new CropOption();
+
+					co.title = getPackageManager().getApplicationLabel(
+							res.activityInfo.applicationInfo);
+					co.icon = getPackageManager().getApplicationIcon(
+							res.activityInfo.applicationInfo);
+					co.appIntent = new Intent(intent);
+
+					co.appIntent
+							.setComponent(new ComponentName(
+									res.activityInfo.packageName,
+									res.activityInfo.name));
+
+					cropOptions.add(co);
+				}
+
+				CropOptionAdapter adapter = new CropOptionAdapter(
+						getApplicationContext(), cropOptions);
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle(R.string.choose_cropper);
+				builder.setAdapter(adapter,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int item) {
+								startActivityForResult(
+										cropOptions.get(item).appIntent,
+										REQUEST_CROP_IMAGE);
+							}
+						});
+
+				builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+
+						if (mImageCaptureUri != null) {
+							// getContentResolver().delete(mImageCaptureUri,
+							// null, null );
+							mImageCaptureUri = null;
+						}
+					}
+				});
+
+				AlertDialog croppersdialog = builder.create();
+				croppersdialog.show();
+			}
+		}
 	}
 
 	/** Sets if all contacts are shown in the roster or online contacts only. */
@@ -1179,7 +1233,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 				PreferenceManager.getDefaultSharedPreferences(this).edit()
 						.putBoolean(PreferenceConstants.JID_CONFIGURED, true)
 						.commit();
-				if(isNewAccount)
+				if (isNewAccount)
 					pushNewAccount();
 				checkVersion();
 			}
@@ -1187,9 +1241,11 @@ public class MainWindow extends SherlockExpandableListActivity {
 			if (strStatus.contains("S")
 					&& !strStatus.equals(mConfig.statusMessage)) {
 				isStatusSet = true;
-				PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
-				.putString(PreferenceConstants.STATUS_MESSAGE, strStatus)
-				.commit();
+				PreferenceManager
+						.getDefaultSharedPreferences(MainWindow.this)
+						.edit()
+						.putString(PreferenceConstants.STATUS_MESSAGE,
+								strStatus).commit();
 				serviceAdapter.setStatusFromConfig();
 			}
 			break;
@@ -1265,7 +1321,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 					serviceAdapter.connect();
 				} else if (mConfig.presence_required && isConnected())
 					serviceAdapter.setStatusFromConfig();
-				
+
 				// handle server-related intents after connecting to the backend
 				handleJabberIntent();
 			}
@@ -1371,7 +1427,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 		}
 	}
 
-	private void showFirstStartUpDialog(boolean enable, String username, String password) {
+	private void showFirstStartUpDialog(boolean enable, String username,
+			String password) {
 		Log.i(TAG, "showFirstStartUpDialog, JID: " + mConfig.jabberID);
 		// load preference defaults
 		PreferenceManager.setDefaultValues(this, R.layout.mainprefs, false);
@@ -1384,7 +1441,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 				.commit();
 
 		// show welcome dialog
-		new FirstStartDialog(this, serviceAdapter, enable, username, password).show();
+		new FirstStartDialog(this, serviceAdapter, enable, username, password)
+				.show();
 	}
 
 	public static Intent createIntent(Context context) {
@@ -1572,8 +1630,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	private String getMyStatusMsg() {
 		if (mLocation != null && mConfig.coins != null)
-			return mConfig.coins.toString() + "S" + mLocation.getLatitude() + "#"
-					+ mLocation.getLongitude();
+			return mConfig.coins.toString() + "S" + mLocation.getLatitude()
+					+ "#" + mLocation.getLongitude();
 		else if (mConfig.coins != null)
 			return mConfig.coins.toString() + "S";
 		else
@@ -1606,7 +1664,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 					RosterConstants.GROUP);
 			Cursor oldCursor = getCursor();
 			changeCursor(cursor);
-			if(oldCursor != null)
+			if (oldCursor != null)
 				stopManagingCursor(oldCursor);
 		}
 
@@ -1642,7 +1700,8 @@ public class MainWindow extends SherlockExpandableListActivity {
 						.findViewById(R.id.groupname);
 				groupname.setText(R.string.friends_group);
 			}
-			groups.add(cursor.getString(cursor.getColumnIndex(RosterConstants.GROUP)));
+			groups.add(cursor.getString(cursor
+					.getColumnIndex(RosterConstants.GROUP)));
 		}
 
 		@Override
@@ -1660,11 +1719,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 				herStatus = statusMsg.getText().toString();
 				statusMsg.setText(StatusUtil.makeStatusWithLocation(mLocation,
 						herStatus));
-			} else if(hasStatus){
+			} else if (hasStatus) {
 				herStatus = statusMsg.getText().toString();
 				statusMsg.setText(StatusUtil.makeStatus(herStatus));
-			}
-			else
+			} else
 				statusMsg.setText("");
 
 			String jid = cursor.getString(cursor
@@ -1691,26 +1749,24 @@ public class MainWindow extends SherlockExpandableListActivity {
 		}
 	}
 	
-	
-	/////////////////////////////////////// Async Tasks //////////////////////////////////////////////
-	
 
 	class UserChecker extends AsyncTask<String, Void, JSONObject> {
 
 		private final HttpClient client = new DefaultHttpClient();
 		private ProgressDialog dialog = new ProgressDialog(MainWindow.this);
 		private COMMAND cmd;
-		
-		public void setCmd(COMMAND cmd){
+
+		public void setCmd(COMMAND cmd) {
 			this.cmd = cmd;
 		}
-		
+
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
 
-			if(cmd == COMMAND.FIND){
-				dialog.setMessage(MainWindow.this.getString(R.string.connecting_bereshtook));
+			if (cmd == COMMAND.FIND) {
+				dialog.setMessage(MainWindow.this
+						.getString(R.string.connecting_bereshtook));
 				dialog.show();
 			}
 
@@ -1726,11 +1782,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 				HttpResponse httpResponse = client.execute(new HttpGet(url));
 				inputStream = httpResponse.getEntity().getContent();
 
-				if (inputStream != null){
+				if (inputStream != null) {
 					result = convertInputStreamToString(inputStream);
 					inputStream.close();
-				}
-				else
+				} else
 					result = "problem";
 
 				try {
@@ -1750,114 +1805,125 @@ public class MainWindow extends SherlockExpandableListActivity {
 		@Override
 		protected void onPostExecute(JSONObject json) {
 			try {
-				if(json == null || json.equals("problem")){
+				if (json == null || json.equals("problem")) {
 					dialog.cancel();
 					showToastNotification(R.string.error_fetch_data);
 					return;
 				}
 				String result = json.getString("result");
-				if(result == null || result.equals("error"))
+				if (result == null || result.equals("error"))
 					return;
-				if(cmd == COMMAND.FIND){
-					if(result.equals("not_exist"))
+				if (cmd == COMMAND.FIND) {
+					if (result.equals("not_exist"))
 						showFirstStartUpDialog(true, null, null);
-					else if(result.equals("user_exist")){
+					else if (result.equals("user_exist")) {
 						String username = json.getString("username");
 						String password = json.getString("password");
 						showFirstStartUpDialog(false, username, password);
 					}
+				} else if (cmd == COMMAND.INSERT) {
+					PreferenceManager
+							.getDefaultSharedPreferences(MainWindow.this)
+							.edit()
+							.putBoolean(PreferenceConstants.ACCOUNT_PUSHED,
+									true).commit();
 				}
-				
+
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			if(dialog != null)
+			if (dialog != null)
 				dialog.cancel();
-			
+
 		}
 
 	}
-	
-	class OfflineAvatarLoader extends AsyncTask<Void, Void, Drawable>{
+
+	class OfflineAvatarLoader extends AsyncTask<Void, Void, Drawable> {
 
 		@Override
 		protected Drawable doInBackground(Void... arg0) {
 			Bitmap tempBitmap = loadAvatarFromStorage(mConfig.userName);
-			if(tempBitmap != null);
-				return new BitmapDrawable(getResources(), tempBitmap);
+			if (tempBitmap != null)
+				;
+			return new BitmapDrawable(getResources(), tempBitmap);
 		}
-		
+
 		@Override
 		protected void onPostExecute(Drawable result) {
 			super.onPostExecute(result);
-			if(result != null){
+			if (result != null) {
 				mAvatar = result;
 				actionBar.setIcon(mAvatar);
 			}
 		}
-	}	
-	
-	class OnlineAvatarLoader extends AsyncTask<Void, Void, Drawable>{
+	}
+
+	class OnlineAvatarLoader extends AsyncTask<Void, Void, Drawable> {
 
 		@Override
 		protected Drawable doInBackground(Void... arg0) {
 			Bitmap bm = dataServiceAdapter.loadAvatar(mConfig.jabberID);
-			
-			if(bm != null){
+
+			if (bm != null) {
 				saveAvatarToStorage(bm, mConfig.userName);
 				return new BitmapDrawable(getResources(), bm);
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Drawable result) {
 			super.onPostExecute(result);
-			if(result != null)
-				actionBar.setIcon(result);
+			if (result != null)
+				mAvatar = result;
+			else
+				mAvatar = getResources().getDrawable(getStatusActionIcon());
+			
+			actionBar.setIcon(mAvatar);
 		}
 	}
-	
-	class AvatarUploader extends AsyncTask<Bitmap, Void, Drawable>{
+
+	class AvatarUploader extends AsyncTask<Bitmap, Void, Drawable> {
 
 		@Override
 		protected Drawable doInBackground(Bitmap... args) {
-			if(dataServiceAdapter != null)
+			if (dataServiceAdapter != null)
 				dataServiceAdapter.saveAvatar(args[0]);
-			
+
 			saveAvatarToStorage(args[0], mConfig.userName);
-			
+
 			Drawable avatar = new BitmapDrawable(getResources(), args[0]);
-			return avatar; 
+			return avatar;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Drawable result) {
 			super.onPostExecute(result);
-			if(result != null)
+			if (result != null)
 				actionBar.setIcon(result);
 		}
 	}
-	
+
 	private boolean saveAvatarToStorage(Bitmap image, String filename) {
 
 		try {
-			FileOutputStream fos = MainWindow.this.openFileOutput(
-					filename, Context.MODE_PRIVATE);
+			FileOutputStream fos = MainWindow.this.openFileOutput(filename,
+					Context.MODE_PRIVATE);
 
 			image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 			fos.close();
-			
-			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
-			.putBoolean(PreferenceConstants.IS_AVATAR_SET, true)
-			.commit();
+
+			PreferenceManager.getDefaultSharedPreferences(MainWindow.this)
+					.edit().putBoolean(PreferenceConstants.IS_AVATAR_SET, true)
+					.commit();
 			return true;
 		} catch (Exception e) {
 			Log.e("saveToInternalStorage()", e.getMessage());
 			return false;
 		}
 	}
-	
+
 	private Bitmap loadAvatarFromStorage(String filename) {
 		Bitmap thumbnail = null;
 		try {
@@ -1868,60 +1934,61 @@ public class MainWindow extends SherlockExpandableListActivity {
 			Log.e("getThumbnail() on internal storage", ex.getMessage());
 		}
 		return thumbnail;
-	}	
+	}
 
-	class CoinLoader extends AsyncTask<Void, Void, String>{
+	class CoinLoader extends AsyncTask<Void, Void, String> {
 
 		@Override
 		protected String doInBackground(Void... arg0) {
 			return dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
 		}
-		
+
 		@Override
 		protected void onPostExecute(String coins) {
 			super.onPostExecute(coins);
-			if(coins == null)
+			if (coins == null)
 				return;
-			PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
-			.putInt(PreferenceConstants.COINS, Integer.parseInt(coins))
-			.commit();
-			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins.toString()) + " " + getString(R.string.coin));
+			PreferenceManager.getDefaultSharedPreferences(MainWindow.this)
+					.edit()
+					.putInt(PreferenceConstants.COINS, Integer.parseInt(coins))
+					.commit();
+			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins
+					.toString()) + " " + getString(R.string.coin));
 			updateStatus();
 		}
 
 	}
-	
-	class VersionChecker extends AsyncTask<Void, Void, String> {
-		private static final String URL_VERSION = "http://bereshtook.ir:3373/users/version/";
+
+	class VersionChecker extends AsyncTask<String, Void, String> {
 		private final HttpClient client = new DefaultHttpClient();
-		
+
 		@Override
-		protected String doInBackground(Void... urls) {
+		protected String doInBackground(String... urls) {
 			try {
 				PackageManager manager = MainWindow.this.getPackageManager();
 				PackageInfo info = manager.getPackageInfo(
 						MainWindow.this.getPackageName(), 0);
 				String version = info.versionName;
-				
-				if(version == null || version.equals(mConfig.versionName))
+
+				if (version == null || version.equals(mConfig.versionName))
 					return null;
-				
-				String url = URL_VERSION + mConfig.userName + "/" + version;
+
+				String url = urls[0] + mConfig.userName + "/" + version;
 
 				HttpResponse httpResponse = client.execute(new HttpGet(url));
 				InputStream inputStream = httpResponse.getEntity().getContent();
 
-				if (inputStream != null){
+				if (inputStream != null) {
 					inputStream.close();
 				}
-				
+
 				return version;
 
-			}catch (ClientProtocolException e) {
+			} catch (ClientProtocolException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			}catch (Exception e) {
+			} catch (Exception e) {
 				Log.e("Bereshtook", "Error getting version");
 			}
 			return null;
@@ -1930,10 +1997,12 @@ public class MainWindow extends SherlockExpandableListActivity {
 		@Override
 		protected void onPostExecute(String versionName) {
 			super.onPostExecute(versionName);
-			if(versionName != null){
-				PreferenceManager.getDefaultSharedPreferences(MainWindow.this).edit()
-				.putString(PreferenceConstants.VERSION_NAME, versionName)
-				.commit();
+			if (versionName != null) {
+				PreferenceManager
+						.getDefaultSharedPreferences(MainWindow.this)
+						.edit()
+						.putString(PreferenceConstants.VERSION_NAME,
+								versionName).commit();
 			}
 		}
 
@@ -1947,10 +2016,10 @@ public class MainWindow extends SherlockExpandableListActivity {
 		String result = "";
 		while ((line = bufferedReader.readLine()) != null)
 			result += line;
-	
+
 		inputStream.close();
 		return result;
-	
+
 	}
-	
+
 }

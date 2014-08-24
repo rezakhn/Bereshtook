@@ -10,6 +10,7 @@ public class BereshtookApplication extends Application {
 	// http://xmpp.org/registrar/disco-categories.html
 	public static final String XMPP_IDENTITY_NAME = "Bereshtook";
 	public static final String XMPP_IDENTITY_TYPE = "phone";
+	public static final String SEED = "com.java.System.";
 
 	// MTM is needed globally for both the backend (connect)
 	// and the frontend (display dialog)

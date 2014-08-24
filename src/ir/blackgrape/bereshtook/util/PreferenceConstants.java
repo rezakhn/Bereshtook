@@ -29,4 +29,5 @@ public class PreferenceConstants {
 	public final static String COINS = "coins";
 	public final static String IS_AVATAR_SET = "isAvatarSet";
 	public final static String VERSION_NAME = "versionName";
+	public final static String ACCOUNT_PUSHED = "accountPushed";
 }

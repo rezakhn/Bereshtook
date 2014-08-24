@@ -1,12 +1,16 @@
 package ir.blackgrape.bereshtook.scoreboard;
 
 import ir.blackgrape.bereshtook.R;
+import ir.blackgrape.bereshtook.util.ConstantKeys;
+import ir.blackgrape.bereshtook.util.Decryptor;
 import ir.blackgrape.bereshtook.util.StringUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,7 +40,6 @@ public class FragmentTabScoreboard extends SherlockFragment {
 	private static final String RANK = "rank";
 	private static final String USERNAME = "user";
 	private static final String SCORE = "score";
-	private static final String URL = "http://bereshtook.ir:3372/top10/";
 
 	public void setUsername(String username) {
 		this.username = username;
@@ -51,8 +54,12 @@ public class FragmentTabScoreboard extends SherlockFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (myRank == null) {
-			String serverURL = URL + factor + "/" + username;
-			new DataFetcher().execute(serverURL);
+			try {
+				String serverURL = Decryptor.convert(ConstantKeys.URL_TOPS) + factor + "/" + username;
+				new DataFetcher().execute(serverURL);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
