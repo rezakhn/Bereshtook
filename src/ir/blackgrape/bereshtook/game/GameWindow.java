@@ -21,6 +21,8 @@ import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -263,16 +265,11 @@ public abstract class GameWindow extends SherlockActivity {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
 				if (!dataSaved) {
-					mCoins = loadCoins();
-					if (mCoins != null) {
-						mCoins -= 100;
-						saveCoins(mCoins);
-					}
-					saveData(PRIVATE_DATA.PLAYED_GAMES,
-							loadData(PRIVATE_DATA.PLAYED_GAMES) + 1);
-					saveData(PRIVATE_DATA.LEFTS,
-							loadData(PRIVATE_DATA.LEFTS) + 1);
-					dataSaved = true;
+					InitCommit ic = new InitCommit();
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+						ic.executeOnExecutor(InitCommit.THREAD_POOL_EXECUTOR);
+					else
+						ic.execute();
 				}
 			}
 
@@ -387,5 +384,27 @@ public abstract class GameWindow extends SherlockActivity {
 		} catch (IllegalArgumentException e) {
 			Log.e(TAG, "Service wasn't bound!");
 		}
+	}
+	
+	class InitCommit extends AsyncTask<Void, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			mCoins = loadCoins();
+			if (mCoins != null) {
+				mCoins -= 100;
+				saveCoins(mCoins);
+			}
+			Integer playedGames = loadData(PRIVATE_DATA.PLAYED_GAMES);
+			if(playedGames != null)
+				saveData(PRIVATE_DATA.PLAYED_GAMES, playedGames++);
+			Integer lefts = loadData(PRIVATE_DATA.LEFTS);
+			if(lefts != null)
+				saveData(PRIVATE_DATA.LEFTS, lefts++);
+			dataSaved = true;
+			
+			return null;
+		}
+		
 	}
 }
