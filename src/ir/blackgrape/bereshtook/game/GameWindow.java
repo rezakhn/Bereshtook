@@ -118,13 +118,20 @@ public abstract class GameWindow extends SherlockActivity {
 				mCoins = loadCoins();
 			mCoins += 200;
 			saveCoins(mCoins);
-			saveData(PRIVATE_DATA.WINS, loadData(PRIVATE_DATA.WINS) + 1);
-			saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.LEFTS) - 1);
+			Integer loadedWins = loadData(PRIVATE_DATA.WINS);
+			if(loadedWins != null)
+				saveData(PRIVATE_DATA.WINS, loadedWins++);
+			Integer loadedLefts = loadData(PRIVATE_DATA.LEFTS);
+			if(loadedLefts != null)
+				saveData(PRIVATE_DATA.LEFTS, loadedLefts--);
 			winDialog();
 		} else if (getGame().getMyScore() < getGame().getHerScore()) {
 			soundCry.start();
-			saveData(PRIVATE_DATA.LOSSES, loadData(PRIVATE_DATA.LOSSES) + 1);
-			saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.LEFTS) - 1);
+			Integer loadedLosses = loadData(PRIVATE_DATA.LOSSES);
+			if(loadedLosses != null)
+				saveData(PRIVATE_DATA.LOSSES, loadedLosses++);
+			Integer loadedLefts = loadData(PRIVATE_DATA.LEFTS);
+			saveData(PRIVATE_DATA.LEFTS, loadedLefts--);
 			loseDialog();
 		}
 	}
@@ -167,8 +174,12 @@ public abstract class GameWindow extends SherlockActivity {
 		gameEnded = true;
 		mCoins += 100;
 		saveCoins(mCoins);
-		saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.LEFTS) - 1);
-		saveData(PRIVATE_DATA.LEFTS, loadData(PRIVATE_DATA.PLAYED_GAMES) - 1);
+		Integer loadedLefts = loadData(PRIVATE_DATA.LEFTS);
+		if(loadedLefts != null)
+			saveData(PRIVATE_DATA.LEFTS, loadedLefts--);
+		Integer loadedGames = loadData(PRIVATE_DATA.PLAYED_GAMES);
+		if(loadedGames != null)
+			saveData(PRIVATE_DATA.LEFTS, loadedGames--);
 
 		new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
@@ -391,6 +402,8 @@ public abstract class GameWindow extends SherlockActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			mCoins = loadCoins();
+			if(mCoins == null)
+				mCoins = mConfig.coins;
 			if (mCoins != null) {
 				mCoins -= 100;
 				saveCoins(mCoins);
