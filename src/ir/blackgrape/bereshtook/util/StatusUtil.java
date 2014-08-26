@@ -1,6 +1,5 @@
 package ir.blackgrape.bereshtook.util;
 
-import ir.blackgrape.bereshtook.R;
 import android.content.Context;
 import android.location.Location;
 
@@ -15,7 +14,7 @@ public class StatusUtil {
 	public static CharSequence makeStatus(String herStatus) {
 		if(herStatus.contains("S")){
 			String coins = herStatus.substring(0, herStatus.indexOf('S'));
-			return StringUtil.convertToPersian(coins) + " " + mContext.getString(R.string.coin);
+			return StringUtil.convertToPersian(coins) + " " + "سکه";
 		}
 		else
 			return "";
@@ -54,14 +53,14 @@ public class StatusUtil {
 		 if(coins != null && distance != null){
 			 sb.append(StringUtil.convertToPersian(coins));
 			 sb.append(" ");
-			 sb.append(mContext.getString(R.string.coin));
+			 sb.append("سکه");
 			 sb.append(" (");
 			 sb.append(distance);
 			 sb.append(")");
 			 return sb;
 		 }
 		 else if(coins != null)
-			 return StringUtil.convertToPersian(coins) + " " + mContext.getString(R.string.coin);
+			 return StringUtil.convertToPersian(coins) + " " + "سکه";
 		 else if(distance != null)
 			 return "(" + distance + ")";
 		 else
@@ -80,12 +79,12 @@ public class StatusUtil {
 		Integer iDis = fDis.intValue();
 		
 		if(fDis < 2000){
-			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + mContext.getString(R.string.meter);
+			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + "متر";
 		}
 		else{
 			Double dDis = iDis.doubleValue() / 1000;
 			iDis = dDis.intValue();
-			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + mContext.getString(R.string.kilometer);
+			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + "کیلومتر";
 		}
 		return strDis;
 	}

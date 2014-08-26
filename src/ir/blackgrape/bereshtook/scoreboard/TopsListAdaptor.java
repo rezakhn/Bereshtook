@@ -28,7 +28,7 @@ public class TopsListAdaptor extends SimpleAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view =  super.getView(position, convertView, parent);
-		if(myRank != null && position == myRank-1)
+		if(myRank != null && (position == myRank-1 || position == 9))
 			view.setBackgroundColor(context.getResources().getColor(R.color.top_me_background));
 		else
 			view.setBackgroundColor(context.getResources().getColor(R.color.tops_row_background));
