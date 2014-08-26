@@ -1,6 +1,7 @@
 package ir.blackgrape.bereshtook.scoreboard;
 
 import ir.blackgrape.bereshtook.R;
+import ir.blackgrape.bereshtook.data.RosterProvider.RosterConstants;
 import ir.blackgrape.bereshtook.util.ConstantKeys;
 import ir.blackgrape.bereshtook.util.Decryptor;
 import ir.blackgrape.bereshtook.util.StringUtil;
@@ -23,15 +24,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
 public class FragmentTabScoreboard extends SherlockFragment {
 	protected String factor;
-	protected String username;
+	protected String myUsername;
 	protected Integer myRank;
 	protected Integer myScore;
 	protected ListView lstTop10;
@@ -42,7 +49,7 @@ public class FragmentTabScoreboard extends SherlockFragment {
 	private static final String SCORE = "score";
 
 	public void setUsername(String username) {
-		this.username = username;
+		this.myUsername = username;
 	}
 
 	@Override
@@ -55,7 +62,7 @@ public class FragmentTabScoreboard extends SherlockFragment {
 		super.onCreate(savedInstanceState);
 		if (myRank == null) {
 			try {
-				String serverURL = Decryptor.convert(ConstantKeys.URL_TOPS) + factor + "/" + username;
+				String serverURL = Decryptor.convert(ConstantKeys.URL_TOPS) + factor + "/" + myUsername;
 				new DataFetcher().execute(serverURL);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -138,7 +145,7 @@ public class FragmentTabScoreboard extends SherlockFragment {
 				if(myRank > tops.length()){
 					HashMap<String, String> me = new HashMap<String, String>();
 					me.put(RANK, StringUtil.convertToPersian(myRank.toString()));
-					me.put(USERNAME, username);
+					me.put(USERNAME, myUsername);
 					me.put(SCORE, StringUtil.convertToPersian(myScore.toString()));
 					oslist.add(me);
 				}
@@ -147,6 +154,27 @@ public class FragmentTabScoreboard extends SherlockFragment {
 						new String[] { RANK, USERNAME, SCORE}, new int[] {R.id.rank, R.id.username, R.id.score});
 				adaptor.setMyRank(myRank);
 				lstTop10.setAdapter(adaptor);
+				lstTop10.setOnItemClickListener(new OnItemClickListener() {
+
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view,
+							int position, long id) {
+						TextView UserText = (TextView) view.findViewById(R.id.username);
+						String username = (String) UserText.getText();
+						if(myUsername == null || myUsername.equals(username))
+							return;
+						String userJid = username + "@bereshtook.ir";
+						Intent chatIntent = new Intent(FragmentTabScoreboard.this.getActivity(),
+								ir.blackgrape.bereshtook.chat.ChatWindow.class);
+						Uri userNameUri = Uri.parse(userJid);
+						chatIntent.setData(userNameUri);
+						chatIntent.putExtra(
+								ir.blackgrape.bereshtook.chat.ChatWindow.INTENT_EXTRA_USERNAME,
+								username);
+						
+						startActivity(chatIntent);
+					}
+				});
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
