@@ -7,9 +7,11 @@ import ir.blackgrape.bereshtook.game.rps.RPSGame.Choice;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Turn;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Winner;
 import ir.blackgrape.bereshtook.util.StringUtil;
+import android.R.anim;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,6 +33,7 @@ public class RPSWindow extends GameWindow {
 	private static final String ROCK_MSG = RPS_GAME + "ROCK#";
 	private static final String PAPER_MSG = RPS_GAME + "PAPER#";
 	private static final String SCISSOR_MSG = RPS_GAME + "SCISSOR#";
+	private static final int GAME_TIME = 30000;
 	
 	private RPSGame game;
 	private Button btnRockUp;
@@ -65,17 +68,55 @@ public class RPSWindow extends GameWindow {
 		txtStatusUp = (TextView) findViewById(R.id.txt_status_up);
 		txtStatusDown = (TextView) findViewById(R.id.txt_status_down);
 		
+		txtHerTimer = (TextView) findViewById(R.id.txt_timer_up);
+		txtMyTimer = (TextView) findViewById(R.id.txt_timer_down);
+		
 		btnRockDown.setOnClickListener(buttonClickListener);
 		btnPaperDown.setOnClickListener(buttonClickListener);
 		btnScissorDown.setOnClickListener(buttonClickListener);
-		
 		txtStatusDown.setOnClickListener(statusClickListener);
+		
+		myTimer = new CountDownTimer(GAME_TIME, ONE_SECOND) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				txtMyTimer.setText(millisUntilFinished / ONE_SECOND + " " + getString(R.string.second));
+				if(millisUntilFinished < ONE_SECOND * 10){
+					txtMyTimer.setTextColor(getResources().getColor(R.color.red));
+					soundBeep.start();
+				}
+				else
+					txtMyTimer.setTextColor(getResources().getColor(R.color.black));
+			}
+			@Override
+			public void onFinish() {
+				txtMyTimer.setText(getString(R.string.time_out_game));
+				timeOutDialog();
+			}
+		};
+		
+		herTimer = new CountDownTimer(GAME_TIME, ONE_SECOND) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				txtHerTimer.setText(millisUntilFinished / ONE_SECOND + " " + getString(R.string.second));
+				if(millisUntilFinished < ONE_SECOND * 10){
+					txtHerTimer.setTextColor(getResources().getColor(R.color.red));
+					soundBeep.start();
+				}
+				else
+					txtHerTimer.setTextColor(getResources().getColor(R.color.black));
+			}
+			@Override
+			public void onFinish() {
+				txtHerTimer.setText(getString(R.string.time_out_game));
+				sheLeft();
+			}
+		};
 		
 		startGame();
 		txtScoreUp.setText(StringUtil.convertToPersian(game.getHerScore().toString()) + "/" + StringUtil.convertToPersian(game.getMaxScore().toString()));
 		txtScoreDown.setText(StringUtil.convertToPersian(game.getMyScore().toString()) + "/" + StringUtil.convertToPersian(game.getMaxScore().toString()));
 	}
-
+	
 	private OnClickListener buttonClickListener = new OnClickListener() {
 		
 		@Override
@@ -92,6 +133,7 @@ public class RPSWindow extends GameWindow {
 				notTurn.show();
 				return;
 			}
+			myTimer.cancel();
 			if(game.getTrn() == Turn.BOTH)
 				soundChoice.start();
 			
@@ -139,6 +181,7 @@ public class RPSWindow extends GameWindow {
 	@Override
 	protected void onReceiveMsg(String msg) {
 		if(msg.equals(ROCK_MSG) || msg.equals(PAPER_MSG) || msg.equals(SCISSOR_MSG)){
+			herTimer.cancel();
 			if(game.getTrn() == Turn.BOTH)
 				soundChoice.start();
 			int background = R.raw.tick;
@@ -221,7 +264,6 @@ public class RPSWindow extends GameWindow {
 	}
 
 	private void nextRound(boolean isNewGame) {
-		game.nextRound();
 		final Handler handler = new Handler();
 		if(!isNewGame){
 			handler.postDelayed(new Runnable() {
@@ -233,8 +275,11 @@ public class RPSWindow extends GameWindow {
 			    }
 			}, 1750);
 		}
-		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore())
+		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore()){
 			game.nextRound();
+			myTimer.start();
+			herTimer.start();
+		}
 		else
 			endGame();
 	}

@@ -149,7 +149,6 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		
 
 		registerForContextMenu(getListView());
 		setContactFromUri();
@@ -160,7 +159,6 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		setSmileyButton();
 		setSmileyListener();
 		setUserInput();
-		
 		
 		String titleUserid;
 		if (mUserScreenName != null) {

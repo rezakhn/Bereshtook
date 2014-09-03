@@ -28,6 +28,8 @@ import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.StringUtil;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -409,11 +411,16 @@ public class ShopActivity extends SherlockActivity {
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
 		.putInt(PreferenceConstants.COINS, mConfig.coins)
 		.commit();
-    	dataServiceAdapter.saveGameData(PRIVATE_DATA.COINS, mConfig.coins.toString());
+		Map<String, String> data = new HashMap<String, String>();
+		data.put(PRIVATE_DATA.COINS, mConfig.coins.toString());
+    	dataServiceAdapter.saveGameData(data);
     }
 
     void loadCoins() {
-		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
+		Map<String, String> data = dataServiceAdapter.loadGameData();
+		if(data == null)
+			return;
+		String strCoins = data.get(PRIVATE_DATA.COINS);
 		if(strCoins != null){
 			Integer coins = Integer.parseInt(strCoins);
 			PreferenceManager.getDefaultSharedPreferences(this).edit()

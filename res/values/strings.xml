@@ -276,6 +276,7 @@
     <string name="go">بریم</string>
     <string name="confirm">تایید</string>
     <string name="cancel">انصراف</string>
+    <string name="sorry">ببخشید</string>
     
     <string name="rps_game">سنگ کاغذ قیچی</string>
     <string name="ttt_game">دوز</string>
@@ -325,6 +326,11 @@
     <string name="draw">مساوی</string>
     <string name="not_your_turn">الان نوبت شما نیست!</string>
     <string name="you_are_not_online">شما آنلاین نیستید</string>
+    <string name="default_timer">30 ثانیه</string>
+    <string name="second">ثانیه</string>
+    <string name="time_out_game">پایان وقت</string>
+    <string name="time_out_title">پایان وقت</string>
+    <string name="time_out_message">حواست کجاست؟ وقتت تموم شد و بازی رو باختی!</string>
     
     <string name="choose_profile_image">انتخاب عکس پروفایل</string>
     <string name="gallery">گالری</string>

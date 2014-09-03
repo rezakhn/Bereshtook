@@ -3,6 +3,7 @@ package ir.blackgrape.bereshtook;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,16 +17,16 @@ public class XMPPDataServiceAdapter {
 		this.serviceStub = service;
 	}
 	
-	public void saveGameData(String key, String value){
+	public void saveGameData(Map<String, String> map){
 		try {
-			serviceStub.saveData(key, value);
+			serviceStub.saveData(map);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 	}
-	public String loadGameData(String key){
+	public Map<String, String> loadGameData(){
 		try {
-			return serviceStub.loadData(key);
+			return serviceStub.loadData();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}

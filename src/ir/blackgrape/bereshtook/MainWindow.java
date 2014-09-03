@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -1940,7 +1941,16 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		@Override
 		protected String doInBackground(Void... arg0) {
-			return dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
+			Map<String, String> data = dataServiceAdapter.loadGameData();
+			if(data != null){
+				PreferenceManager.getDefaultSharedPreferences(MainWindow.this)
+				.edit()
+				.putInt(PreferenceConstants.COINS, Integer.parseInt(data.get(PRIVATE_DATA.COINS)))
+				.commit();
+				return data.get(PRIVATE_DATA.COINS);
+			}
+			else
+				return mConfig.coins.toString();
 		}
 
 		@Override
@@ -1948,10 +1958,6 @@ public class MainWindow extends SherlockExpandableListActivity {
 			super.onPostExecute(coins);
 			if (coins == null)
 				return;
-			PreferenceManager.getDefaultSharedPreferences(MainWindow.this)
-					.edit()
-					.putInt(PreferenceConstants.COINS, Integer.parseInt(coins))
-					.commit();
 			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins
 					.toString()) + " " + getString(R.string.coin));
 			updateStatus();

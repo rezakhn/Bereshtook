@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Pair;
 import android.view.View;
@@ -37,6 +38,7 @@ public class TTTWindow extends GameWindow {
 	private static final String SEVEN_MSG = TTT_GAME + "SEVEN#";
 	private static final String EIGHT_MSG = TTT_GAME + "EIGHT#";
 	private static final String NINE_MSG = TTT_GAME + "NINE#";
+	private static final int GAME_TIME = 30000;
 	
 	private Context mContext;
 	private TTTGame game;
@@ -60,6 +62,45 @@ public class TTTWindow extends GameWindow {
 		iv[2][0] = (ImageView) findViewById(R.id.cell_seven);
 		iv[2][1] = (ImageView) findViewById(R.id.cell_eight);
 		iv[2][2] = (ImageView) findViewById(R.id.cell_nine);
+		
+		txtHerTimer = (TextView) findViewById(R.id.txt_timer_up);
+		txtMyTimer = (TextView) findViewById(R.id.txt_timer_down);
+		
+		myTimer = new CountDownTimer(GAME_TIME, ONE_SECOND) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				txtMyTimer.setText(millisUntilFinished / ONE_SECOND + " " + getString(R.string.second));
+				if(millisUntilFinished < ONE_SECOND * 10){
+					txtMyTimer.setTextColor(getResources().getColor(R.color.red));
+					soundBeep.start();
+				}
+				else
+					txtMyTimer.setTextColor(getResources().getColor(R.color.black));
+			}
+			@Override
+			public void onFinish() {
+				txtMyTimer.setText(getString(R.string.time_out_game));
+				timeOutDialog();
+			}
+		};
+		
+		herTimer = new CountDownTimer(GAME_TIME, ONE_SECOND) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				txtHerTimer.setText(millisUntilFinished / ONE_SECOND + " " + getString(R.string.second));
+				if(millisUntilFinished < ONE_SECOND * 10){
+					txtHerTimer.setTextColor(getResources().getColor(R.color.red));
+					soundBeep.start();
+				}
+				else
+					txtHerTimer.setTextColor(getResources().getColor(R.color.black));
+			}
+			@Override
+			public void onFinish() {
+				txtHerTimer.setText(getString(R.string.time_out_game));
+				sheLeft();
+			}
+		};
 		
 		for(int j=0; j<3; j++)
 			for(int i=0; i<3; i++)
@@ -87,12 +128,13 @@ public class TTTWindow extends GameWindow {
 				notTurn.show();
 				return;
 			}
-				
+			boolean isValid = false;
 			switch(v.getId()){
 			case R.id.cell_one:
 				if(game.map[0][0]!=-1)
 					break;
 				game.setMyChoice(0, 0);
+				isValid = true;
 				sendMsg(ONE_MSG);
 				iv[0][0].setImageResource(R.raw.ttt_ex);
 				break;
@@ -100,6 +142,7 @@ public class TTTWindow extends GameWindow {
 				if(game.map[0][1]!=-1)
 					break;
 				game.setMyChoice(0, 1);
+				isValid = true;
 				sendMsg(TWO_MSG);
 				iv[0][1].setImageResource(R.raw.ttt_ex);
 				break;
@@ -107,6 +150,7 @@ public class TTTWindow extends GameWindow {
 				if(game.map[0][2]!=-1)
 					break;
 				game.setMyChoice(0, 2);
+				isValid = true;
 				sendMsg(THREE_MSG);
 				iv[0][2].setImageResource(R.raw.ttt_ex);
 				break;
@@ -114,6 +158,7 @@ public class TTTWindow extends GameWindow {
 				if(game.map[1][0]!=-1)
 					break;
 				game.setMyChoice(1, 0);
+				isValid = true;
 				sendMsg(FOUR_MSG);
 				iv[1][0].setImageResource(R.raw.ttt_ex);
 				break;
@@ -121,6 +166,7 @@ public class TTTWindow extends GameWindow {
 				if(game.map[1][1]!=-1)
 					break;
 				game.setMyChoice(1, 1);
+				isValid = true;
 				sendMsg(FIVE_MSG);
 				iv[1][1].setImageResource(R.raw.ttt_ex);
 				break;
@@ -128,6 +174,7 @@ public class TTTWindow extends GameWindow {
 				if(game.map[1][2]!=-1)
 					break;
 				game.setMyChoice(1, 2);
+				isValid = true;
 				sendMsg(SIX_MSG);
 				iv[1][2].setImageResource(R.raw.ttt_ex);
 				break;
@@ -135,6 +182,7 @@ public class TTTWindow extends GameWindow {
 				if(game.map[2][0]!=-1)
 					break;
 				game.setMyChoice(2, 0);
+				isValid = true;
 				sendMsg(SEVEN_MSG);
 				iv[2][0].setImageResource(R.raw.ttt_ex);
 				break;
@@ -142,6 +190,7 @@ public class TTTWindow extends GameWindow {
 				if(game.map[2][1]!=-1)
 					break;
 				game.setMyChoice(2, 1);
+				isValid = true;
 				sendMsg(EIGHT_MSG);
 				iv[2][1].setImageResource(R.raw.ttt_ex);
 				break;
@@ -149,11 +198,16 @@ public class TTTWindow extends GameWindow {
 				if(game.map[2][2]!=-1)
 					break;
 				game.setMyChoice(2, 2);
+				isValid = true;
 				sendMsg(NINE_MSG);
 				iv[2][2].setImageResource(R.raw.ttt_ex);
 				break;
 			}
-			checkWinner();
+			if(isValid){
+				myTimer.cancel();
+				checkWinner();
+				herTimer.start();
+			}
 		}
 	};
 	
@@ -198,7 +252,9 @@ public class TTTWindow extends GameWindow {
 		if(msg.equals(ONE_MSG) || msg.equals(TWO_MSG) || msg.equals(THREE_MSG)
 				|| msg.equals(FOUR_MSG) || msg.equals(FIVE_MSG) || msg.equals(SIX_MSG)
 				|| msg.equals(SEVEN_MSG) || msg.equals(EIGHT_MSG) || msg.equals(NINE_MSG)){
+			herTimer.cancel();
 			checkWinner();
+			myTimer.start();
 		}
 		else if(msg.startsWith(STATUS_MSG)){
 			String status = msg.replaceFirst(STATUS_MSG, "");
@@ -214,6 +270,7 @@ public class TTTWindow extends GameWindow {
 		if(result.first == Winner.DRAW && !game.noRemainedCell())
 			return; // continue game!
 		else if(result.first == Winner.DRAW && game.noRemainedCell()){
+			showToast(result.first);
 			playSound(result.first);
 			nextRound(false);
 		}
@@ -269,6 +326,17 @@ public class TTTWindow extends GameWindow {
 			soundLose.start();
 		else
 			soundDraw.start();
+	}
+	
+	private void showToast(Winner first) {
+		Toast toast;
+		if(first == Winner.ME)
+			toast = IcsToast.makeText(mContext, getString(R.string.you_won), IcsToast.LENGTH_SHORT);
+		else if(first == Winner.SHE)
+			toast = IcsToast.makeText(mContext, getString(R.string.you_lose), IcsToast.LENGTH_SHORT);
+		else
+			toast = IcsToast.makeText(mContext, getString(R.string.draw), IcsToast.LENGTH_SHORT);
+		toast.show();
 	}
 
 	protected void updateWinnerScore(Winner wnr) {
@@ -345,8 +413,13 @@ public class TTTWindow extends GameWindow {
 			    }
 			}, 2000);
 		}
-		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore())
+		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore()){
 			game.nextRound();
+			if(game.getTrn() == Turn.MY)
+				myTimer.start();
+			else if(game.getTrn() == Turn.HER)
+				herTimer.start();
+		}
 		else
 			endGame();
 	}

@@ -11,7 +11,10 @@ import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StringUtil;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jivesoftware.smackx.packet.DefaultPrivateData;
@@ -289,20 +292,27 @@ public class XMPPService extends GenericService {
 		mServiceDataConnection = new IXMPPDataService.Stub() {
 			
 			@Override
-			public void saveData(String key, String value){
-				if(mSmackable != null && mSmackable.isAuthenticated()){
-					DefaultPrivateData privateData = mSmackable.loadPrivateData(PRIVATE_DATA.GAME, PRIVATE_DATA.DOMAIN);
-					privateData.setValue(key, value);
-					mSmackable.savePrivateData(privateData);
-				}
+			public void saveData(Map map) throws RemoteException {
+				DefaultPrivateData privateData = mSmackable.loadPrivateData(PRIVATE_DATA.GAME, PRIVATE_DATA.DOMAIN);
+				Map<String, String> myMap = map;
+				for(String key : myMap.keySet())
+					privateData.setValue(key, myMap.get(key));
+				mSmackable.savePrivateData(privateData);
 			}
-			
+
 			@Override
-			public String loadData(String key){
+			public Map loadData() throws RemoteException {
 				if(mSmackable != null && mSmackable.isAuthenticated()){
 					DefaultPrivateData privateData = mSmackable.loadPrivateData(PRIVATE_DATA.GAME, PRIVATE_DATA.DOMAIN);
-					if(privateData != null)
-						return privateData.getValue(key);
+					if(privateData == null)
+						return null;
+					Map<String, String> myMap = new HashMap<String, String>();
+					Iterator<String> names = privateData.getNames();
+					while(names.hasNext()){
+						String key = names.next();
+						myMap.put(key, privateData.getValue(key));
+					}
+					return myMap;
 				}
 				return null;
 			}

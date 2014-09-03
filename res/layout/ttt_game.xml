@@ -318,6 +318,18 @@
         android:gravity="center"
         android:clickable="true"
         />
+     
+     <TextView android:id="@+id/txt_timer_up"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/score_up"
+        android:layout_alignBottom="@id/score_up"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:text="@string/default_timer"
+        />     
           
       <ImageView android:id="@+id/score_down"
          android:layout_width="wrap_content"
@@ -341,6 +353,19 @@
         android:clickable="true"
         android:text="@string/send_status"
         />
+     
+     <TextView android:id="@+id/txt_timer_down"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/score_down"
+        android:layout_alignTop="@id/score_down"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:clickable="true"
+        android:text="@string/default_timer"
+        />     
            
       <TextView android:id="@+id/max_score"
          android:layout_width="match_parent"

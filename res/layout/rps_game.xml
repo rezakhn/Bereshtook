@@ -96,6 +96,18 @@
         android:textColor="@android:color/black"
         android:gravity="center"
         android:layout_margin="5dp"
+        />
+     
+     <TextView android:id="@+id/txt_timer_up"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_toLeftOf="@id/btn_score_up"
+        android:layout_alignTop="@id/btn_score_up"
+        android:layout_alignBottom="@id/btn_score_up"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:text="@string/default_timer"
+        android:layout_margin="5dp"
         />      
     
     <Button
@@ -121,6 +133,18 @@
         android:gravity="center"
         android:clickable="true"
         android:text="@string/send_status"
+        android:layout_margin="5dp"
+        />
+     
+     <TextView android:id="@+id/txt_timer_down"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_toLeftOf="@id/btn_score_down"
+        android:layout_alignTop="@id/btn_score_down"
+        android:layout_alignBottom="@id/btn_score_down"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:text="@string/default_timer"
         android:layout_margin="5dp"
         />
         

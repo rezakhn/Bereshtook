@@ -48,5 +48,8 @@
     <color name="tops_header_background">#CCA37A</color>
     <color name="tops_row_background">#E6B88A</color>
     <color name="top_me_background">#FFFF00</color>
+    
+    <color name="red">#FF0000</color>
+    <color name="black">#000000</color>
 </resources>
 

@@ -11,8 +11,11 @@ import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.StringUtil;
+
+import java.util.Map;
+
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,6 +27,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -47,6 +51,7 @@ public abstract class GameWindow extends SherlockActivity {
 	public static final String ACCEPT_CODE = "ACCEPT#";
 	public static final String DENY_CODE = "DENY#";
 	public static final String EXIT_CODE = "EXIT#";
+	public static final int ONE_SECOND = 1000;
 
 	private Intent mServiceIntent;
 	private ServiceConnection mServiceConnection;
@@ -55,7 +60,12 @@ public abstract class GameWindow extends SherlockActivity {
 	private Intent dataServiceIntent;
 	private ServiceConnection dataServiceConnection;
 	private XMPPDataServiceAdapter dataServiceAdapter;
-	protected Integer mCoins = null;
+	private Integer mCoins;
+	private Integer mLefts;
+	private Integer mPlayedGames;
+	private Integer mWins;
+	private Integer mLosses;
+	private Map<String, String> gameMap;
 
 	protected TextView txtStatusUp;
 	protected TextView txtStatusDown;
@@ -72,10 +82,17 @@ public abstract class GameWindow extends SherlockActivity {
 	protected MediaPlayer soundDraw;
 	protected MediaPlayer soundChoice;
 	protected MediaPlayer soundError;
+	protected MediaPlayer soundBeep;
 	protected boolean dataSaved = false;
 	protected boolean gameEnded = false;
 	
+	protected CountDownTimer myTimer;
+	protected CountDownTimer herTimer;
+	protected TextView txtMyTimer;
+	protected TextView txtHerTimer;
+	
 	private BereshtookConfiguration mConfig;
+	private boolean finished = false;
 
 	protected abstract Game getGame();
 
@@ -106,6 +123,7 @@ public abstract class GameWindow extends SherlockActivity {
 		soundDraw = MediaPlayer.create(this, R.raw.sound_draw);
 		soundLose = MediaPlayer.create(this, R.raw.sound_lose);
 		soundError = MediaPlayer.create(this, R.raw.sound_error);
+		soundBeep = MediaPlayer.create(this, R.raw.sound_beep);
 		registerXMPPService();
 		registerDataService();
 	}
@@ -114,26 +132,42 @@ public abstract class GameWindow extends SherlockActivity {
 		gameEnded = true;
 		if (getGame().getMyScore() > getGame().getHerScore()) {
 			soundCheer.start();
-			if (mCoins == null)
-				mCoins = loadCoins();
 			mCoins += 200;
-			saveCoins(mCoins);
-			Integer loadedWins = loadData(PRIVATE_DATA.WINS);
-			if(loadedWins != null)
-				saveData(PRIVATE_DATA.WINS, loadedWins++);
-			Integer loadedLefts = loadData(PRIVATE_DATA.LEFTS);
-			if(loadedLefts != null)
-				saveData(PRIVATE_DATA.LEFTS, loadedLefts--);
+			mLefts--;
+			mWins++;
+			asyncSave();
 			winDialog();
 		} else if (getGame().getMyScore() < getGame().getHerScore()) {
 			soundCry.start();
-			Integer loadedLosses = loadData(PRIVATE_DATA.LOSSES);
-			if(loadedLosses != null)
-				saveData(PRIVATE_DATA.LOSSES, loadedLosses++);
-			Integer loadedLefts = loadData(PRIVATE_DATA.LEFTS);
-			saveData(PRIVATE_DATA.LEFTS, loadedLefts--);
+			mLefts--;
+			mLosses++;
+			asyncSave();
 			loseDialog();
 		}
+	}
+
+	private void asyncSave() {
+		if(noEffect)
+			return;
+		FinalCommit fc = new FinalCommit();
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			fc.executeOnExecutor(FinalCommit.THREAD_POOL_EXECUTOR);
+		else
+			fc.execute();
+	}
+
+	private void save() {
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+		.putInt(PreferenceConstants.COINS, mCoins)
+		.commit();
+		gameMap.put(PRIVATE_DATA.COINS, mCoins.toString());
+		gameMap.put(PRIVATE_DATA.PLAYED_GAMES, mPlayedGames.toString());
+		gameMap.put(PRIVATE_DATA.LEFTS, mLefts.toString());
+		gameMap.put(PRIVATE_DATA.WINS, mWins.toString());
+		gameMap.put(PRIVATE_DATA.LOSSES, mLosses.toString());
+		
+		if(dataServiceAdapter != null)
+			dataServiceAdapter.saveGameData(gameMap);
 	}
 
 	private void loseDialog() {
@@ -146,7 +180,10 @@ public abstract class GameWindow extends SherlockActivity {
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						finish();
+						if(finished)
+							finish();
+						else
+							finished = true;
 					}
 				});
 		dialog.setCancelable(false);
@@ -163,7 +200,10 @@ public abstract class GameWindow extends SherlockActivity {
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						finish();
+						if(finished)
+							finish();
+						else
+							finished = true;
 					}
 				});
 		dialog.setCancelable(false);
@@ -173,14 +213,9 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void sheLeft() {
 		gameEnded = true;
 		mCoins += 100;
-		saveCoins(mCoins);
-		Integer loadedLefts = loadData(PRIVATE_DATA.LEFTS);
-		if(loadedLefts != null)
-			saveData(PRIVATE_DATA.LEFTS, loadedLefts--);
-		Integer loadedGames = loadData(PRIVATE_DATA.PLAYED_GAMES);
-		if(loadedGames != null)
-			saveData(PRIVATE_DATA.LEFTS, loadedGames--);
-
+		mLefts--;
+		mPlayedGames--;
+		asyncSave();
 		new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
 				.setTitle(R.string.opponent_leaved_title)
@@ -191,11 +226,30 @@ public abstract class GameWindow extends SherlockActivity {
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								finish();
+								if(finished)
+									finish();
+								else
+									finished = true;
 							}
 						}).show();
 	}
 
+	protected void timeOutDialog() {
+		new AlertDialog.Builder(this)
+		.setIcon(android.R.drawable.ic_dialog_alert)
+		.setTitle(R.string.time_out_title)
+		.setMessage(R.string.time_out_message)
+		.setCancelable(false)
+		.setPositiveButton(R.string.sorry,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog,
+							int which) {
+							finish();
+					}
+				}).show();
+	}
+	
 	protected void sendMsg(String msg) {
 		if (weAreOnline())
 			mServiceAdapter.sendMessage(withJabberID, msg);
@@ -223,20 +277,6 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		GameBroadcastReceiver.removeGame();
-	}
-
-	public void invitationAccepted(String from) {
-		Builder dialog = new AlertDialog.Builder(this);
-		dialog.setTitle("invite Game");
-		dialog.setMessage(from + " accepted your invitaion!");
-		dialog.setNeutralButton(R.string.ok,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-
-					}
-				});
-		dialog.create();
-		dialog.show();
 	}
 
 	private void registerXMPPService() {
@@ -275,7 +315,7 @@ public abstract class GameWindow extends SherlockActivity {
 
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				if (!dataSaved) {
+				if (!dataSaved && !noEffect) {
 					InitCommit ic = new InitCommit();
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 						ic.executeOnExecutor(InitCommit.THREAD_POOL_EXECUTOR);
@@ -330,47 +370,6 @@ public abstract class GameWindow extends SherlockActivity {
 		}
 	};
 
-	protected Integer loadCoins() {
-		if (dataServiceAdapter == null)
-			return null;
-
-		String strCoins = dataServiceAdapter.loadGameData(PRIVATE_DATA.COINS);
-		if (strCoins != null)
-			return Integer.parseInt(strCoins);
-		return null;
-	}
-
-	protected void saveCoins(Integer coins) {
-		if(noEffect)
-			return;
-		PreferenceManager.getDefaultSharedPreferences(this).edit()
-		.putInt(PreferenceConstants.COINS, coins)
-		.commit();
-		if (dataServiceAdapter == null || coins == null)
-			return;
-		if (coins < 0)
-			coins = 0;
-		dataServiceAdapter.saveGameData(PRIVATE_DATA.COINS, coins.toString());
-	}
-
-	protected Integer loadData(String key) {
-		if (dataServiceAdapter == null || key == null)
-			return null;
-
-		String strValue = dataServiceAdapter.loadGameData(key);
-		if (strValue != null)
-			return Integer.parseInt(strValue);
-		return null;
-	}
-
-	protected void saveData(String key, Integer value) {
-		if(noEffect)
-			return;
-		if (dataServiceAdapter == null || value == null)
-			return;
-		dataServiceAdapter.saveGameData(key, value.toString());
-	}
-
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -401,23 +400,56 @@ public abstract class GameWindow extends SherlockActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mCoins = loadCoins();
-			if(mCoins == null)
-				mCoins = mConfig.coins;
-			if (mCoins != null) {
-				mCoins -= 100;
-				saveCoins(mCoins);
-			}
-			Integer playedGames = loadData(PRIVATE_DATA.PLAYED_GAMES);
-			if(playedGames != null)
-				saveData(PRIVATE_DATA.PLAYED_GAMES, playedGames++);
-			Integer lefts = loadData(PRIVATE_DATA.LEFTS);
-			if(lefts != null)
-				saveData(PRIVATE_DATA.LEFTS, lefts++);
-			dataSaved = true;
+			if(dataServiceAdapter != null)
+				gameMap = dataServiceAdapter.loadGameData();
+			if(gameMap == null)
+				return null;
+			mCoins = Integer.valueOf(gameMap.get(PRIVATE_DATA.COINS));
+			mCoins -= 100;
+			mLefts = Integer.valueOf(gameMap.get(PRIVATE_DATA.LEFTS));
+			mLefts++;
+			mPlayedGames = Integer.valueOf(gameMap.get(PRIVATE_DATA.PLAYED_GAMES));
+			mPlayedGames++;
+			mWins = Integer.valueOf(gameMap.get(PRIVATE_DATA.WINS));
+			mLosses = Integer.valueOf(gameMap.get(PRIVATE_DATA.LOSSES));
 			
+			save();
 			return null;
 		}
-		
 	}
+
+	class FinalCommit extends AsyncTask<Void, Void, Void>{
+		private ProgressDialog waitDialog;
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			waitDialog = new ProgressDialog(GameWindow.this);
+			waitDialog.setCancelable(false);
+			waitDialog.show();
+		}
+		@Override
+		protected Void doInBackground(Void... params) {
+			save();
+			return null;
+		}
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			waitDialog.cancel();
+			if(finished)
+				GameWindow.this.finish();
+			else
+				finished = true;
+		}
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if(myTimer != null)
+			myTimer.cancel();
+		if(herTimer != null)
+			herTimer.cancel();
+	}	
 }
