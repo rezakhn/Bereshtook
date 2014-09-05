@@ -128,6 +128,7 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void endGame() {
+		cancleTimers();
 		gameEnded = true;
 		if (getGame().getMyScore() > getGame().getHerScore()) {
 			soundCheer.start();
@@ -223,6 +224,7 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void sheLeft() {
+		cancleTimers();
 		gameEnded = true;
 		mCoins += 100;
 		mLefts--;
@@ -247,6 +249,7 @@ public abstract class GameWindow extends SherlockActivity {
 	}
 
 	protected void timeOutDialog() {
+		cancleTimers();
 		new AlertDialog.Builder(this)
 		.setIcon(android.R.drawable.ic_dialog_alert)
 		.setTitle(R.string.time_out_title)
@@ -476,11 +479,8 @@ public abstract class GameWindow extends SherlockActivity {
 	
 	@Override
 	protected void onStop() {
+		cancleTimers();
 		super.onStop();
-		if(myTimer != null)
-			myTimer.cancel();
-		if(herTimer != null)
-			herTimer.cancel();
 		if(!gameEnded){
 			sendMsg(getExitMsg());
         	finish();
@@ -508,5 +508,10 @@ public abstract class GameWindow extends SherlockActivity {
 	
 	public String getWithJabberID(){
 		return withJabberID;
+	}
+	
+	private void cancleTimers(){
+		myTimer.cancel();
+		herTimer.cancel();
 	}
 }
