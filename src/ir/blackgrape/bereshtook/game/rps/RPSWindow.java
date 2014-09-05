@@ -89,6 +89,7 @@ public class RPSWindow extends GameWindow {
 			}
 			@Override
 			public void onFinish() {
+				cancleTimers();
 				txtMyTimer.setText(getString(R.string.time_out_game));
 				timeOutDialog();
 			}
@@ -107,6 +108,7 @@ public class RPSWindow extends GameWindow {
 			}
 			@Override
 			public void onFinish() {
+				cancleTimers();
 				txtHerTimer.setText(getString(R.string.time_out_game));
 				sheLeft();
 			}

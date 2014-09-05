@@ -288,12 +288,6 @@ public abstract class GameWindow extends SherlockActivity {
 				&& !msg.endsWith(ACCEPT_CODE) && !msg.endsWith(DENY_CODE);
 	}
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		GameBroadcastReceiver.removeGame();
-	}
-
 	private void registerXMPPService() {
 		Log.i(TAG, "called startXMPPService()");
 		mServiceIntent = new Intent(this, XMPPService.class);
@@ -479,6 +473,7 @@ public abstract class GameWindow extends SherlockActivity {
 	
 	@Override
 	protected void onStop() {
+		GameBroadcastReceiver.removeGame();
 		cancleTimers();
 		super.onStop();
 		if(!gameEnded){
@@ -510,7 +505,7 @@ public abstract class GameWindow extends SherlockActivity {
 		return withJabberID;
 	}
 	
-	private void cancleTimers(){
+	protected void cancleTimers(){
 		myTimer.cancel();
 		herTimer.cancel();
 	}
