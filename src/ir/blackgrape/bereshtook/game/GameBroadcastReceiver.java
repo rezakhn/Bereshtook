@@ -50,9 +50,8 @@ public class GameBroadcastReceiver extends BroadcastReceiver {
 			game.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			mContext.startActivity(game);
 		}
-		else if(isGameSet)
+		else if(isGameSet && from.equals(mGameWindow.getWithJabberID()))
 			mGameWindow.onReceiveMsg(message);
-
 	}
 
 }

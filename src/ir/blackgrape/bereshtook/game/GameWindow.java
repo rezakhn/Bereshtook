@@ -451,5 +451,9 @@ public abstract class GameWindow extends SherlockActivity {
 			myTimer.cancel();
 		if(herTimer != null)
 			herTimer.cancel();
-	}	
+	}
+	
+	public String getWithJabberID(){
+		return withJabberID;
+	}
 }
