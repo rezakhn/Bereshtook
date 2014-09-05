@@ -331,6 +331,9 @@
     <string name="time_out_game">پایان وقت</string>
     <string name="time_out_title">پایان وقت</string>
     <string name="time_out_message">حواست کجاست؟ وقتت تموم شد و بازی رو باختی!</string>
+    <string name="load_problem_title">خطا</string>
+    <string name="load_problem_message">یه مشکلی عجیب پیش اومده!</string>
+    <string name="load_problem_button">عجب!</string>
     
     <string name="choose_profile_image">انتخاب عکس پروفایل</string>
     <string name="gallery">گالری</string>

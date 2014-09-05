@@ -285,30 +285,7 @@ public class RPSWindow extends GameWindow {
 	}
 	
 	@Override
-	public void onBackPressed() {
-	    new AlertDialog.Builder(this)
-	        .setIcon(android.R.drawable.ic_dialog_alert)
-	        .setTitle(R.string.exit_game_title)
-	        .setMessage(R.string.exit_game_message)
-	        .setPositiveButton(R.string.exit_game_confirm, new DialogInterface.OnClickListener()
-		    {
-		        @Override
-		        public void onClick(DialogInterface dialog, int which) {
-		        	sendMsg(EXIT_MSG);
-		            finish();
-		        }
-	
-		    })
-		    .setNegativeButton(R.string.exit_game_cancel, null)
-		    .show();
-	}
-	
-	@Override
-	protected void onStop() {
-		super.onStop();
-		if(!gameEnded){
-			sendMsg(EXIT_MSG);
-        	finish();
-		}
+	protected String getExitMsg() {
+		return EXIT_MSG;
 	}
 }

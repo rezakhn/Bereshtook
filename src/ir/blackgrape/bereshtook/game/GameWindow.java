@@ -95,10 +95,9 @@ public abstract class GameWindow extends SherlockActivity {
 	private boolean finished = false;
 
 	protected abstract Game getGame();
-
 	protected abstract void onReceiveMsg(String msg);
-
 	protected abstract void startGame();
+	protected abstract String getExitMsg();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +167,19 @@ public abstract class GameWindow extends SherlockActivity {
 		
 		if(dataServiceAdapter != null)
 			dataServiceAdapter.saveGameData(gameMap);
+	}
+	
+	private boolean load(){
+		if(dataServiceAdapter != null)
+			gameMap = dataServiceAdapter.loadGameData();
+		if(gameMap == null)
+			return false;
+		mCoins = Integer.valueOf(gameMap.get(PRIVATE_DATA.COINS));
+		mLefts = Integer.valueOf(gameMap.get(PRIVATE_DATA.LEFTS));
+		mPlayedGames = Integer.valueOf(gameMap.get(PRIVATE_DATA.PLAYED_GAMES));
+		mWins = Integer.valueOf(gameMap.get(PRIVATE_DATA.WINS));
+		mLosses = Integer.valueOf(gameMap.get(PRIVATE_DATA.LOSSES));
+		return true;
 	}
 
 	private void loseDialog() {
@@ -400,19 +412,20 @@ public abstract class GameWindow extends SherlockActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			if(dataServiceAdapter != null)
-				gameMap = dataServiceAdapter.loadGameData();
-			if(gameMap == null)
-				return null;
-			mCoins = Integer.valueOf(gameMap.get(PRIVATE_DATA.COINS));
-			mCoins -= 100;
-			mLefts = Integer.valueOf(gameMap.get(PRIVATE_DATA.LEFTS));
-			mLefts++;
-			mPlayedGames = Integer.valueOf(gameMap.get(PRIVATE_DATA.PLAYED_GAMES));
-			mPlayedGames++;
-			mWins = Integer.valueOf(gameMap.get(PRIVATE_DATA.WINS));
-			mLosses = Integer.valueOf(gameMap.get(PRIVATE_DATA.LOSSES));
+			boolean success = false;
+			int count = 0;
+			do{
+				if(count > 10){
+					loadProblemDialog();
+					return null;
+				}
+				success = load();
+				count++;
+			}while(!success);
 			
+			mCoins -= 100;
+			mLefts++;
+			mPlayedGames++;
 			save();
 			return null;
 		}
@@ -444,6 +457,23 @@ public abstract class GameWindow extends SherlockActivity {
 		}
 	}
 	
+	private void loadProblemDialog(){
+		new AlertDialog.Builder(this)
+		.setIcon(android.R.drawable.ic_dialog_alert)
+		.setTitle(R.string.load_problem_title)
+		.setMessage(R.string.load_problem_message)
+		.setCancelable(false)
+		.setPositiveButton(R.string.load_problem_button,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog,
+							int which) {
+							sendMsg(getExitMsg());
+							finish();
+					}
+				}).show();
+	}
+	
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -451,6 +481,29 @@ public abstract class GameWindow extends SherlockActivity {
 			myTimer.cancel();
 		if(herTimer != null)
 			herTimer.cancel();
+		if(!gameEnded){
+			sendMsg(getExitMsg());
+        	finish();
+		}		
+	}
+	
+	@Override
+	public void onBackPressed() {
+	    new AlertDialog.Builder(this)
+	        .setIcon(android.R.drawable.ic_dialog_alert)
+	        .setTitle(R.string.exit_game_title)
+	        .setMessage(R.string.exit_game_message)
+	        .setPositiveButton(R.string.exit_game_confirm, new DialogInterface.OnClickListener()
+		    {
+		        @Override
+		        public void onClick(DialogInterface dialog, int which) {
+		        	sendMsg(getExitMsg());
+		            finish();
+		        }
+	
+		    })
+		    .setNegativeButton(R.string.exit_game_cancel, null)
+		    .show();
 	}
 	
 	public String getWithJabberID(){

@@ -42,4 +42,9 @@ public class BattleshipWindow extends GameWindow {
 		return null;
 	}
 
+	@Override
+	protected String getExitMsg() {
+		return null;
+	}
+
 }
