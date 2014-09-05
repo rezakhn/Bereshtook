@@ -226,10 +226,12 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void sheLeft() {
 		cancleTimers();
 		gameEnded = true;
-		mCoins += 100;
-		mLefts--;
-		mPlayedGames--;
-		asyncSave();
+		if(mCoins != null){
+			mCoins += 100;
+			mLefts--;
+			mPlayedGames--;
+			asyncSave();
+		}
 		new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
 				.setTitle(R.string.opponent_leaved_title)
@@ -324,7 +326,7 @@ public abstract class GameWindow extends SherlockActivity {
 
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
-				if (!dataSaved && !noEffect) {
+				if (!dataSaved) {
 					InitCommit ic = new InitCommit();
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 						ic.executeOnExecutor(InitCommit.THREAD_POOL_EXECUTOR);
@@ -409,6 +411,13 @@ public abstract class GameWindow extends SherlockActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			if(noEffect){
+				mCoins = 0;
+				mWins = 0;
+				mLosses = 0;
+				mPlayedGames = 0;
+				return null;
+			}
 			boolean success = false;
 			int count = 0;
 			do{
@@ -424,6 +433,7 @@ public abstract class GameWindow extends SherlockActivity {
 			mLefts++;
 			mPlayedGames++;
 			save();
+			dataSaved = true;
 			return null;
 		}
 	}

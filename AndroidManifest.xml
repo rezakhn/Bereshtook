@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="preferExternal"
-	android:versionCode="42" android:versionName="@string/version_name" package="ir.blackgrape.bereshtook">
+	android:versionCode="43" android:versionName="@string/version_name" package="ir.blackgrape.bereshtook">
 
 	<uses-sdk android:targetSdkVersion="19" android:minSdkVersion="8"/>
 
