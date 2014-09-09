@@ -193,7 +193,7 @@ public abstract class GameWindow extends SherlockActivity {
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						if(finished)
+						if(finished || noEffect)
 							finish();
 						else
 							finished = true;
@@ -213,7 +213,7 @@ public abstract class GameWindow extends SherlockActivity {
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						if(finished)
+						if(finished || noEffect)
 							finish();
 						else
 							finished = true;
@@ -226,12 +226,10 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void sheLeft() {
 		cancleTimers();
 		gameEnded = true;
-		if(mCoins != null){
-			mCoins += 100;
-			mLefts--;
-			mPlayedGames--;
-			asyncSave();
-		}
+		mCoins += 100;
+		mLefts--;
+		mPlayedGames--;
+		asyncSave();
 		new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
 				.setTitle(R.string.opponent_leaved_title)
@@ -242,7 +240,7 @@ public abstract class GameWindow extends SherlockActivity {
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								if(finished)
+								if(finished || noEffect)
 									finish();
 								else
 									finished = true;
@@ -415,6 +413,7 @@ public abstract class GameWindow extends SherlockActivity {
 				mCoins = 0;
 				mWins = 0;
 				mLosses = 0;
+				mLefts = 0;
 				mPlayedGames = 0;
 				return null;
 			}
@@ -447,6 +446,7 @@ public abstract class GameWindow extends SherlockActivity {
 			waitDialog = new ProgressDialog(GameWindow.this);
 			waitDialog.setCancelable(false);
 			waitDialog.show();
+			validateValues();
 		}
 		@Override
 		protected Void doInBackground(Void... params) {
@@ -518,5 +518,19 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void cancleTimers(){
 		myTimer.cancel();
 		herTimer.cancel();
+	}
+	
+	private void validateValues(){
+		if(mCoins < 0)
+			mCoins = 0;
+		if(mWins < 0)
+			mWins = 0;
+		if(mLosses < 0)
+			mLosses = 0;
+		if(mLefts < 0)
+			mLefts = 0;
+		if(mPlayedGames < 0)
+			mPlayedGames = 0;
+			
 	}
 }
