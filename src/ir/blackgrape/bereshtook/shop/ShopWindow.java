@@ -25,7 +25,7 @@ import ir.blackgrape.bereshtook.util.ConstantKeys;
 import ir.blackgrape.bereshtook.util.Decryptor;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
-import ir.blackgrape.bereshtook.util.StringUtil;
+import ir.blackgrape.bereshtook.util.PersianUtil;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -100,7 +100,7 @@ import com.actionbarsherlock.app.SherlockActivity;
  *
  * @author Bruno Oliveira (Google)
  */
-public class ShopActivity extends SherlockActivity {
+public class ShopWindow extends SherlockActivity {
     // Debug tag, for logging
     static final String TAG = "CoinShop";
 
@@ -348,7 +348,7 @@ public class ShopActivity extends SherlockActivity {
                 
                 mConfig.coins += extraCoins;
                 saveCoins();
-                currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mConfig.coins.toString())));
+                currentCoins.setText(getString(R.string.current_amount_coins, PersianUtil.convertToPersian(mConfig.coins.toString())));
                 successDialog(extraCoins);
             }
             else {
@@ -376,7 +376,7 @@ public class ShopActivity extends SherlockActivity {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.successful_payment);
-		dialog.setMessage(getString(R.string.add_coins_success, StringUtil.convertToPersian(extraCoins.toString())));
+		dialog.setMessage(getString(R.string.add_coins_success, PersianUtil.convertToPersian(extraCoins.toString())));
 		dialog.setPositiveButton(R.string.ok,
 				new DialogInterface.OnClickListener() {
 
@@ -454,7 +454,7 @@ public class ShopActivity extends SherlockActivity {
 				dataServiceAdapter = new XMPPDataServiceAdapter(
 						IXMPPDataService.Stub.asInterface(service));
 				loadCoins();
-				currentCoins.setText(getString(R.string.current_amount_coins, StringUtil.convertToPersian(mConfig.coins.toString())));
+				currentCoins.setText(getString(R.string.current_amount_coins, PersianUtil.convertToPersian(mConfig.coins.toString())));
 				setWaitScreen(false);
 			}
 			

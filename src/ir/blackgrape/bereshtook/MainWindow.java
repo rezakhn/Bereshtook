@@ -17,7 +17,7 @@ import ir.blackgrape.bereshtook.scoreboard.ScoreboardActivity;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.IXMPPRosterService;
 import ir.blackgrape.bereshtook.service.XMPPService;
-import ir.blackgrape.bereshtook.shop.ShopActivity;
+import ir.blackgrape.bereshtook.shop.ShopWindow;
 import ir.blackgrape.bereshtook.util.ConnectionState;
 import ir.blackgrape.bereshtook.util.ConstantKeys;
 import ir.blackgrape.bereshtook.util.CropOption;
@@ -28,7 +28,7 @@ import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.SimpleCursorTreeAdapter;
 import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StatusUtil;
-import ir.blackgrape.bereshtook.util.StringUtil;
+import ir.blackgrape.bereshtook.util.PersianUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -850,7 +850,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 	private void loadCoins() {
 		if (mConfig.coins != null)
-			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins
+			actionBar.setSubtitle(PersianUtil.convertToPersian(mConfig.coins
 					.toString()) + " " + getString(R.string.coin));
 		if (!isConnected() || dataServiceAdapter == null)
 			return;
@@ -973,7 +973,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 
 		case R.id.menu_coins:
 			if (isConnected())
-				startActivity(new Intent(this, ShopActivity.class));
+				startActivity(new Intent(this, ShopWindow.class));
 			else if (!isConnecting())
 				toggleConnection();
 			return true;
@@ -984,6 +984,11 @@ public class MainWindow extends SherlockExpandableListActivity {
 			else if (!isConnecting())
 				toggleConnection();
 			return true;
+		case R.id.menu_search:
+			if(isConnected())
+				startActivity(new Intent(this, SearchWindow.class));
+			else if(isConnecting())
+				toggleConnection();
 		}
 
 		return false;
@@ -1958,7 +1963,7 @@ public class MainWindow extends SherlockExpandableListActivity {
 			super.onPostExecute(coins);
 			if (coins == null)
 				return;
-			actionBar.setSubtitle(StringUtil.convertToPersian(mConfig.coins
+			actionBar.setSubtitle(PersianUtil.convertToPersian(mConfig.coins
 					.toString()) + " " + getString(R.string.coin));
 			updateStatus();
 		}

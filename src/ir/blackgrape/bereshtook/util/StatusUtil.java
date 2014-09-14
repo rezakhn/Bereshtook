@@ -14,7 +14,7 @@ public class StatusUtil {
 	public static CharSequence makeStatus(String herStatus) {
 		if(herStatus.contains("S")){
 			String coins = herStatus.substring(0, herStatus.indexOf('S'));
-			return StringUtil.convertToPersian(coins) + " " + "سکه";
+			return PersianUtil.convertToPersian(coins) + " " + "سکه";
 		}
 		else
 			return "";
@@ -51,7 +51,7 @@ public class StatusUtil {
 		 
 		 StringBuilder sb = new StringBuilder();
 		 if(coins != null && distance != null){
-			 sb.append(StringUtil.convertToPersian(coins));
+			 sb.append(PersianUtil.convertToPersian(coins));
 			 sb.append(" ");
 			 sb.append("سکه");
 			 sb.append(" (");
@@ -60,7 +60,7 @@ public class StatusUtil {
 			 return sb;
 		 }
 		 else if(coins != null)
-			 return StringUtil.convertToPersian(coins) + " " + "سکه";
+			 return PersianUtil.convertToPersian(coins) + " " + "سکه";
 		 else if(distance != null)
 			 return "(" + distance + ")";
 		 else
@@ -79,12 +79,12 @@ public class StatusUtil {
 		Integer iDis = fDis.intValue();
 		
 		if(fDis < 2000){
-			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + "متر";
+			strDis += PersianUtil.convertToPersian(iDis.toString()) + " " + "متر";
 		}
 		else{
 			Double dDis = iDis.doubleValue() / 1000;
 			iDis = dDis.intValue();
-			strDis += StringUtil.convertToPersian(iDis.toString()) + " " + "کیلومتر";
+			strDis += PersianUtil.convertToPersian(iDis.toString()) + " " + "کیلومتر";
 		}
 		return strDis;
 	}

@@ -6,7 +6,7 @@ import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Choice;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Turn;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Winner;
-import ir.blackgrape.bereshtook.util.StringUtil;
+import ir.blackgrape.bereshtook.util.PersianUtil;
 import android.R.anim;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -115,8 +115,8 @@ public class RPSWindow extends GameWindow {
 		};
 		
 		startGame();
-		txtScoreUp.setText(StringUtil.convertToPersian(game.getHerScore().toString()) + "/" + StringUtil.convertToPersian(game.getMaxScore().toString()));
-		txtScoreDown.setText(StringUtil.convertToPersian(game.getMyScore().toString()) + "/" + StringUtil.convertToPersian(game.getMaxScore().toString()));
+		txtScoreUp.setText(PersianUtil.convertToPersian(game.getHerScore().toString()) + "/" + PersianUtil.convertToPersian(game.getMaxScore().toString()));
+		txtScoreDown.setText(PersianUtil.convertToPersian(game.getMyScore().toString()) + "/" + PersianUtil.convertToPersian(game.getMaxScore().toString()));
 	}
 	
 	private OnClickListener buttonClickListener = new OnClickListener() {

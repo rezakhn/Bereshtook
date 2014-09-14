@@ -4,7 +4,7 @@ import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.data.RosterProvider.RosterConstants;
 import ir.blackgrape.bereshtook.util.ConstantKeys;
 import ir.blackgrape.bereshtook.util.Decryptor;
-import ir.blackgrape.bereshtook.util.StringUtil;
+import ir.blackgrape.bereshtook.util.PersianUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -135,18 +135,18 @@ public class FragmentTabScoreboard extends SherlockFragment {
 					JSONObject item = tops.getJSONObject(i.toString());
 					HashMap<String, String> map = new HashMap<String, String>();
 					Integer rank = i+1;
-					map.put(RANK, StringUtil.convertToPersian(rank.toString()));
+					map.put(RANK, PersianUtil.convertToPersian(rank.toString()));
 					map.put(USERNAME, item.getString(USERNAME));
 					Integer score = item.getInt(factor);
-					map.put(SCORE, StringUtil.convertToPersian(score.toString()));
+					map.put(SCORE, PersianUtil.convertToPersian(score.toString()));
 					oslist.add(map);
 				}
 				
 				if(myRank > tops.length()){
 					HashMap<String, String> me = new HashMap<String, String>();
-					me.put(RANK, StringUtil.convertToPersian(myRank.toString()));
+					me.put(RANK, PersianUtil.convertToPersian(myRank.toString()));
 					me.put(USERNAME, myUsername);
-					me.put(SCORE, StringUtil.convertToPersian(myScore.toString()));
+					me.put(SCORE, PersianUtil.convertToPersian(myScore.toString()));
 					oslist.add(me);
 				}
 				

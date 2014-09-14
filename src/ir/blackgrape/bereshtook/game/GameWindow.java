@@ -10,7 +10,7 @@ import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
-import ir.blackgrape.bereshtook.util.StringUtil;
+import ir.blackgrape.bereshtook.util.PersianUtil;
 
 import java.util.Map;
 
@@ -188,7 +188,7 @@ public abstract class GameWindow extends SherlockActivity {
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.lose_game_title);
 		int amount = noEffect ? 0 : 100;
-		dialog.setMessage(getString(R.string.lose_game_message, StringUtil.convertToPersian(Integer.valueOf(amount).toString())));
+		dialog.setMessage(getString(R.string.lose_game_message, PersianUtil.convertToPersian(Integer.valueOf(amount).toString())));
 		dialog.setPositiveButton(R.string.lose_game_button,
 				new DialogInterface.OnClickListener() {
 					@Override
@@ -208,7 +208,7 @@ public abstract class GameWindow extends SherlockActivity {
 		dialog.setIcon(R.drawable.ic_coins);
 		dialog.setTitle(R.string.won_game_title);
 		int amount = noEffect ? 0 : 100;
-		dialog.setMessage(getString(R.string.won_game_message, StringUtil.convertToPersian(Integer.valueOf(amount).toString())));
+		dialog.setMessage(getString(R.string.won_game_message, PersianUtil.convertToPersian(Integer.valueOf(amount).toString())));
 		dialog.setPositiveButton(R.string.won_game_button,
 				new DialogInterface.OnClickListener() {
 					@Override

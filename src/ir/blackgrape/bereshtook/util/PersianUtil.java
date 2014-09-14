@@ -1,6 +1,6 @@
 package ir.blackgrape.bereshtook.util;
 
-public class StringUtil {
+public class PersianUtil {
 	private static char[] arabicChars = {'٠','١','٢','٣','٤','٥','٦','٧','٨','٩'};
 	
 	public static String convertToPersian(String str){

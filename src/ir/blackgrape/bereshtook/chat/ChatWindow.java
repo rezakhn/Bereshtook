@@ -16,7 +16,7 @@ import ir.blackgrape.bereshtook.game.ttt.TTTWindow;
 import ir.blackgrape.bereshtook.service.IXMPPChatService;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
-import ir.blackgrape.bereshtook.shop.ShopActivity;
+import ir.blackgrape.bereshtook.shop.ShopWindow;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.StatusMode;
 import ir.blackgrape.bereshtook.util.StatusUtil;
@@ -560,7 +560,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                    	startActivity(new Intent(ChatWindow.this, ShopActivity.class));
+                    	startActivity(new Intent(ChatWindow.this, ShopWindow.class));
                     }
                 });
 		chooseNotifyDialog.setNegativeButton(R.string.cancel,

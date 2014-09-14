@@ -115,6 +115,7 @@
 	<string name="menu_connect">اتصال</string>
 	<string name="menu_disconnect">قطع ارتباط</string>
 	<string name="menu_about">درباره برشتوک</string>
+	<string name="menu_search">جستجو</string>
 	
 	<string name="top_bereshtooks">برترین برشتوک ها</string>
 	<string name="win_percent">درصد پیروزی</string>
