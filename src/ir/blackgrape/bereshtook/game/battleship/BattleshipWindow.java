@@ -11,6 +11,7 @@ public class BattleshipWindow extends GameWindow {
 	public static final String INVITE_MSG = BATTLESHIP_GAME + "INVITE#";
 	public static final String ACCEPT_MSG = BATTLESHIP_GAME + "ACCEPT#";
 	public static final String DENY_MSG = BATTLESHIP_GAME + "DENY#";
+	public static final String EXIT_MSG = BATTLESHIP_GAME + "EXIT";
 	
 	private GLSurfaceView mGLView;
 	
@@ -24,12 +25,12 @@ public class BattleshipWindow extends GameWindow {
 	
 	@Override
 	protected void onReceiveMsg(String msg) {
-
+		
 	}
 
 	@Override
 	protected void startGame() {
-
+		
 	}
 
 	@Override
@@ -44,7 +45,7 @@ public class BattleshipWindow extends GameWindow {
 
 	@Override
 	protected String getExitMsg() {
-		return null;
+		return EXIT_MSG;
 	}
 
 }

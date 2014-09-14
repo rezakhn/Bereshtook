@@ -133,6 +133,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		GameBroadcastReceiver.setContext(getApplicationContext());
 		setTheme(BereshtookApplication.getConfig(this).getTheme());
 		super.onCreate(savedInstanceState);
 		mActivity = this;
