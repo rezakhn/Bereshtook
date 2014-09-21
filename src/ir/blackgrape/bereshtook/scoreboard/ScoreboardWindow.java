@@ -10,7 +10,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
-public class ScoreboardActivity extends SherlockFragmentActivity {
+public class ScoreboardWindow extends SherlockFragmentActivity {
 	
 	private ActionBar mActionBar;
 	private ViewPager mPager;

@@ -1,6 +1,7 @@
 package ir.blackgrape.bereshtook.game;
 
 import ir.blackgrape.bereshtook.game.battleship.BattleshipWindow;
+import ir.blackgrape.bereshtook.game.dotline.DotlineWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSWindow;
 import ir.blackgrape.bereshtook.game.ttt.TTTWindow;
 import android.content.BroadcastReceiver;
@@ -21,7 +22,7 @@ public class GameBroadcastReceiver extends BroadcastReceiver {
 		noEffect = _noEffect;
 	}
 	
-	public static void setGame(GameWindow gameWindow, String jid){
+	public static void setGame(GameWindow gameWindow){
 		mGameWindow = gameWindow;
 		isGameSet = true;
 	}
@@ -41,6 +42,8 @@ public class GameBroadcastReceiver extends BroadcastReceiver {
 				game = new Intent(mContext, RPSWindow.class);
 			else if(message.startsWith(TTTWindow.TTT_GAME))
 				game = new Intent(mContext, TTTWindow.class);
+			else if(message.startsWith(DotlineWindow.DOTLINE_GAME))
+				game = new Intent(mContext, DotlineWindow.class);
 			else if(message.startsWith(BattleshipWindow.BATTLESHIP_GAME))
 				game = new Intent(mContext, BattleshipWindow.class);
 			

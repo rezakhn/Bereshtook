@@ -7,9 +7,6 @@ import ir.blackgrape.bereshtook.game.rps.RPSGame.Choice;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Turn;
 import ir.blackgrape.bereshtook.game.rps.RPSGame.Winner;
 import ir.blackgrape.bereshtook.util.PersianUtil;
-import android.R.anim;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -35,12 +32,9 @@ public class RPSWindow extends GameWindow {
 	private static final String SCISSOR_MSG = RPS_GAME + "SCISSOR#";
 	private static final int GAME_TIME = 30000;
 	
-	private RPSGame game;
-	private Button btnRockUp;
+	private RPSGame mGame;
 	private Button btnRockDown;
-	private Button btnPaperUp;
 	private Button btnPaperDown;
-	private Button btnScissorUp;
 	private Button btnScissorDown;
 	private ImageView choiceUp;
 	private ImageView choiceDown;
@@ -52,11 +46,8 @@ public class RPSWindow extends GameWindow {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.rps_game);
 		
-		btnRockUp = (Button) findViewById(R.id.btnRockUp);
 		btnRockDown = (Button) findViewById(R.id.btn_rock_down);
-		btnPaperUp = (Button) findViewById(R.id.btnPaperUp);
 		btnPaperDown = (Button) findViewById(R.id.btn_paper_down);
-		btnScissorUp = (Button) findViewById(R.id.btnScissorUp);
 		btnScissorDown = (Button) findViewById(R.id.btn_scissor_down);
 		
 		choiceUp = (ImageView)findViewById(R.id.img_choice_up);
@@ -115,8 +106,8 @@ public class RPSWindow extends GameWindow {
 		};
 		
 		startGame();
-		txtScoreUp.setText(PersianUtil.convertToPersian(game.getHerScore().toString()) + "/" + PersianUtil.convertToPersian(game.getMaxScore().toString()));
-		txtScoreDown.setText(PersianUtil.convertToPersian(game.getMyScore().toString()) + "/" + PersianUtil.convertToPersian(game.getMaxScore().toString()));
+		txtScoreUp.setText(PersianUtil.convertToPersian(mGame.getHerScore().toString()) + "/" + PersianUtil.convertToPersian(mGame.getMaxScore().toString()));
+		txtScoreDown.setText(PersianUtil.convertToPersian(mGame.getMyScore().toString()) + "/" + PersianUtil.convertToPersian(mGame.getMaxScore().toString()));
 	}
 	
 	private OnClickListener buttonClickListener = new OnClickListener() {
@@ -129,36 +120,36 @@ public class RPSWindow extends GameWindow {
 				tNotSent.show();
 				return;
 			}
-			else if(game.getTrn() != Turn.MY && game.getTrn() != Turn.BOTH){
+			else if(mGame.getTrn() != Turn.MY && mGame.getTrn() != Turn.BOTH){
 				soundError.start();
 				Toast notTurn = IcsToast.makeText(mContext, getString(R.string.not_your_turn), IcsToast.LENGTH_SHORT);
 				notTurn.show();
 				return;
 			}
 			myTimer.cancel();
-			if(game.getTrn() == Turn.BOTH)
+			if(mGame.getTrn() == Turn.BOTH)
 				soundChoice.start();
 			
 			switch(v.getId()){
 			case R.id.btn_rock_down:
 				sendMsg(ROCK_MSG);
-				game.setMyChoice(Choice.ROCK);
+				mGame.setMyChoice(Choice.ROCK);
 				choiceDown.setBackgroundResource(R.raw.a_rock_down);
 				break;
 			case R.id.btn_paper_down:
 				sendMsg(PAPER_MSG);
-				game.setMyChoice(Choice.PAPER);
+				mGame.setMyChoice(Choice.PAPER);
 				choiceDown.setBackgroundResource(R.raw.a_paper_down);
 				break;
 			case R.id.btn_scissor_down:
 				sendMsg(SCISSOR_MSG);
-				game.setMyChoice(Choice.SCISSOR);
+				mGame.setMyChoice(Choice.SCISSOR);
 				choiceDown.setBackgroundResource(R.raw.a_scissor_down);
 				break;
 			}
 			
-			if(game.getTrn() == Turn.NONE){
-				switch (game.getHerChoice()) {
+			if(mGame.getTrn() == Turn.NONE){
+				switch (mGame.getHerChoice()) {
 				case ROCK:
 					choiceUp.setBackgroundResource(R.raw.a_rock_up);
 					break;
@@ -184,25 +175,25 @@ public class RPSWindow extends GameWindow {
 	protected void onReceiveMsg(String msg) {
 		if(msg.equals(ROCK_MSG) || msg.equals(PAPER_MSG) || msg.equals(SCISSOR_MSG)){
 			herTimer.cancel();
-			if(game.getTrn() == Turn.BOTH)
+			if(mGame.getTrn() == Turn.BOTH)
 				soundChoice.start();
 			int background = R.raw.tick;
 			if(msg.equals(ROCK_MSG)){
-				game.setHerChoice(Choice.ROCK);
+				mGame.setHerChoice(Choice.ROCK);
 				background = R.raw.a_rock_up;
 			}
 			else if(msg.equals(PAPER_MSG)){
-				game.setHerChoice(Choice.PAPER);
+				mGame.setHerChoice(Choice.PAPER);
 				background = R.raw.a_paper_up;
 			}
 			else if(msg.equals(SCISSOR_MSG)){
-				game.setHerChoice(Choice.SCISSOR);
+				mGame.setHerChoice(Choice.SCISSOR);
 				background = R.raw.a_scissor_up;
 			}
-			if(game.getTrn() == Turn.MY)
+			if(mGame.getTrn() == Turn.MY)
 				background = R.raw.tick;
 			choiceUp.setBackgroundResource(background);
-			if(game.getTrn() == Turn.NONE)
+			if(mGame.getTrn() == Turn.NONE)
 				checkWinner();
 		}
 		else if(msg.startsWith(STATUS_MSG)){
@@ -218,7 +209,7 @@ public class RPSWindow extends GameWindow {
 	private void checkWinner() {
 		enableChoices(false);
 		Toast toast = null;
-		Winner result = game.judge();
+		Winner result = mGame.judge();
 		switch (result) {
 		case ME:
 			toast = IcsToast.makeText(mContext, getString(R.string.you_won), IcsToast.LENGTH_SHORT);
@@ -232,8 +223,8 @@ public class RPSWindow extends GameWindow {
 		}
 		playSound(result);
 		toast.show();
-		txtScoreUp.setText(game.getHerScore().toString() + "/" + game.getMaxScore());
-		txtScoreDown.setText(game.getMyScore().toString() + "/" + game.getMaxScore());
+		txtScoreUp.setText(mGame.getHerScore().toString() + "/" + mGame.getMaxScore());
+		txtScoreDown.setText(mGame.getMyScore().toString() + "/" + mGame.getMaxScore());
 		nextRound(false);
 	}
 	
@@ -255,14 +246,14 @@ public class RPSWindow extends GameWindow {
 	
 	@Override
 	protected void startGame() {
-		game = new RPSGame();
-		game.init();
+		mGame = new RPSGame();
+		mGame.init();
 		nextRound(true);
 	}
 	
 	@Override
 	protected Game getGame() {
-		return game;
+		return mGame;
 	}
 
 	private void nextRound(boolean isNewGame) {
@@ -277,8 +268,8 @@ public class RPSWindow extends GameWindow {
 			    }
 			}, 1750);
 		}
-		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore()){
-			game.nextRound();
+		if(mGame.getMyScore() < mGame.getMaxScore() && mGame.getHerScore() < mGame.getMaxScore()){
+			mGame.nextRound();
 			myTimer.start();
 			herTimer.start();
 		}

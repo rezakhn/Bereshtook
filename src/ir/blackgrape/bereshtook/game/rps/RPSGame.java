@@ -37,7 +37,6 @@ public class RPSGame extends Game {
 		this.herScore = herScore;
 	}
 
-	@Override
 	public Integer getMaxScore() {
 		return maxScore;
 	}

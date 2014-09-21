@@ -11,6 +11,7 @@ import ir.blackgrape.bereshtook.data.RosterProvider;
 import ir.blackgrape.bereshtook.game.GameBroadcastReceiver;
 import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.game.battleship.BattleshipWindow;
+import ir.blackgrape.bereshtook.game.dotline.DotlineWindow;
 import ir.blackgrape.bereshtook.game.rps.RPSWindow;
 import ir.blackgrape.bereshtook.game.ttt.TTTWindow;
 import ir.blackgrape.bereshtook.service.IXMPPChatService;
@@ -467,6 +468,7 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
                     android.R.layout.select_dialog_singlechoice);
             arrayAdapter.add(getString(R.string.rps_game));
             arrayAdapter.add(getString(R.string.ttt_game));
+            arrayAdapter.add(getString(R.string.dotline_game));
             //arrayAdapter.add(getString(R.string.battleship_game));
             
 			AlertDialog.Builder chooseGameDialog = new AlertDialog.Builder(
@@ -488,19 +490,32 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.dismiss();
-							String inviteMsg = null;
 							switch (which) {
 							case 0:
-								inviteMsg = RPSWindow.INVITE_MSG;
+								if(mCoins < 100)
+									lowCoinAlert(getString(R.string.rps_game), 100);
+								else
+									showGameRules(RPSWindow.INVITE_MSG, false);
 								break;
 							case 1:
-								inviteMsg = TTTWindow.INVITE_MSG;
+								if(mCoins < 100)
+									lowCoinAlert(getString(R.string.ttt_game), 100);
+								else
+									showGameRules(TTTWindow.INVITE_MSG, false);
 								break;
 							case 2:
-								inviteMsg = BattleshipWindow.INVITE_MSG;
+								if(mCoins < 2500)
+									lowCoinAlert(getString(R.string.dotline_game), 2500);
+								else
+									showGameRules(DotlineWindow.INVITE_MSG, false);
 								break;
+							case 3:
+								if(mCoins < 2500)
+									lowCoinAlert(getString(R.string.battleship_game), 2500);
+								else
+									showGameRules(BattleshipWindow.INVITE_MSG, false);
+								break;								
 							}
-							showGameRules(inviteMsg, false);
 						}
 					});
             chooseGameDialog.show();
@@ -512,10 +527,6 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 	}
 	
 	private void showGameRules(final String inviteOrAcceptMsg, final boolean isGuest) {
-		if(mCoins < 100 && !isGuest){
-			lowCoinAlert();
-			return;
-		}
 		AlertDialog.Builder chooseNotifyDialog = new AlertDialog.Builder(
 				ChatWindow.this);
 		chooseNotifyDialog.setIcon(R.drawable.ic_launcher);
@@ -549,12 +560,12 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 		chooseNotifyDialog.show();
 	}
 	
-	private void lowCoinAlert() {
+	private void lowCoinAlert(String gameName, int neededCoins) {
 		AlertDialog.Builder chooseNotifyDialog = new AlertDialog.Builder(
 				ChatWindow.this);
 		chooseNotifyDialog.setIcon(R.drawable.ic_launcher);
 		chooseNotifyDialog.setTitle(R.string.attention);
-		chooseNotifyDialog.setMessage(R.string.coin_lack_desc);
+		chooseNotifyDialog.setMessage(getString(R.string.coin_lack_desc, gameName, neededCoins));
 		chooseNotifyDialog.setPositiveButton(R.string.buy_coin,
 				new DialogInterface.OnClickListener() {
 
@@ -581,12 +592,14 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 			game = new Intent(this, RPSWindow.class);
 		else if(gameName.equals(TTTWindow.TTT_GAME))
 			game = new Intent(this, TTTWindow.class);
+		else if(gameName.equals(DotlineWindow.DOTLINE_GAME))
+			game = new Intent(this, DotlineWindow.class);
 		else if(gameName.equals(BattleshipWindow.BATTLESHIP_GAME))
 			game = new Intent(this, BattleshipWindow.class);
 		
 		game.putExtra("jid", mWithJabberID);
 		game.putExtra("isGuest", true);
-		if(herCoins < 100 || mCoins <100)
+		if(herCoins < 100 || mCoins < 100)
 			game.putExtra("noEffect", true);
 		else
 			game.putExtra("noEffect", false);
@@ -738,6 +751,8 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 								acceptMsg = RPSWindow.ACCEPT_MSG;
 							else if(message.startsWith(TTTWindow.TTT_GAME))
 								acceptMsg = TTTWindow.ACCEPT_MSG;
+							else if(message.startsWith(DotlineWindow.DOTLINE_GAME))
+								acceptMsg = DotlineWindow.ACCEPT_MSG;
 							else if(message.startsWith(BattleshipWindow.BATTLESHIP_GAME))
 								acceptMsg = BattleshipWindow.ACCEPT_MSG;
 							showGameRules(acceptMsg, true);

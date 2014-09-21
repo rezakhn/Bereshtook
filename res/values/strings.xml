@@ -256,7 +256,7 @@
 	<string name="shop_bereshtook">فروشگاه برشتوک</string>
 	<string name="coin">سکه</string>
 	<string name="current_amount_coins">شما در حال حاضر %s سکه دارید</string>
-	<string name="coin_info_description">برای بدست آوردن سکه میتوانید بازی کنید و برنده شوید یا سکه بخرید و به ما در بهتر کردن برشتوک کمک کنید.</string>
+	<string name="coin_info_description">برای بدست آوردن سکه میتوانید بازی کنید و برنده شوید یا سکه بخرید.</string>
 	<string name="coin_pack1_desc">۵۰۰ سکه فقط ۵۰۰ تومان</string>
 	<string name="coin_pack2_desc">۱۰۰۰ سکه فقط ۹۰۰ تومان</string>
 	<string name="coin_pack3_desc">۲۰۰۰ سکه فقط ۱۵۰۰ تومان</string>
@@ -279,14 +279,15 @@
     <string name="cancel">انصراف</string>
     <string name="sorry">ببخشید</string>
     
-    <string name="rps_game">سنگ کاغذ قیچی</string>
+    <string name="rps_game">سنگ-کاغذ-قیچی</string>
     <string name="ttt_game">دوز</string>
+    <string name="dotline_game">نقطه-خط</string>
     <string name="battleship_game">نبرد کشتی ها</string>
     
     <string name="attention">توجه</string>
     <string name="win_lose_condition_desc">اگه بازیو ببری ۱۰۰ سکه جایزه میگیری ولی اگه خدایی ناکرده ببازی ۱۰۰ سکه ازت کم میشه!</string>
     <string name="no_effect_desc">این بازی بدون تاثیر است</string>
-    <string name="coin_lack_desc">برای دعوت به بازی به حداقل ۱۰۰ سکه نیاز داری</string>
+    <string name="coin_lack_desc">برای دعوت به بازی %1$s به حداقل %2$d سکه نیاز داری</string>
     <string name="buy_coin">خرید سکه</string>
     <string name="successful_payment">پرداخت موفق</string>
     <string name="add_coins_success">%s سکه به حساب شما اضافه شد</string>
@@ -341,4 +342,13 @@
     <string name="camera">دوربین</string>
     <string name="crop_app_not_found">ابزار ویرایش عکس پیدا نشد</string>
     <string name="choose_cropper">یک ابزار را انتخاب کنید</string>
+    
+    <string name="feld_groesse">Feld:</string>
+    <string name="spielen">Spielen</string>
+    <string name="app_beenden">Beenden</string>
+    <string name="player">بازیکن:</string>
+    <string name="game_score">Spielergebnis</string>
+    <string name="winner">برنده</string>
+    <string name="play_again">Nochmal!</string>
+    <string name="zurueck_zum_hauptmenue">Hauptmenü</string>
 </resources>

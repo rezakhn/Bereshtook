@@ -42,7 +42,6 @@ public class TTTGame extends Game {
 		this.herScore = herScore;
 	}
 
-	@Override
 	public Integer getMaxScore() {
 		return maxScore;
 	}

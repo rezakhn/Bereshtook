@@ -54,7 +54,7 @@
 			android:label="@string/account_settings_title">
 		</activity>
 		
-		<activity android:name=".shop.ShopActivity"
+		<activity android:name=".shop.ShopWindow"
 		    android:screenOrientation="portrait">
 		</activity>
 				
@@ -66,11 +66,15 @@
 		    android:screenOrientation="portrait">
 		</activity>
 		
+		<activity android:name=".game.dotline.DotlineWindow"
+		    android:screenOrientation="portrait">
+		</activity>
+				
 		<activity android:name=".game.battleship.BattleshipWindow"
 		    android:screenOrientation="portrait">
 		</activity>
 		
-		<activity android:name=".scoreboard.ScoreboardActivity"
+		<activity android:name=".scoreboard.ScoreboardWindow"
 		    android:screenOrientation="portrait">
 		</activity>		
 						

@@ -91,7 +91,6 @@ public abstract class GameWindow extends SherlockActivity {
 	protected TextView txtMyTimer;
 	protected TextView txtHerTimer;
 	
-	private BereshtookConfiguration mConfig;
 	private boolean finished = false;
 
 	protected abstract Game getGame();
@@ -103,7 +102,6 @@ public abstract class GameWindow extends SherlockActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = this;
-		mConfig = BereshtookApplication.getConfig(this);
 		
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		ActionBar actionBar = getSupportActionBar();
@@ -111,7 +109,7 @@ public abstract class GameWindow extends SherlockActivity {
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
 		withJabberID = getIntent().getStringExtra("jid");
-		GameBroadcastReceiver.setGame(this, withJabberID);
+		GameBroadcastReceiver.setGame(this);
 		isGuest = getIntent().getBooleanExtra("isGuest", false);
 		noEffect = getIntent().getBooleanExtra("noEffect", false);
 

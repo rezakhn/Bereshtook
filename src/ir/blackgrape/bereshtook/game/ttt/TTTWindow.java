@@ -6,9 +6,7 @@ import ir.blackgrape.bereshtook.game.GameWindow;
 import ir.blackgrape.bereshtook.game.ttt.TTTGame.Turn;
 import ir.blackgrape.bereshtook.game.ttt.TTTGame.WinType;
 import ir.blackgrape.bereshtook.game.ttt.TTTGame.Winner;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -41,7 +39,7 @@ public class TTTWindow extends GameWindow {
 	private static final int GAME_TIME = 30000;
 	
 	private Context mContext;
-	private TTTGame game;
+	private TTTGame mGame;
 	private ImageView iv[][];
 	
 	@Override
@@ -124,7 +122,7 @@ public class TTTWindow extends GameWindow {
 				tNotSent.show();
 				return;
 			}
-			else if(game.getTrn() != Turn.MY){
+			else if(mGame.getTrn() != Turn.MY){
 				soundError.start();
 				Toast notTurn = IcsToast.makeText(mContext, getString(R.string.not_your_turn), IcsToast.LENGTH_SHORT);
 				notTurn.show();
@@ -133,73 +131,73 @@ public class TTTWindow extends GameWindow {
 			boolean isValid = false;
 			switch(v.getId()){
 			case R.id.cell_one:
-				if(game.map[0][0]!=-1)
+				if(mGame.map[0][0]!=-1)
 					break;
-				game.setMyChoice(0, 0);
+				mGame.setMyChoice(0, 0);
 				isValid = true;
 				sendMsg(ONE_MSG);
 				iv[0][0].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_two:
-				if(game.map[0][1]!=-1)
+				if(mGame.map[0][1]!=-1)
 					break;
-				game.setMyChoice(0, 1);
+				mGame.setMyChoice(0, 1);
 				isValid = true;
 				sendMsg(TWO_MSG);
 				iv[0][1].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_three:
-				if(game.map[0][2]!=-1)
+				if(mGame.map[0][2]!=-1)
 					break;
-				game.setMyChoice(0, 2);
+				mGame.setMyChoice(0, 2);
 				isValid = true;
 				sendMsg(THREE_MSG);
 				iv[0][2].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_four:
-				if(game.map[1][0]!=-1)
+				if(mGame.map[1][0]!=-1)
 					break;
-				game.setMyChoice(1, 0);
+				mGame.setMyChoice(1, 0);
 				isValid = true;
 				sendMsg(FOUR_MSG);
 				iv[1][0].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_five:
-				if(game.map[1][1]!=-1)
+				if(mGame.map[1][1]!=-1)
 					break;
-				game.setMyChoice(1, 1);
+				mGame.setMyChoice(1, 1);
 				isValid = true;
 				sendMsg(FIVE_MSG);
 				iv[1][1].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_six:
-				if(game.map[1][2]!=-1)
+				if(mGame.map[1][2]!=-1)
 					break;
-				game.setMyChoice(1, 2);
+				mGame.setMyChoice(1, 2);
 				isValid = true;
 				sendMsg(SIX_MSG);
 				iv[1][2].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_seven:
-				if(game.map[2][0]!=-1)
+				if(mGame.map[2][0]!=-1)
 					break;
-				game.setMyChoice(2, 0);
+				mGame.setMyChoice(2, 0);
 				isValid = true;
 				sendMsg(SEVEN_MSG);
 				iv[2][0].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_eight:
-				if(game.map[2][1]!=-1)
+				if(mGame.map[2][1]!=-1)
 					break;
-				game.setMyChoice(2, 1);
+				mGame.setMyChoice(2, 1);
 				isValid = true;
 				sendMsg(EIGHT_MSG);
 				iv[2][1].setImageResource(R.raw.ttt_ex);
 				break;
 			case R.id.cell_nine:
-				if(game.map[2][2]!=-1)
+				if(mGame.map[2][2]!=-1)
 					break;
-				game.setMyChoice(2, 2);
+				mGame.setMyChoice(2, 2);
 				isValid = true;
 				sendMsg(NINE_MSG);
 				iv[2][2].setImageResource(R.raw.ttt_ex);
@@ -216,39 +214,39 @@ public class TTTWindow extends GameWindow {
 	@Override
 	protected void onReceiveMsg(String msg) {
 		if(msg.equals(ONE_MSG)){
-			game.setHerChoice(0, 0);
+			mGame.setHerChoice(0, 0);
 			iv[0][0].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(TWO_MSG)){
-			game.setHerChoice(0, 1);
+			mGame.setHerChoice(0, 1);
 			iv[0][1].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(THREE_MSG)){
-			game.setHerChoice(0, 2);
+			mGame.setHerChoice(0, 2);
 			iv[0][2].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(FOUR_MSG)){
-			game.setHerChoice(1, 0);
+			mGame.setHerChoice(1, 0);
 			iv[1][0].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(FIVE_MSG)){
-			game.setHerChoice(1, 1);
+			mGame.setHerChoice(1, 1);
 			iv[1][1].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(SIX_MSG)){
-			game.setHerChoice(1, 2);
+			mGame.setHerChoice(1, 2);
 			iv[1][2].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(SEVEN_MSG)){
-			game.setHerChoice(2, 0);
+			mGame.setHerChoice(2, 0);
 			iv[2][0].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(EIGHT_MSG)){
-			game.setHerChoice(2, 1);
+			mGame.setHerChoice(2, 1);
 			iv[2][1].setImageResource(R.raw.ttt_oh);
 		}
 		else if(msg.equals(NINE_MSG)){
-			game.setHerChoice(2, 2);
+			mGame.setHerChoice(2, 2);
 			iv[2][2].setImageResource(R.raw.ttt_oh);
 		}
 		if(msg.equals(ONE_MSG) || msg.equals(TWO_MSG) || msg.equals(THREE_MSG)
@@ -268,10 +266,10 @@ public class TTTWindow extends GameWindow {
 	}
 
 	private void checkWinner(){
-		final Pair<Winner, WinType> result = game.judge();
-		if(result.first == Winner.DRAW && !game.noRemainedCell())
+		final Pair<Winner, WinType> result = mGame.judge();
+		if(result.first == Winner.DRAW && !mGame.noRemainedCell())
 			return; // continue game!
-		else if(result.first == Winner.DRAW && game.noRemainedCell()){
+		else if(result.first == Winner.DRAW && mGame.noRemainedCell()){
 			showToast(result.first);
 			playSound(result.first);
 			nextRound(false);
@@ -347,11 +345,11 @@ public class TTTWindow extends GameWindow {
 		int scoreboardId;
 		
 		if(wnr.equals(Winner.ME)){
-			score = game.getMyScore();
+			score = mGame.getMyScore();
 			scoreboardId = R.id.score_down;
 		}
 		else{
-			score = game.getHerScore();
+			score = mGame.getHerScore();
 			scoreboardId = R.id.score_up;
 		}
 		switch (score) {
@@ -393,14 +391,14 @@ public class TTTWindow extends GameWindow {
 
 	@Override
 	protected void startGame() {
-		game = new TTTGame();
-		game.init(!isGuest);
+		mGame = new TTTGame();
+		mGame.init(!isGuest);
 		nextRound(true);
 	}
 	
 	@Override
 	protected Game getGame() {
-		return game;
+		return mGame;
 	}
 	
 	private void nextRound(boolean isNewGame){
@@ -415,11 +413,11 @@ public class TTTWindow extends GameWindow {
 			    }
 			}, 2000);
 		}
-		if(game.getMyScore() < game.getMaxScore() && game.getHerScore() < game.getMaxScore()){
-			game.nextRound();
-			if(game.getTrn() == Turn.MY)
+		if(mGame.getMyScore() < mGame.getMaxScore() && mGame.getHerScore() < mGame.getMaxScore()){
+			mGame.nextRound();
+			if(mGame.getTrn() == Turn.MY)
 				myTimer.start();
-			else if(game.getTrn() == Turn.HER)
+			else if(mGame.getTrn() == Turn.HER)
 				herTimer.start();
 		}
 		else

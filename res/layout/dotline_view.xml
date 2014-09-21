@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_centerHorizontal="true"
+    android:layout_centerVertical="true"
+    android:background="@color/hintergrund_farbe"
+    android:orientation="vertical" >
+
+    <TableLayout
+        android:id="@+id/tableLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal" >
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:id="@+id/aktuellerSpielerSymbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/player_symbol_kaese" />
+
+            <TextView
+                android:id="@+id/punkteAnzeige"
+                android:layout_gravity="center_vertical"
+                style="@style/SpielerNamen" />
+            
+            <TextView android:id="@+id/txt_timer_up"
+		        android:layout_width="match_parent"
+		        android:layout_height="60dp"
+		        android:textColor="@android:color/black"
+		        android:gravity="center"
+		        android:text="@string/default_timer"
+		        android:layout_margin="5dp"
+        	/>            
+        </TableRow>
+
+    </TableLayout>
+
+    <ir.blackgrape.bereshtook.game.dotline.GameFieldView
+        android:id="@+id/spielfeldView"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent" />
+    
+
+     <TableRow
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content" >
+
+         <ImageView
+             android:id="@+id/aktuellerSpielerSymbol2"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:src="@drawable/player_symbol_maus" />
+
+         <TextView
+             android:id="@+id/punkteAnzeige2"
+             android:layout_gravity="center_vertical"
+             style="@style/SpielerNamen" />
+         
+         <TextView android:id="@+id/txt_timer_down"
+		       android:layout_width="match_parent"
+		       android:layout_height="60dp"
+		       android:textColor="@android:color/black"
+		       android:gravity="center"
+		       android:text="@string/default_timer"
+		       android:layout_margin="5dp"
+     	 />            
+     </TableRow>    
+
+</LinearLayout>
