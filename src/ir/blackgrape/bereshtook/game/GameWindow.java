@@ -1,16 +1,14 @@
 package ir.blackgrape.bereshtook.game;
 
-import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPDataServiceAdapter;
 import ir.blackgrape.bereshtook.chat.XMPPChatServiceAdapter;
-import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.service.IXMPPChatService;
 import ir.blackgrape.bereshtook.service.IXMPPDataService;
 import ir.blackgrape.bereshtook.service.XMPPService;
 import ir.blackgrape.bereshtook.util.PRIVATE_DATA;
-import ir.blackgrape.bereshtook.util.PreferenceConstants;
 import ir.blackgrape.bereshtook.util.PersianUtil;
+import ir.blackgrape.bereshtook.util.PreferenceConstants;
 
 import java.util.Map;
 

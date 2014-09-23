@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PlayerManager {
+	public static String myName = "me";
 
     private List<Player> playerList = new ArrayList<Player>();
 

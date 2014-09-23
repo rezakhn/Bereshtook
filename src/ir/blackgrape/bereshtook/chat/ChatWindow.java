@@ -504,14 +504,14 @@ public class ChatWindow extends SherlockListActivity implements OnKeyListener,
 									showGameRules(TTTWindow.INVITE_MSG, false);
 								break;
 							case 2:
-								if(mCoins < 2500)
-									lowCoinAlert(getString(R.string.dotline_game), 2500);
+								if(mCoins < 2000)
+									lowCoinAlert(getString(R.string.dotline_game), 2000);
 								else
 									showGameRules(DotlineWindow.INVITE_MSG, false);
 								break;
 							case 3:
-								if(mCoins < 2500)
-									lowCoinAlert(getString(R.string.battleship_game), 2500);
+								if(mCoins < 2000)
+									lowCoinAlert(getString(R.string.battleship_game), 2000);
 								else
 									showGameRules(BattleshipWindow.INVITE_MSG, false);
 								break;								

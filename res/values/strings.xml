@@ -10,7 +10,8 @@
 	<string name="conn_disconnecting">قطع شدن از سرور</string>
 	<string name="conn_online">آنلاین</string>
 	<string name="conn_offline">آفلاین</string>
-	<string name="conn_empty_roster">مخاطبی برای نمایش وجود ندارد</string>
+	<string name="conn_empty_roster">در حال دریافت لیست برشتوک ها&#8230;
+	    (برای بار اول کمی طول می کشد)</string>
 	<string name="conn_reconnect">تلاش مجدد برای وصل شدن تا %s ثانیه دیگر</string>
 	<string name="conn_disconnected">ارتباط قطع شد</string>
 	<string name="conn_no_network">شبکه ایی پیدا نشد</string>
@@ -121,9 +122,9 @@
 	<string name="win_percent">درصد پیروزی</string>
 	<string name="wins_num">تعداد پیروزی</string>
 	<string name="coins_num">تعداد سکه</string>
-	<string name="tops_loading">در حال گرفتن آخرین اطلاعات...</string>
-	<string name="creating_account">در حال ساختن یه برشتوک جدید...</string>
-	<string name="connecting_bereshtook">در حال برقراری ارتباط با سرور...</string>
+	<string name="tops_loading">در حال گرفتن آخرین اطلاعات&#8230;</string>
+	<string name="creating_account">در حال ساختن یه برشتوک جدید&#8230;</string>
+	<string name="connecting_bereshtook">در حال برقراری ارتباط با سرور&#8230;</string>
 	
 	<string name="error_fetch_data">خطا در گرفتن اطلاعات</string>
 	

@@ -1,10 +1,8 @@
 package ir.blackgrape.bereshtook.dialogs;
 
-import ir.blackgrape.bereshtook.BereshtookApplication;
 import ir.blackgrape.bereshtook.MainWindow;
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.XMPPRosterServiceAdapter;
-import ir.blackgrape.bereshtook.data.BereshtookConfiguration;
 import ir.blackgrape.bereshtook.exceptions.BereshtookXMPPAdressMalformedException;
 import ir.blackgrape.bereshtook.preferences.AccountPrefs;
 import ir.blackgrape.bereshtook.util.PreferenceConstants;

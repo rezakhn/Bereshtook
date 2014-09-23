@@ -3,21 +3,18 @@ package ir.blackgrape.bereshtook.game.dotline;
 import ir.blackgrape.bereshtook.R;
 import ir.blackgrape.bereshtook.game.Game;
 import ir.blackgrape.bereshtook.game.GameWindow;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class DotlineWindow extends GameWindow {
 	
 	public static final String DOTLINE_GAME = GAME_CODE + "DOTLINE#";
+	public static final String LINE_CODE = GAME_CODE + "LINE#";
 	public static final String INVITE_MSG = DOTLINE_GAME + "INVITE#";
 	public static final String ACCEPT_MSG = DOTLINE_GAME + "ACCEPT#";
 	public static final String DENY_MSG = DOTLINE_GAME + "DENY#";
@@ -28,6 +25,12 @@ public class DotlineWindow extends GameWindow {
     private GameField gameField;
     private PlayerManager playersManager;
     private DotlineGame mGame;
+    
+	private TextView txtScoreUp;
+	private TextView txtScoreDown;
+	
+	private RelativeLayout layout_up;
+	private RelativeLayout layout_down;
 
     private final Handler mHandler = new Handler();
 
@@ -51,7 +54,7 @@ public class DotlineWindow extends GameWindow {
         gameFieldView = (GameFieldView) findViewById(R.id.spielfeldView);
         gameFieldView.init(gameField);
         
-        Player me = new Player("me",
+        Player me = new Player(PlayerManager.myName,
                         BitmapFactory.decodeResource(getResources(), R.drawable.player_symbol_maus),
                         getResources().getColor(R.color.spieler_1_farbe), spielerTyp1);
         Player her = new Player(withJabberID,
@@ -67,6 +70,16 @@ public class DotlineWindow extends GameWindow {
         	playersManager.addPlayer(her);
         }
 
+		txtStatusUp = (TextView) findViewById(R.id.txt_status_up);
+		txtStatusDown = (TextView) findViewById(R.id.txt_status_down);
+		txtStatusDown.setOnClickListener(statusClickListener);
+		
+		txtScoreUp = (TextView)findViewById(R.id.txt_score_up);
+		txtScoreDown = (TextView)findViewById(R.id.txt_score_down);
+		
+		layout_up = (RelativeLayout) findViewById(R.id.layout_up);
+		layout_down = (RelativeLayout) findViewById(R.id.layout_down);
+		
 		txtHerTimer = (TextView) findViewById(R.id.txt_timer_up);
 		txtMyTimer = (TextView) findViewById(R.id.txt_timer_down);
 		
@@ -108,6 +121,12 @@ public class DotlineWindow extends GameWindow {
 			}
 		};
 		
+        ImageView imageHer = (ImageView) findViewById(R.id.img_symbol_up);
+        imageHer.setImageBitmap(her.getSymbol());
+        
+        ImageView imageMe = (ImageView) findViewById(R.id.img_symbol_down);
+        imageMe.setImageBitmap(me.getSymbol());
+		
         mGame = new DotlineGame();
         startGame();
     }
@@ -130,22 +149,31 @@ public class DotlineWindow extends GameWindow {
 
                 mHandler.post(new Runnable() {
                     public void run() {
-
-                        ImageView imageView = (ImageView) findViewById(R.id.aktuellerSpielerSymbol);
-                        imageView.setImageBitmap(player.getSymbol());
-
-                        TextView textView = (TextView) findViewById(R.id.punkteAnzeige);
-                        textView.setText(String.valueOf(calculateScore(player)));
+                    	if(player.getName().equals(PlayerManager.myName)){
+                    		layout_down.setBackgroundColor(getResources().getColor(R.color.red));
+                    		layout_up.setBackgroundColor(getResources().getColor(R.color.grayed_out));
+                    		txtScoreDown.setText(String.valueOf(calculateScore(player)));
+                    		herTimer.cancel();
+                    		myTimer.start();
+                    	}
+                    	else{
+                    		layout_up.setBackgroundColor(getResources().getColor(R.color.red));
+                    		layout_down.setBackgroundColor(getResources().getColor(R.color.grayed_out));
+                    		txtScoreUp.setText(String.valueOf(calculateScore(player)));
+                            myTimer.cancel();
+                            herTimer.start();
+                    	}
                     }
                 });
 
                 Line line = null;
 
-                if (!player.isComputerGegner()) {	// always true
+                if (player.getName().equals(PlayerManager.myName)) {
 
-                    gameFieldView.resetLastLine();
+                    gameFieldView.resetMyLastLine();
+                    gameFieldView.resetMyLastMessage();
 
-                    while ((line = gameFieldView.getLastLine()) == null) {
+                    while ((line = gameFieldView.getMyLastLine()) == null) {
                         try {
                             synchronized (gameFieldView) {
                                 gameFieldView.wait();
@@ -154,15 +182,18 @@ public class DotlineWindow extends GameWindow {
 
                         }
                     }
-
-                } else {	// never happens
-
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException ignore) {
+                    if(gameFieldView.getMyLastMessage() != null)
+                    	sendMsg(gameFieldView.getMyLastMessage());
+                } else {
+                	gameFieldView.resetHerLastLine();
+                    while ((line = gameFieldView.getHerLastLine()) == null) {
+                        try {
+                            synchronized (gameFieldView) {
+                                gameFieldView.wait();
+                            }
+                        } catch (InterruptedException ignore) {
+                        }
                     }
-
-                    line = computerGegnerZug(player.getSpielerTyp());
                 }
 
                 chooseLine(line);
@@ -186,56 +217,14 @@ public class DotlineWindow extends GameWindow {
 
     }
 
-    private Line computerGegnerZug(PlayerType spielerTyp) {
+    private void chooseLine(Line line) {
 
-        Line line = waehleLetztenOffenenStrichFuerKaestchen();
-
-        if (line != null)
-            return line;
-
-        Line randomLine = randomChooseLine();
-
-        if (spielerTyp == PlayerType.COMPUTER_MEDIUM) {
-
-            int loopCounter = 0;
-
-            while (randomLine.isKoennteUmliegendendesKaestchenSchliessen()) {
-
-                randomLine = randomChooseLine();
-
-                if (++loopCounter >= 30)
-                    break;
-            }
-        }
-
-        return randomLine;
-    }
-
-    private Line waehleLetztenOffenenStrichFuerKaestchen() {
-
-        for (Box box : gameField.getOpenBoxesList())
-            if (box.getLinesWithoutOwner().size() == 1)
-                return box.getLinesWithoutOwner().get(0);
-
-        return null;
-    }
-
-    private Line randomChooseLine() {
-
-        List<Line> linesWithoutOwner = new ArrayList<Line>(gameField.getLinesWithoutOwner());
-        Line randomLine = linesWithoutOwner.get(new Random().nextInt(linesWithoutOwner.size()));
-
-        return randomLine;
-    }
-
-    private void chooseLine(Line strich) {
-
-        if (strich.getOwner() != null)
+        if (line.getOwner() != null)
             return;
 
         Player currentPlayer = playersManager.getCurrentPlayer();
 
-        boolean kaestchenKonnteGeschlossenWerden = gameField.chooseLine(strich, currentPlayer);
+        boolean kaestchenKonnteGeschlossenWerden = gameField.chooseLine(line, currentPlayer);
 
         if (!kaestchenKonnteGeschlossenWerden)
             playersManager.selectNextPlayer();
@@ -288,8 +277,15 @@ public class DotlineWindow extends GameWindow {
 
 	@Override
 	protected void onReceiveMsg(String msg) {
-		// TODO Auto-generated method stub
-		
+		if(msg.startsWith(LINE_CODE))
+			gameFieldView.onReceiveMove(msg);
+		else if(msg.startsWith(STATUS_MSG)){
+			String status = msg.replaceFirst(STATUS_MSG, "");
+			txtStatusUp.setText(status);
+		}
+		else if(msg.equals(EXIT_MSG)){
+			sheLeft();
+		}
 	}
 
 	@Override
@@ -297,6 +293,13 @@ public class DotlineWindow extends GameWindow {
         Thread thread = new Thread(new GameLoopRunnable());
         thread.start();
         running = true;
+        
+        txtScoreUp.setText("0");
+        txtScoreDown.setText("0");
+        if(isGuest)
+        	herTimer.start();
+        else
+        	myTimer.start();
 	}
 
 	@Override

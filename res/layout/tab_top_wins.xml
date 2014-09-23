@@ -43,7 +43,7 @@
 	    android:background="@color/tops_header_background"
 	     >
 	    <TextView
-	        android:layout_width="40dp"
+	        android:layout_width="60dp"
 	        android:layout_height="wrap_content"
 	        android:layout_margin="5dp"
 	        android:textAppearance="?android:attr/textAppearanceLarge"

@@ -7,13 +7,13 @@ public class Player {
     private String name;
     private Bitmap symbol;
     private int farbe;
-    private PlayerType spielerTyp;
+    private PlayerType playerType;
 
     public Player(String name, Bitmap symbol, int farbe, PlayerType spielerTyp) {
         this.name = name;
         this.symbol = symbol;
         this.farbe = farbe;
-        this.spielerTyp = spielerTyp;
+        this.playerType = spielerTyp;
     }
 
     public String getName() {
@@ -28,12 +28,12 @@ public class Player {
         return farbe;
     }
 
-    public PlayerType getSpielerTyp() {
-        return spielerTyp;
+    public PlayerType getPlayerType() {
+        return playerType;
     }
 
     public boolean isComputerGegner() {
-        return spielerTyp.isComputerGegner();
+        return playerType.isComputerGegner();
     }
 
     @Override

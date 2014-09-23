@@ -8,7 +8,6 @@ import android.opengl.GLSurfaceView.Renderer;
 
 public class GLBattleshipRenderer implements Renderer {
 
-	private Ship mShip;
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

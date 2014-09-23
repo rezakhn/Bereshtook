@@ -5,71 +5,93 @@
     android:layout_height="fill_parent"
     android:layout_centerHorizontal="true"
     android:layout_centerVertical="true"
-    android:background="@color/hintergrund_farbe"
+    android:background="@color/dotline_background"
     android:orientation="vertical" >
 
-    <TableLayout
-        android:id="@+id/tableLayout1"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
+    <RelativeLayout
+        android:id="@+id/layout_up"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:orientation="horizontal" >
 
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
             <ImageView
-                android:id="@+id/aktuellerSpielerSymbol"
+                android:id="@+id/img_symbol_up"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/player_symbol_kaese" />
+                android:layout_alignParentLeft="true"/>
 
             <TextView
-                android:id="@+id/punkteAnzeige"
-                android:layout_gravity="center_vertical"
-                style="@style/SpielerNamen" />
+                android:id="@+id/txt_score_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/img_symbol_up"
+                android:textAppearance="?android:attr/textAppearanceLarge"/>
             
             <TextView android:id="@+id/txt_timer_up"
-		        android:layout_width="match_parent"
-		        android:layout_height="60dp"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
 		        android:textColor="@android:color/black"
-		        android:gravity="center"
 		        android:text="@string/default_timer"
-		        android:layout_margin="5dp"
-        	/>            
-        </TableRow>
+		        android:layout_marginLeft="10dp"
+		        android:layout_toRightOf="@id/txt_score_up"
+        	/>
+            
+	     <TextView android:id="@+id/txt_status_up"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textColor="@android:color/black"
+	        android:layout_margin="5dp"
+	        android:layout_alignParentRight="true"
+	        />               
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:id="@+id/layout_down"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal" >
+        
+         <ImageView
+             android:id="@+id/img_symbol_down"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignParentLeft="true"
+             />
 
-    </TableLayout>
+         <TextView
+             android:id="@+id/txt_score_down"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_toRightOf="@id/img_symbol_down"
+             android:gravity="center"
+             android:layout_margin="10dp"
+             android:textAppearance="?android:attr/textAppearanceLarge" />
+         
+         <TextView android:id="@+id/txt_timer_down"
+		       android:layout_width="wrap_content"
+		       android:layout_height="wrap_content"
+		       android:textColor="@android:color/black"
+		       android:text="@string/default_timer"
+		       android:layout_marginLeft="10dp"
+		       android:layout_toRightOf="@id/txt_score_down"
+     	 />
+         
+	     <TextView android:id="@+id/txt_status_down"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textColor="@android:color/black"
+	        android:layout_margin="5dp"
+	        android:text="@string/send_status"
+	        android:layout_alignParentRight="true"
+	        />         
+         
+     </RelativeLayout>	 
 
     <ir.blackgrape.bereshtook.game.dotline.GameFieldView
         android:id="@+id/spielfeldView"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     
-
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-
-         <ImageView
-             android:id="@+id/aktuellerSpielerSymbol2"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:src="@drawable/player_symbol_maus" />
-
-         <TextView
-             android:id="@+id/punkteAnzeige2"
-             android:layout_gravity="center_vertical"
-             style="@style/SpielerNamen" />
-         
-         <TextView android:id="@+id/txt_timer_down"
-		       android:layout_width="match_parent"
-		       android:layout_height="60dp"
-		       android:textColor="@android:color/black"
-		       android:gravity="center"
-		       android:text="@string/default_timer"
-		       android:layout_margin="5dp"
-     	 />            
-     </TableRow>    
-
 </LinearLayout>

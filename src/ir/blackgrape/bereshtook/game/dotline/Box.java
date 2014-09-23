@@ -165,6 +165,23 @@ public class Box {
 
         return null;
     }
+    
+    public String findLineDir(int pixelX, int pixelY) {
+
+        if (getRectStrichOben() != null && getRectStrichOben().contains(pixelX, pixelY))
+            return "U";
+
+        if (getRectStrichUnten() != null && getRectStrichUnten().contains(pixelX, pixelY))
+            return "D";
+
+        if (getRectStrichLinks() != null && getRectStrichLinks().contains(pixelX, pixelY))
+            return "L";
+
+        if (getRectStrichRechts() != null && getRectStrichRechts().contains(pixelX, pixelY))
+            return "R";
+
+        return null;
+    } 
 
     public void onDraw(Canvas canvas) {
 
